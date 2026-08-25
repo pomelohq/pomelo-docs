@@ -2,3 +2,6 @@ node_modules
 .vitepress/dist
 .vitepress/cache
 .DS_Store
+
+# generated at build from the pomelo repo CHANGELOG
+docs/changelog.md
