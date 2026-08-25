@@ -1,0 +1,124 @@
+/*
+ * Pomelo docs theme — palette lifted straight from the app icon: a pomelo
+ * cross-section (magenta/purple ring, soft-pink segments, one yellow wedge, a
+ * `>_` prompt) on a peach→lavender gradient. Brand = purple-magenta, pop = the
+ * pomelo yellow, hero backdrop = the icon's pastel wash. Clean, rounded, airy.
+ */
+
+:root {
+  --pom-magenta: #a63d9e;
+  --pom-magenta-deep: #8c3387;
+  --pom-pink: #e86fa8;
+  --pom-yellow: #f3c53e;
+  --pom-peach: #f9dccb;
+  --pom-lavender: #cdd4ee;
+
+  --vp-c-brand-1: #a63d9e;
+  --vp-c-brand-2: #8c3387;
+  --vp-c-brand-3: #b94fb2;
+  --vp-c-brand-soft: rgba(166, 61, 158, 0.10);
+
+  --vp-c-tip-1: var(--vp-c-brand-1);
+  --vp-c-tip-soft: var(--vp-c-brand-soft);
+  --vp-c-note-1: var(--vp-c-brand-1);
+
+  --vp-c-bg: #faf7fb;
+  --vp-c-bg-alt: #ffffff;
+  --vp-c-bg-elv: #ffffff;
+  --vp-c-bg-soft: #ffffff;
+  --vp-c-border: rgba(70, 40, 70, 0.16);
+  --vp-c-divider: rgba(70, 40, 70, 0.10);
+  --vp-c-text-1: #2a1930;
+  --vp-c-text-2: rgba(60, 40, 66, 0.72);
+  --vp-c-text-3: rgba(60, 40, 66, 0.45);
+
+  --vp-c-success-1: #34c759;
+  --vp-c-success-soft: rgba(52, 199, 89, 0.14);
+  --vp-c-warning-1: #e0a400;
+  --vp-c-warning-soft: rgba(243, 197, 62, 0.16);
+  --vp-c-danger-1: #ff3b30;
+  --vp-c-danger-soft: rgba(255, 59, 48, 0.10);
+
+  /* Hero wordmark: pomelo sweep — purple → pink → yellow. */
+  --vp-home-hero-name-color: transparent;
+  --vp-home-hero-name-background: linear-gradient(110deg, #a63d9e 12%, #e86fa8 52%, #f3c53e 96%);
+
+  /* Blurred blob behind the hero icon = the icon's peach/lavender backdrop. */
+  --vp-home-hero-image-background-image: linear-gradient(145deg, #f9dccb 20%, #e7b7dd 55%, #cdd4ee 100%);
+  --vp-home-hero-image-filter: blur(52px);
+
+  --vp-button-brand-bg: #a63d9e;
+  --vp-button-brand-hover-bg: #b94fb2;
+  --vp-button-brand-active-bg: #8c3387;
+  --vp-button-brand-border: transparent;
+
+  --vp-code-tab-active-bar-color: var(--vp-c-brand-1);
+  --pom-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --vp-border-radius: 14px;
+}
+
+.dark {
+  --vp-c-bg: #17121a;
+  --vp-c-bg-alt: #1f1823;
+  --vp-c-bg-elv: #1f1823;
+  --vp-c-bg-soft: #1f1823;
+
+  --vp-c-border: rgba(255, 255, 255, 0.12);
+  --vp-c-divider: rgba(255, 255, 255, 0.07);
+  --vp-c-gutter: #100c13;
+
+  --vp-c-text-1: #f6f0f7;
+  --vp-c-text-2: rgba(240, 232, 245, 0.62);
+  --vp-c-text-3: rgba(240, 232, 245, 0.40);
+
+  --vp-c-brand-1: #d581cf;
+  --vp-c-brand-2: #c86fc2;
+  --vp-c-brand-3: #dd93d8;
+  --vp-c-brand-soft: rgba(213, 129, 207, 0.16);
+
+  --vp-c-warning-1: #f3c53e;
+  --vp-c-warning-soft: rgba(243, 197, 62, 0.15);
+
+  --vp-home-hero-name-background: linear-gradient(110deg, #d581cf 12%, #f19bc0 52%, #f3c53e 96%);
+  --vp-home-hero-image-background-image: linear-gradient(145deg, #6a3a52 10%, #7a4a86 55%, #3d4a72 100%);
+  --vp-home-hero-image-filter: blur(56px);
+
+  --vp-button-brand-text: #1a0f18;
+  --vp-button-brand-hover-text: #1a0f18;
+  --vp-button-brand-active-text: #1a0f18;
+  --vp-button-brand-bg: #d581cf;
+  --vp-button-brand-hover-bg: #dd93d8;
+  --vp-button-brand-border: transparent;
+
+  --vp-code-block-bg: #100c13;
+}
+
+/* ============================================================
+   Landing (index.md → layout: page + <PomHome/>)
+   ============================================================ */
+.dark { --vp-c-bg: #0d0a11; }
+html, body { overflow-x: hidden; }
+
+/* Full-bleed the page-layout container on the landing only */
+.pom-landing .VPPage,
+.pom-landing .VPPage .vp-doc { max-width: none !important; padding: 0 !important; }
+.pom-landing .VPPage > .vp-doc > div { width: 100%; }
+
+/* Download → a compact accent pill in the top nav. Style the inner .text span
+   (not the full-height <a>) so it fits the bar instead of overflowing it. */
+.VPNavBarMenuLink[href*="releases/latest"] .text {
+  background: var(--vp-c-brand-1); color: #fff !important;
+  padding: 7px 15px; border-radius: 20px; border-bottom: 0 !important;
+  transition: background 0.16s;
+}
+.dark .VPNavBarMenuLink[href*="releases/latest"] .text { color: #1a0f18 !important; }
+.VPNavBarMenuLink[href*="releases/latest"]:hover .text { background: var(--vp-c-brand-3); }
+
+.diagram {
+  margin: 24px 0;
+  padding: 12px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 12px;
+  background: var(--vp-c-bg-alt);
+}
+.diagram svg { display: block; width: 100%; height: auto; }
