@@ -33,6 +33,7 @@ const GROUPS = [
       { text: 'Network', link: '/docs/network' },
       { text: 'Keyboard shortcuts', link: '/docs/shortcuts' },
       { text: 'FAQ & troubleshooting', link: '/docs/faq' },
+      { text: 'Changelog', link: '/docs/changelog' },
     ],
   },
 ]
@@ -75,6 +76,7 @@ export default defineConfig({
     nav: [
       { text: 'Docs', link: '/docs/install' },
       { text: 'Reference', link: '/reference/config' },
+      { text: 'Changelog', link: '/docs/changelog' },
       { text: 'Download', link: 'https://github.com/pomelohq/pomelo/releases/latest' }
     ],
 
