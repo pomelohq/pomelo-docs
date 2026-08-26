@@ -15,6 +15,7 @@ const GROUPS = [
     items: [
       { text: 'The app', link: '/docs/app' },
       { text: 'Workspaces', link: '/docs/workspace' },
+      { text: 'Agent status', link: '/docs/agent-status' },
       { text: 'Services', link: '/docs/services' },
       { text: 'Databases', link: '/docs/databases' },
     ],
