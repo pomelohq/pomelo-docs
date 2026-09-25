@@ -1,74 +1,81 @@
 # `pom.yml` reference
 
 The project config. Pomelo walks up from the current directory looking
-for this file — keep it at the monorepo root.
+for this file - keep it at the project root. To change it from the app, see
+[Project config](../docs/project-config).
 
 ## Splitting into multiple files
 
 When one file gets unwieldy, drop a `pom.d/` directory next to `pom.yml`.
-Every `pom.d/**/*.yml` (walked recursively, lexical order) is **deep-merged**
-into the root on load, so the root stays a small index and the bulk lives in
-fragments:
+Every `pom.d/**/*.yml` (and `.yaml`; walked recursively, in path order,
+dot-files skipped) is **deep-merged** into the root on load, so the root
+stays a small index and the bulk lives in fragments:
 
 ```
-pom.yml                    # session, default_branch — a tiny index
+pom.yml                    # session, default_branch - a tiny index
 pom.d/
   environments.yml
   presets.yml
   shared-services.yml
   repos/
-    01-api.yml             # { repos: { api: … } } — one repo per file
+    01-api.yml             # { repos: { api: ... } } - one repo per file
     02-web.yml
 ```
 
 Maps merge by key (a fragment's repos add to the root's), existing keys keep
-their order and new ones append — so port/ordering stays stable. A single
-`pom.yml` with no `pom.d/` works exactly as before.
+their order and new ones append. Scalars and lists are replaced, not
+concatenated: a later fragment's list wins. Files load in path order (hence
+the `01-`/`02-` prefix), and repo order follows it.
 
-You don't have to split — a single `pom.yml` works exactly as before. When you
-do, keep the small stuff (session, defaults, …) in `pom.yml` and move `repos`,
-`environments`, `presets` and `shared_services` into fragments under `pom.d/`.
-Files load in lexical order (hence the `01-`/`02-` prefix), but you can also
-reorder repos in the app.
+You don't have to split - a single `pom.yml` works the same.
+**Settings > Project > Split into pom.d** (or `pom config split`) does it
+for you and keeps the old file as `pom.yml.bak`.
 
 ::: tip Editing a split config
-The app's **Project** config editor opens the merged view; when the config is
-split it resolves the right `pom.d/**` fragment automatically. Every save is
-validated against the full merged config before it lands.
+**Open Project Config** lists `pom.yml` and every `pom.d` fragment; you edit
+one file at a time. Every save is checked against the full merged config
+before it lands. See [Checked saves](../docs/project-config#checked-saves).
 :::
 
 ## Top level
 
 ```yaml
 session: myproject              # project name (namespaces state, holders, databases)
-default_branch: main            # global default git branch
-preset: dev-tools               # optional preset name applied to every repo
+default_branch: main            # global default git branch (default: main)
+preset: dev-tools               # optional: run this preset's services once per workspace
 
 environments:                   # per-profile URL overrides (see below)
   staging:
-    api.server: "https://api.acme.dev"   # {{api.server.url}} resolves here on staging
+    api.server: "https://api.example.com"   # {{api.server.url}} resolves here on staging
 
 presets: { ... }                # see "Presets" below
 shared_services: { ... }        # see "Shared services" below
 repos: { ... }                  # see "Repos" below
+seed: [ ... ]                   # optional: run once in the workspace root before repo seeds
+prepare_main: [reset, migrate, seed]   # phases of Prepare Main (default: all three)
 ```
 
+A top-level `preset:` does not apply to repos: the named presets' `services`
+run once per workspace, in the workspace root.
+
 ::: tip Editor is a per-user app setting
-Which GUI editor ⌘E opens (VS Code, Cursor, Zed, …) is chosen in the app's
-**Settings › General**, not in `pom.yml` — it's a personal preference, not
-shared project config.
+Which app **Open in External Editor** launches is chosen in **Settings >
+Editor > External Editor** (Auto picks the first one installed), not in
+`pom.yml` - it's a personal preference, not shared project config.
 :::
 
 ### Environments & profiles
 
-**`environments:`** (top-level) defines alternate environments — each remaps a
-`<repo>.<service>` to a **non-local** address (a deployed server, a shared DB),
-so `{{<repo>.<service>.url}}` resolves there instead of the workspace's own
-service.
+**`environments:`** (top-level) defines alternate environments - each maps a
+`<repo>.<service>` to a **non-local** URL (a deployed server), so
+`{{<repo>.<service>.url}}` (and `.host`, `.port`, `.ws`) resolves there
+instead of the workspace's own service, and the dev-proxy forwards there.
+The value is used as written (no templates).
 
 **`profiles:`** (repo or service level) picks which of those environments the
-repo offers. `local` is always implicit; switch the active one from the service
-card.
+repo offers. `local` is always included. A service-level list replaces the
+repo's for that service. Switch the active one from the service's menu in
+the Services panel (`Env: <profile>`).
 
 ```yaml
 repos:
@@ -82,26 +89,26 @@ repos:
 
 environments:
   staging:
-    api.server: "https://api.acme.dev"      # {{api.server.url}} → this on staging
+    api.server: "https://api.example.com"   # {{api.server.url}} -> this on staging
 ```
 
 ## Repos
 
-A repo splits into **identity** (what it is — spec + env + services) and
+A repo splits into **identity** (what it is - spec + env + services) and
 **`lifecycle`** (how a workspace is set up, run day-to-day, and torn down):
 
 ```yaml
 repos:
   api:
     # identity
-    alias: api                 # display label only — never referenced
+    alias: api                 # short name for hostnames and templates
     default_branch: master     # override global default for this repo
     preset: shared-infra       # apply a preset
-    pre_start: nvm use         # one-shot hook before any service runs
+    pre_start: nvm use         # runs before each service's cmd
     profiles: [local, staging] # environments this repo can pick (default [local])
-    seed_from_main: true       # inherit prepared DBs / deps from main
+    seed_from_main: true       # inherit prepared DBs from main
 
-    databases:                 # named — auto-created per workspace
+    databases:                 # named - auto-created per workspace
       main: "{{branch.safe}}"
       test: "{{branch.safe}}_test"
     env:                       # env templates (resolved per workspace)
@@ -113,81 +120,84 @@ repos:
       worker:
         cmd: go run . worker
 
-    # lifecycle — the ops side, kept out of identity
+    # lifecycle - the ops side, kept out of identity
     lifecycle:
-      copy: [.env, .env.secrets] # files copied from repo into each worktree
-      commands:                  # named recipe — the agent & pipeline run these
+      copy: [.env, .env.secrets] # files copied from main into each worktree
+      commands:                  # named recipe - the pipeline and the agent run these
         install: go mod download
         migrate: go run . migrate
-      shortcuts:                 # quick commands surfaced in the ⚡ menu
+      shortcuts:                 # quick commands in the Services panel and palette
         - cmd: go test ./...     # runs in the worktree with the workspace's
-          desc: Run tests        # resolved env already sourced
+          desc: Run tests        # env exported
 ```
 
 | Field | Description |
 | --- | --- |
-| `alias` | Display label in the web UI. **Not** referenced by templates — rename freely. |
+| `alias` | Short name used in service hostnames and in templates (`{{<alias>.<service>.url}}`; the repo key works too). Defaults to the key. **Rename Alias...** in Settings > Project rewrites the references for you. |
 | `default_branch` | Override the global default branch for this repo. |
-| `preset` | Apply a named [preset](#presets). |
-| `pre_start` | One-shot command run before any service in this repo (e.g. `nvm use`). |
-| `profiles` | Environments this repo's services can pick (default `[local]`); defined under top-level `environments`. A service can narrow it. |
-| `env` | Env vars to generate. Flat map → `.env.local`, or file-keyed (see below). Uses [templates](./templates). |
-| `databases` | **Named** map (`name: template`); auto-created per workspace. Referenced as `{{db.name}}`. |
-| `seed_from_main` | Clone this repo's DBs from the **main** workspace's copies instead of creating them empty; skips `lifecycle.seed`. See below. |
+| `preset` | Apply a named [preset](#presets), or a list of them. |
+| `pre_start` | Command run in the same shell right before each service's `cmd` (e.g. `nvm use`). A service-level `pre_start` replaces it. |
+| `shell_env` | Env assignments put in front of every service command; a service's own replaces it. |
+| `profiles` | Environments this repo's services can pick (default `[local]`); defined under top-level `environments`. |
+| `env` | Env vars to generate. Flat map -> `.env.local`, or file-keyed (see below). Uses [templates](./templates). |
+| `databases` | **Named** map (`name: template`); auto-created per workspace as `<session>_<template>`. Referenced as `{{db.name}}`. Only `{{branch...}}` tokens expand here. |
+| `seed_from_main` | Clone this repo's DBs from the **main** workspace's copies instead of creating them empty; skips the repo's `seed`. See below. |
 | `services` | Named services. See [Services](../docs/services). |
-| `lifecycle` | The ops side — set up / run / tear down. See below. |
+| `lifecycle` | The ops side - set up / run / tear down. See below. |
 
-The **`lifecycle:`** block keeps ops out of the repo's identity:
+The **`lifecycle:`** block keeps ops out of the repo's identity. The same
+keys are also read at the repo's top level; `lifecycle:` wins.
 
 | `lifecycle` field | Description |
 | --- | --- |
-| `copy` | Files copied from the source repo into each worktree. |
-| `commands` | Named canonical commands (`install`, `migrate`, `lint`, `test`, …). The AI agent and the create pipeline run *these* instead of guessing. |
-| `setup` | Ordered steps run automatically right after the worktree is created. |
+| `copy` | Files copied from main's checkout into each new worktree (`*` allowed in the last path part; files the worktree has are kept). |
+| `commands` | Named canonical commands (`install`, `migrate`, `lint`, `test`, ...). Each also shows up as a shortcut. |
+| `setup` | Ordered steps run right after the worktree is created, in the worktree with the repo's env. Defaults to the `install`, `generate` and `migrate` commands. |
+| `migrate` | Migration steps (used by Prepare Main and Keep Main Fresh). |
 | `seed` | Seed steps for a fresh database (skipped when `seed_from_main`). |
-| `shortcuts` | Quick commands surfaced in a service card's ⚡ menu. |
-| `pre_delete` | Commands run before the worktree is deleted. |
+| `shortcuts` | Quick commands in the Services panel's repo menu (**Run: ...**) and the command palette. |
+| `pre_start` | Same as the repo-level `pre_start`. |
+| `pre_delete` | Commands run before the worktree is deleted (failures only warn). |
 
-### Faster workspaces — inherit prepared state from `main`
+### Faster workspaces - inherit prepared state from `main`
 
-Set up the **main** workspace once (install deps, migrate + seed its DBs) and
-new workspaces copy that prepared state instead of rebuilding it. `main` runs
-services normally — it's the golden source.
+Set up the **main** workspace once (**Prepare Main...**: reset, migrate and
+seed its DBs) and new workspaces copy that prepared state instead of
+rebuilding it.
 
 ```yaml
 repos:
   api:
-    seed_from_main: true   # clone api's DBs from main (CREATE DATABASE … TEMPLATE)
+    seed_from_main: true   # clone api's DBs from main (CREATE DATABASE ... TEMPLATE)
 ```
 
-- **Databases** — `seed_from_main: true` clones the repo's DBs from main's
+- **Databases** - `seed_from_main: true` clones the repo's DBs from main's
   counterparts in seconds (with main's sample data) rather than creating them
-  empty + re-seeding; the repo's own `seed` is skipped. Missing main DB → empty
-  create fallback.
-- **node_modules** — a fresh worktree seeds `node_modules` from a hash-keyed
-  store built off main's installed copy, materialized copy-on-write (APFS
-  clonefile / Linux reflink) so the install is a near-no-op and the tree shares
-  disk blocks. Automatic for non-pnpm repos; pnpm repos are skipped (pnpm's own
-  store already dedupes). Keyed by lockfile hash, so bumping deps on one branch
-  doesn't disturb others.
-- **Long branch → short workspace name** — creating a workspace from a very long
-  branch derives a concise workspace name (folder + hostnames) via a one-shot
-  `claude` call, while the long branch stays the git branch each repo checks
-  out. So a long `feat-123-add-a-really-long-descriptive-…` branch becomes a
-  short `workspace--feat-123-add-login` with clean
-  `api.feat-123-add-login.localhost` hostnames.
+  empty + re-seeding; the repo's own `seed` is skipped. A missing main DB, or
+  a failed copy, falls back to an empty create with a warning.
+- **node_modules** - for npm and yarn repos (`package-lock.json` or
+  `yarn.lock`), a new worktree gets `node_modules` as an APFS copy-on-write
+  clone from a store keyed by the lockfile's hash, filled from main or from
+  the first successful install with that lockfile. The install is
+  near-instant and shares disk blocks. pnpm repos are skipped (pnpm's own
+  store already dedupes).
+- **Short hostnames** - a branch that starts with a ticket key uses just the
+  key in hostnames (`feat-123-add-login` gives
+  `server.api.feat-123.localhost`); other long branches are cut to 63
+  characters with a hash suffix. In **Create Workspace**, **Refine name &
+  branch with Claude** suggests a display name and a short branch.
 
 ### `env`: one key, three forms
 
-There is no separate `env_output` — the `env` key both holds the
+There is no separate `env_output` - the `env` key both holds the
 variables and decides the target file(s):
 
 ```yaml
-# 1. Flat → written to .env.local
+# 1. Flat -> written to .env.local
 env:
   DATABASE_URL: "postgres://{{shared.postgres.url}}/{{db.main}}"
 
-# 2. File-keyed → each file gets exactly its own vars
+# 2. File-keyed -> each file gets exactly its own vars
 env:
   .env.development.local:
     DATABASE_URL: "postgres://{{shared.postgres.url}}/{{db.dev}}"
@@ -204,18 +214,21 @@ env:
     DATABASE_URL: "postgres://{{shared.postgres.url}}/{{db.test}}"
 ```
 
-A file-specific value overrides `"*"`.
+A file-specific value overrides `"*"`. Pomelo writes the files only where
+the repo already keeps env files (a root with `.env` or `.env.development`,
+or `apps/<name>/.env`) and in a service's `dir`; services get the resolved
+env injected directly either way.
 
 ## Shared services
 
-**Well-known services ship with built-in defaults** — `postgres`, `redis`,
-`minio`, and `opensearch`. Just name the service and Pomelo fills in the
-image, ports, environment, volumes, healthcheck and credentials:
+**Well-known services ship with built-in defaults** - `postgres`, `redis`,
+`minio`, `opensearch` and `zincsearch`. Just name the service and Pomelo
+fills in the image, ports, environment, volumes and credentials:
 
 ```yaml
 shared_services:
-  postgres:                    # full postgres:16 config, filled in
-  redis:                       # redis:7-alpine + appendonly
+  postgres:                    # postgres:16, filled in
+  redis:                       # redis:7-alpine + appendonly, capacity 16
   minio:
   opensearch:
 ```
@@ -240,41 +253,24 @@ shared_services:
     ports: ["5672", "15672"]
 ```
 
-Host ports are dynamically allocated from the workspace pool; you never
-hard-code them.
+One set of containers (a docker compose project named `<session>-shared`)
+serves every workspace. Each port gets a host port that sticks: the port in
+`ports` (e.g. `5432`) when it is free, else the next free one within 100,
+else a random one - so you can set up an external client (`psql`, a GUI)
+once. You never hard-code it: use `{{shared.<name>.port}}`.
 
 | Field | Description |
 | --- | --- |
 | `image` | Docker image. |
-| `ports` | Container ports; host ports are picked from the dynamic pool. |
-| `environment` | Container env vars. |
+| `ports` | Container ports (`"5432"` or `"host:container"`); the first number is the preferred host port. |
+| `environment` | Container env vars (written as-is). |
 | `volumes` | Volume mounts. |
 | `command` | Override container command. |
-| `healthcheck` | Pomelo waits for the healthcheck before marking the service ready. |
+| `healthcheck` | `test` / `interval` / `timeout` / `retries` for the generated compose file. |
 | `db_user` / `db_password` | Credentials for auto database creation. |
-| `capacity` | Max slots per instance (auto-scales when exceeded). |
+| `host` | Host to reach an external database instead of a container. |
+| `capacity` | Max slots per instance (a new instance is added when full). |
 | `type` | Well-known template to base this service on (defaults to the service's name). |
-
-### Fixed shared ports — `shared_stable_ports`
-
-By default a shared service's host port is random (freed and re-picked as the
-port pool moves). If you want to configure an external tool once — **DataGrip**,
-`psql` — pin them:
-
-```yaml
-shared_stable_ports: true
-shared_services:
-  postgres:
-  redis:
-  minio:
-  opensearch:
-```
-
-Each shared service is then pinned to the same deterministic local port
-(`20000–29999`, a pure function of session + service name). The generated
-docker-compose publishes those ports and `{{shared.<name>.url}}` /
-`{{shared.<name>.port}}` agree — so `localhost:<port>` never changes across
-restarts.
 
 ## Presets
 
@@ -288,28 +284,38 @@ presets:
 ```
 
 A repo with `preset: shared-infra` inherits those fields. Multiple
-presets can be applied via a list: `preset: [shared-infra, prisma]`.
+presets can be applied via a list: `preset: [shared-infra, prisma]`. The
+repo's own values win; presets only fill what it leaves unset (`env` and
+`commands` merge key by key, and a preset's services are added only when the
+repo has none by that name). Inside a preset, write the lifecycle keys flat
+(`setup:`, `commands:`, ...), not under `lifecycle:`, and keep `env` a flat
+map.
 
-## Integrations (Jira, …)
+## Integrations (Jira, ...)
 
-Integrations like **Jira** are configured in the app under **Settings ›
-Integrations**, not in `pom.yml` — the API token is stored encrypted in your
-app profile and never enters the shareable config. Once connected, a workspace
-whose branch starts with a ticket key (`feat-123-…` → `FEAT-123`) shows a
-status chip linking to the issue.
+Jira is set up per project in the app under **Settings > Integrations**
+(site URL, account email, API token), not in `pom.yml`. The token is stored
+encrypted for that project, or read from `JIRA_API_TOKEN`, and never enters
+the shareable config. A workspace whose branch starts with a ticket key
+(`feat-123-...` -> `FEAT-123`) shows the ticket's status and can open the
+ticket in a tab.
 
 ## Routing (webhooks & dev-proxy)
 
-Webhooks and same-origin dev URLs are **auto-routed — there is no `webhook:` or
-`proxy:` block to write.** Pomelo derives the routes from your repos/services:
+Webhooks and same-origin dev URLs are **auto-routed - there is no `webhook:` or
+`proxy:` block to write** (the config doctor flags those old keys, and
+**Normalize** removes them). Pomelo derives the routes from your
+repos/services:
 
-- **Dev-proxy** — every service is reachable same-origin at
-  `/_pom_dev/<repo>/<service>` (and at `<service>.<repo>.<branch>.localhost`), so
-  a frontend and its backends share one origin — no CORS, and cookies behave
-  like production. Reference another service's same-origin path with
+- **Dev-proxy** - every service is reachable same-origin at
+  `/_pom_dev/<repo>/<service>` and at
+  `http://<service>.<alias>.<branch>.localhost:8767`, so a frontend and its
+  backends share one origin - no CORS, and cookies behave like production.
+  Reference another service's same-origin path with
   `{{<repo>.<service>.path}}`, or its full URL with `{{<repo>.<service>.url}}`.
-- **Webhooks** — an inbound event fans out to every workspace running the target
-  service at `/<repo>/<service>`, so all your parallel branches receive it.
+  A shared service answers at `http://<name>.<session>.localhost:8767`.
+- **Webhooks** - an inbound event to `127.0.0.1:8766/<repo>/<service>/...`
+  fans out to every workspace running the target service, so all your
+  parallel branches receive it.
 
-The app's **Open** / **Copy URL** actions prefer these hostnames automatically.
 See [Network](../docs/network) for tunnel setup and OAuth callbacks.
