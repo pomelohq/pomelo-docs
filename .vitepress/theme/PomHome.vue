@@ -28,95 +28,93 @@ onMounted(async () => {
   <section class="ph-wrap ph-hero">
     <div class="hero-cols">
       <div class="hero-text">
-        <div class="eyebrow">POMELO · v{{ version }} · NATIVE macOS APP</div>
+        <div class="eyebrow">POMELO - v{{ version }} - NATIVE macOS APP</div>
         <h1>A dev environment.<br><span class="muted">One per branch.</span></h1>
         <p class="lead">A native macOS app that spins up a full, isolated, runnable
-          environment for every branch — services, databases, and shared infra,
-          wired automatically. No YAML archaeology, no port juggling.</p>
+          environment for every branch - services, databases, and shared infra,
+          wired automatically - with a code editor, terminals and your agent
+          next to them. No port juggling.</p>
         <div class="ph-actions">
           <a class="btn primary" :href="DL"><svg class="apple" viewBox="0 0 384 512" aria-hidden="true"><path fill="currentColor" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>Download for macOS</a>
           <a class="btn ghost" :href="GH">View source</a>
         </div>
-        <div class="ph-meta">macOS 14+ · Apple Silicon · Notarized · No account · ~{{ dmgMB }} MB download</div>
+        <div class="ph-meta">macOS 14+ - Apple Silicon - Notarized - No account - ~{{ dmgMB }} MB download</div>
       </div>
       <img class="hero-icon" src="/hero-icon.png" alt="Pomelo" />
     </div>
-    <img class="ph-shot ph-media-lg" src="/shots/hero.png" alt="Pomelo — a full dev environment running per branch: services, databases and ports" />
+    <img class="ph-shot ph-media-lg" src="/shots/app.png" alt="Pomelo: workspaces on the left, the Files panel, the code editor and a terminal" />
   </section>
 
   <!-- 01 ISOLATION -->
   <section class="ph-wrap ph-sec">
     <div class="sec-head">
-      <div class="eyebrow"><span class="bar"></span>01 · ISOLATION</div>
+      <div class="eyebrow"><span class="bar"></span>01 - ISOLATION</div>
       <h2>One branch, one full stack.<br><span class="muted">Nothing shared, nothing to tear down.</span></h2>
     </div>
     <div class="grid3">
-      <div class="pt"><h3>Own worktree</h3><p>Every branch is a real git worktree — check out ten at once, no stashing, no context loss.</p></div>
+      <div class="pt"><h3>Own worktree</h3><p>Every branch is a real git worktree - check out ten at once, no stashing, no context loss. A workspace checks out only the repos its work needs.</p></div>
       <div class="pt"><h3>Own services &amp; DBs</h3><p>Each workspace runs its own services on its own ports with its own databases. Two branches never collide.</p></div>
       <div class="pt"><h3>Conflict-free ports</h3><p>Ports are allocated automatically and stay sticky while a service runs. You never hunt for a free port again.</p></div>
     </div>
-    <img class="ph-shot" src="/shots/isolation.png" alt="Per-branch service board — each workspace runs its own services, databases and ports" />
   </section>
 
   <!-- 02 SPEED -->
   <section class="ph-wrap ph-sec">
     <div class="sec-head">
-      <div class="eyebrow"><span class="bar"></span>02 · SPEED</div>
+      <div class="eyebrow"><span class="bar"></span>02 - SPEED</div>
       <h2>Stop rebuilding on every switch.<br><span class="muted">Golden main, cloned in seconds.</span></h2>
     </div>
     <div class="grid2">
-      <div class="pt"><h3>Databases via TEMPLATE</h3><p>New workspaces clone their databases from a prepared <code>main</code> with <code>CREATE DATABASE … TEMPLATE</code> — sample data included, in seconds.</p></div>
-      <div class="pt"><h3>node_modules, copy-on-write</h3><p>Dependencies materialize from main's installed copy via APFS clone — near-instant, sharing disk blocks, keyed by lockfile hash.</p></div>
+      <div class="pt"><h3>Databases via TEMPLATE</h3><p>New workspaces clone their databases from a prepared <code>main</code> with <code>CREATE DATABASE ... TEMPLATE</code> - sample data included, in seconds.</p></div>
+      <div class="pt"><h3>node_modules, copy-on-write</h3><p>Dependencies materialize from a store of installed copies via APFS clone - near-instant, sharing disk blocks, keyed by lockfile hash.</p></div>
     </div>
   </section>
 
   <!-- 03 DATABASE -->
   <section class="ph-wrap ph-sec">
     <div class="sec-head">
-      <div class="eyebrow"><span class="bar"></span>03 · DATABASE</div>
+      <div class="eyebrow"><span class="bar"></span>03 - DATABASE</div>
       <h2>Your branch's data, right in the app.<br><span class="muted">No second tool to check a row.</span></h2>
     </div>
     <div class="grid3">
-      <div class="pt"><h3>Browse &amp; query</h3><p>A tree of every per-branch database down to its tables. Open a table as a data grid, or run SQL in a console with syntax highlighting and schema-aware autocomplete.</p></div>
-      <div class="pt"><h3>Multiple engines</h3><p>Inspect Postgres tables and Redis keyspaces today — with more engines on the way — over the same connection your services use, wired automatically.</p></div>
-      <div class="pt"><h3>Your agent can too</h3><p>Claude in the workspace lists tables and queries the branch database over MCP while it builds — no copy-pasting connection strings.</p></div>
+      <div class="pt"><h3>Browse &amp; query</h3><p>A tree of the workspace's databases down to their tables. Open a table as a data grid with filters, sorting and CSV export, or run SQL in a saved console.</p></div>
+      <div class="pt"><h3>Postgres and Redis</h3><p>Inspect Postgres tables and Redis keyspaces over the same connection your services use, wired automatically.</p></div>
+      <div class="pt"><h3>Your agent can too</h3><p>Claude in the workspace lists tables and queries the branch database over MCP while it builds - no copy-pasting connection strings.</p></div>
     </div>
-    <p class="fine">Made for the checks you run constantly while coding — inspect a row, confirm a migration, tweak a query — right where you work, no separate client to wire up.</p>
-    <img class="ph-shot" src="/shots/database.png" alt="Database browser — browse per-branch Postgres and Redis, run SQL on the branch database" />
+    <p class="fine">Made for the checks you run constantly while coding - inspect a row, confirm a migration, tweak a query - right where you work, no separate client to wire up.</p>
   </section>
 
   <!-- 04 NATIVE -->
   <section class="ph-wrap ph-sec">
     <div class="sec-head">
-      <div class="eyebrow"><span class="bar"></span>04 · NATIVE</div>
-      <h2>Written in Swift, not in Electron.<br><span class="muted">Here's what that gets you.</span></h2>
+      <div class="eyebrow"><span class="bar"></span>04 - NATIVE</div>
+      <h2>Written in Rust, not in Electron.<br><span class="muted">Here's what that gets you.</span></h2>
     </div>
     <div class="specs">
-      <div class="spec"><b>120fps</b><span>built for ProMotion; streams and terminals stay smooth</span></div>
-      <div class="spec"><b>Portless</b><span>the Go core links in-process over FFI — no localhost server</span></div>
+      <div class="spec"><b>120fps</b><span>GPU-rendered UI; the editor and terminals stay smooth on ProMotion</span></div>
+      <div class="spec"><b>Portless</b><span>one program, core built in - no daemon, no localhost server</span></div>
       <div class="spec"><b>Notarized</b><span>Apple Developer ID, no Gatekeeper prompts</span></div>
-      <div class="spec"><b>~{{ dmgMB }} MB</b><span>signed DMG download; self-contained, no separate runtime</span></div>
+      <div class="spec"><b>Self-updating</b><span>verifies each update's signature before it installs</span></div>
     </div>
   </section>
 
   <!-- 04 AGENTS -->
   <section class="ph-wrap ph-sec">
     <div class="sec-head">
-      <div class="eyebrow"><span class="bar"></span>05 · AGENTS</div>
-      <h2>Config that writes itself.<br><span class="muted">Point it at repos; the agent does the rest.</span></h2>
+      <div class="eyebrow"><span class="bar"></span>05 - AGENTS</div>
+      <h2>Config that writes itself.<br><span class="muted">Point it at repos; detection and Claude do the rest.</span></h2>
     </div>
     <div class="grid3">
-      <div class="pt"><h3>Onboarding agent</h3><p>Reads each repo, detects frameworks and services, and writes a runnable <code>pom.yml</code>.</p></div>
+      <div class="pt"><h3>Detect, then onboard</h3><p>Pomelo detects each repo's stack and services and drafts a <code>pom.yml</code>; set up with AI and Claude makes it runnable while you approve each step.</p></div>
       <div class="pt"><h3>Config doctor</h3><p>Deterministic checks (no LLM) loop until nothing blocks the project from running.</p></div>
-      <div class="pt"><h3>Claude in the window</h3><p>A built-in agent per workspace, wired to the environment it's working in.</p></div>
+      <div class="pt"><h3>Your agent, per workspace</h3><p>Claude Code in each workspace, wired to its running stack through MCP, with its state shown in the sidebar. Any other AI CLI can be the agent command.</p></div>
     </div>
-    <img class="ph-shot" src="/shots/agents.png" alt="Onboarding agent reads each repo and writes a runnable pom.yml, looping config_doctor until clean" />
   </section>
 
   <!-- 05 GET STARTED -->
   <section class="ph-wrap ph-sec">
     <div class="sec-head">
-      <div class="eyebrow"><span class="bar"></span>06 · GET STARTED</div>
+      <div class="eyebrow"><span class="bar"></span>06 - GET STARTED</div>
       <h2>Install it and open a branch.<br><span class="muted">There's nothing to sign up for.</span></h2>
     </div>
     <div class="grid2 gs">
@@ -124,11 +122,11 @@ onMounted(async () => {
         <h3>Download</h3>
         <p>macOS 14 or later. Apple Silicon. About {{ dmgMB }} MB to download.</p>
         <div class="ph-actions"><a class="btn primary" :href="DL"><svg class="apple" viewBox="0 0 384 512" aria-hidden="true"><path fill="currentColor" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>Download for macOS</a></div>
-        <p class="fine">Open the DMG, drag Pomelo to Applications, launch it, and point it at the folder that holds your repos.</p>
+        <p class="fine">Open the DMG, drag Pomelo to Applications, launch it, and create a project from your repos. It keeps itself up to date.</p>
       </div>
       <div>
         <h3>Learn</h3>
-        <p>The docs walk through your first session, services, databases, and the config reference.</p>
+        <p>The docs walk through your first project, services, databases, and the config reference.</p>
         <div class="ph-actions"><a class="btn ghost" href="/docs/quickstart">Read the Quick Start</a> <a class="btn ghost" href="/docs/install">Install guide</a></div>
       </div>
     </div>
