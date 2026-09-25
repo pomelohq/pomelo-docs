@@ -1,9 +1,9 @@
 # Quick Start
 
-From zero to a running branch in a few minutes — all in the app, no CLI
+From zero to a running branch in a few minutes - all in the app, no CLI
 required.
 
-<Shot src="/shots/hero.png" text="The Pomelo window — sidebar of workspaces + service board" />
+<Shot src="/shots/app.png" text="The Pomelo window: workspaces, the Files panel, the editor and a terminal" />
 
 ## 1. Install and open
 
@@ -12,84 +12,91 @@ Download **`Pomelo-<version>.dmg`** from the
 drag **Pomelo** into **Applications**, and open it. See
 [Install](./install) for details.
 
-## 2. Open or start a session
+## 2. Open or create a project
 
-On first launch Pomelo shows a welcome screen with two choices:
+The first window offers two ways in:
 
-- **Open a session** — pick a folder that already has a `pom.yml`.
-- **New session** — start fresh: add your repos and Pomelo scaffolds a
-  runnable session for you under `~/pom/<name>`.
+- **Open Project** (`cmd-o`) - pick a folder that already has a `pom.yml`.
+- **New Project** (`cmd-shift-n`) - start fresh: add your repos and Pomelo
+  creates a project for you under `~/pom/<name>`.
 
-A **session** is one `pom.yml` — your repos and every
+A **project** is one `pom.yml` - your repos and every
 `workspace--<branch>/` worktree live under it.
 
-<Shot src="/shots/welcome.png" text="First-run welcome — Open a session / New session" />
+## 3. New Project - add your repos
 
-## 3. New session — add your repos
+The **New Project** form asks for:
 
-From the welcome screen (or the session menu) click **New session**, give it
-a name, and add your repos. Each repo is either:
+- a **Session name** (the project's folder is shown under it),
+- the **Default branch** (`main` unless you change it),
+- your **Repositories**: **Add folder...** for repos already on disk, or
+  paste a **Git URL** (SSH or HTTPS) and press enter. Each repo can get an
+  alias.
 
-- a **local folder** already on disk, or
-- a **git URL** (SSH or HTTPS) that Pomelo clones for you.
+A project can hold one repo or several - a whole multi-repo codebase.
 
-A session can hold one repo or several — a whole multi-repo codebase.
+## 4. Choose how to set it up
 
-<Shot src="/shots/new-session.png" text="New session sheet — add repos by folder or git URL" />
+Under **Setup**, pick one:
 
-## 4. Let the onboarding agent write `pom.yml`
+- **Set up with AI** - "Claude opens in a terminal to finish pom.yml; you
+  approve each step". Needs Claude Code
+  (`npm install -g @anthropic-ai/claude-code`).
+- **Set up manually** - "pom.yml is drafted from what is detected; you
+  review and edit it".
 
-After you add repos, an **onboarding agent** reads each one, infers how it
-runs (package manager, services, databases, env), and writes a runnable
-`pom.yml`. It then loops the [config doctor](./concepts#config-doctor)
-until it reports clean — so you get a working config without learning the
-schema first.
+Click **Create**. Either way Pomelo clones the repos into the project's
+main workspace (local repos keep their uncommitted work, and the values in
+their gitignored `.env` files are stored as encrypted secrets the config can
+reference by name), detects how each one runs, and drafts a `pom.yml`. The
+draft opens in the editor.
 
-::: tip Requires Claude
-The onboarding agent uses the `claude` CLI. Install it with
-`npm install -g @anthropic-ai/claude-code`. You can also write `pom.yml`
-by hand — see the [config reference](../reference/config).
-:::
+- **With AI**, the onboarding agent opens in a terminal tab and turns the
+  draft into a runnable config, running the config doctor until it reports
+  no errors. You watch and approve what it does.
+- **Manually**, the Services panel opens and a notice says **pom.yml is
+  ready to review**, with how many repos and services were detected.
 
-## 5. Doctor clean
+Your choice is remembered for the next project. You can bring the agent in
+later with **Set Up Project with AI** in the command palette.
 
-Open **Project** (top bar) to see the config editor and its **config
-doctor** health strip at the bottom. When the doctor is clean, the session
-is runnable. If anything is missing (a tool not installed, docker not
-running, a database not created), the doctor names it and points at the
-fix.
+## 5. Check the setup
+
+If anything still keeps the project from running (a tool not installed,
+Docker not running, a secret not set), a **Project setup needs attention**
+notice names it, with **Fix with Claude**. The config stays editable from
+main; every save is [checked](./project-config#checked-saves) before it is
+written.
 
 ## 6. Start services
 
-On the **service board**, start a service from its card. Starting a repo
-service brings up its shared services (Postgres, Redis, …) automatically.
-Each service's live output previews on its card; click the card to attach
-a full terminal.
+Open the **Services** panel (`ctrl-shift-s`) and start a service from its
+row. Starting a repo service brings up its shared services (Postgres,
+Redis, ...) automatically. Click a running service to open its console.
 
-<Shot src="/shots/isolation.png" text="Service board — services running with live previews" />
-
-To work on a feature, create a workspace for a branch (see
-[Workspace lifecycle](./workspace)) and start its services the same way —
-every branch gets its own ports, databases, and env, so you can run
-several at once.
+To work on a feature, create a workspace for a branch with **+** in the
+WORKSPACES sidebar (see [Workspace lifecycle](./workspace)) and start its
+services the same way - every branch gets its own ports, databases, and
+env, so you can run several at once.
 
 ## 7. Browse the database
 
-Open the **Database** tab (⌘4) to inspect a branch's data without leaving
-the app or launching a separate client. Pomelo already knows the connection,
-so there's nothing to configure:
+Open the **Database** panel (`ctrl-shift-d`) to inspect a branch's data
+without a separate client. Pomelo already knows the connection: browse
+tables and Redis keyspaces, open a table as a grid, or run SQL in a
+console. See [Databases](./databases#browsing-data-in-the-app).
 
-- A tree of every per-branch database down to its tables (Postgres) and
-  keyspaces (Redis).
-- Click a table to open it as a data grid with WHERE / ORDER BY and paging,
-  a record panel that shows one row vertically, and streamed CSV export.
-- Or run SQL in a console with syntax highlighting and schema-aware
-  autocomplete.
+## From a terminal
 
-Made for the checks you run constantly while coding — inspect a row, confirm a
-migration, tweak a query — right where you work, no separate client to wire up.
-The workspace's Claude agent can query the same databases over MCP while it
-builds.
+The same flow works with the `pom` CLI (inside the app at
+`Pomelo.app/Contents/MacOS/pom`):
+
+```bash
+pom init [name] [--ai]            # a project from the git repo you are in
+pom onboard --new myproject --repo ./api --repo ./web [--no-ai]
+pom onboard [session]             # let Claude finish an existing project
+pom config edit                   # edit pom.yml, then check it still loads
+```
 
 ## Writing `pom.yml` by hand
 
