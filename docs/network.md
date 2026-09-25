@@ -27,7 +27,7 @@ workspace services.
 
   <rect x="460" y="14" width="230" height="48" rx="10" fill="#1b1c20" stroke="#33343a"/>
   <text x="575" y="37" text-anchor="middle" fill="#e6e6e6" font-size="13" font-weight="600">Webhook provider</text>
-  <text x="575" y="54" text-anchor="middle" fill="#8b8b93" font-size="11">Stripe · GitHub · … (via tunnel)</text>
+  <text x="575" y="54" text-anchor="middle" fill="#8b8b93" font-size="11">Stripe · GitHub · ... (via tunnel)</text>
 
   <line x1="185" y1="62" x2="185" y2="122" stroke="#7c7d87" stroke-width="1.5" marker-end="url(#no-ov)"/>
   <line x1="575" y1="62" x2="575" y2="122" stroke="#7c7d87" stroke-width="1.5" marker-end="url(#no-ov)"/>
@@ -60,9 +60,16 @@ A frontend on `:3000` calling a backend on `:4000` is **cross-origin** — you
 fight CORS, and cookies don't behave like production. Pomelo's **dev-proxy**
 removes that: it fronts every service in a workspace under **one origin**,
 `<service>.<repo>.<branch>.localhost:8767`, and a frontend reaches a backend
-at the same-origin path `/_pom_dev/<repo>/<service>`. Same origin → **no
+at the same-origin path `/_pom_dev/<repo>/<service>`. Same origin -> **no
 CORS, cookies behave like production**. `.localhost` resolves to loopback with
 no `/etc/hosts` edits.
+
+In the hostname, `<repo>` is the repo's alias or name, and `<branch>` is the
+branch lowercased with anything outside `a-z`, `0-9` and `-` turned into `-`
+(`feat/login` becomes `feat-login`), or just its leading ticket key (such as
+`proj-101`) when no other workspace shares it. Both ports can be moved with
+`POM_WEB_PORT`: the relay listens on that port + 1 and the proxy on + 2.
+Settings > Network shows their status and the recent proxied requests.
 
 <figure class="diagram">
 <svg viewBox="0 0 760 350" role="img" aria-label="Same-origin dev-proxy: the browser loads one origin; the dev-proxy routes / to the frontend and /_pom_dev/api/server to the backend." xmlns="http://www.w3.org/2000/svg">
@@ -74,7 +81,7 @@ no `/etc/hosts` edits.
 
   <rect x="230" y="14" width="300" height="52" rx="10" fill="#1b1c20" stroke="#33343a"/>
   <text x="380" y="37" text-anchor="middle" fill="#e6e6e6" font-size="14" font-weight="600">Browser</text>
-  <text x="380" y="55" text-anchor="middle" fill="#8b8b93" font-size="11">web.feat-a.localhost:8767 — one origin</text>
+  <text x="380" y="55" text-anchor="middle" fill="#8b8b93" font-size="11">app.web.feat-a.localhost:8767 - one origin</text>
 
   <line x1="380" y1="66" x2="380" y2="100" stroke="#7c7d87" stroke-width="1.5" marker-end="url(#np-a)"/>
 
@@ -102,7 +109,7 @@ no `/etc/hosts` edits.
 </figure>
 
 Reference another service's same-origin path with `{{<repo>.<service>.path}}`
-(→ `/_pom_dev/<repo>/<service>`), or its full URL with
+(-> `/_pom_dev/<repo>/<service>`), or its full URL with
 `{{<repo>.<service>.url}}`.
 
 ## Switch environment without touching the URL
@@ -111,7 +118,8 @@ The frontend always calls the **same-origin path** `/_pom_dev/api/server` — it
 never changes. The dev-proxy is a **reverse proxy**: for each request it
 forwards `/_pom_dev/<repo>/<service>` to the **local** service by default, or
 to a **deployed** backend when a non-local profile is active. So you retarget
-an environment by **flipping a profile**, and the browser URL — same origin,
+an environment by **flipping a profile** (right-click the frontend service
+in the Services panel > **Env: staging**), and the browser URL — same origin,
 CORS-free — stays exactly the same.
 
 <figure class="diagram">
@@ -160,7 +168,7 @@ repos:
   web:
     profiles: [local, staging]
     env:
-      VITE_API_URL: "{{api.server.path}}"   # → /_pom_dev/api/server (same origin, always)
+      VITE_API_URL: "{{api.server.path}}"   # -> /_pom_dev/api/server (same origin, always)
 environments:
   staging:
     api.server: "https://api.acme.dev"      # dev-proxy forwards there when staging is active
@@ -174,8 +182,9 @@ Testing a feature across several branches at once? An external provider
 (Stripe, a Git host, an OAuth vendor) only knows **one** URL. Pomelo's
 **webhook relay** bridges that: a single local port receives an inbound event
 and **fans it out** to every workspace running the target service. It runs
-inside the app on loopback, one per machine, and follows the active session —
-routes are derived from your repos and services, **nothing to configure**.
+inside the app on loopback, one per machine, and routes across every open
+project - routes are derived from your repos and services, **nothing to
+configure**.
 
 <figure class="diagram">
 <svg viewBox="0 0 760 490" role="img" aria-label="Webhook fan-out: an external provider posts to one relay port, which ACKs immediately and forwards the event to every workspace running the service." xmlns="http://www.w3.org/2000/svg">
@@ -193,7 +202,7 @@ routes are derived from your repos and services, **nothing to configure**.
   <text x="380" y="51" text-anchor="middle" fill="#8b8b93" font-size="11">Stripe · GitHub · OAuth vendor</text>
 
   <line x1="380" y1="60" x2="380" y2="92" stroke="#7c7d87" stroke-width="1.5" marker-end="url(#wh-arrow)"/>
-  <text x="392" y="80" fill="#8b8b93" font-size="11">POST /&lt;repo&gt;/&lt;service&gt;/…</text>
+  <text x="392" y="80" fill="#8b8b93" font-size="11">POST /&lt;repo&gt;/&lt;service&gt;/...</text>
 
   <rect x="270" y="92" width="220" height="42" rx="10" fill="#1b1c20" stroke="#33343a"/>
   <text x="380" y="118" text-anchor="middle" fill="#e6e6e6" font-size="13">Tunnel (ngrok / cloudflared)</text>
@@ -234,30 +243,30 @@ routes are derived from your repos and services, **nothing to configure**.
 </svg>
 </figure>
 
-A request path is `/<repo>/<service>/<rest…>`. The relay resolves
+A request path is `/<repo>/<service>/<rest...>`. The relay resolves
 `<repo>/<service>` against your config — the repo by **alias or name**, the
-service explicitly (or the repo's sole service) — strips that prefix, and
-forwards `/<rest…>` with the original query string, headers (including the
+service by name (both are required) - strips that prefix, and
+forwards `/<rest...>` with the original query string, headers (including the
 provider's **signature**) and body unchanged.
 
 It **ACKs `200` immediately** (`{"ok":true,"service":"api/server","fanout":N}`),
 then forwards the event in the background to **every** workspace whose service
 is currently listening. Each has its own database, so they process
 independently, and one slow or stopped branch never makes the provider retry.
-Stopped workspaces are skipped; the body is capped at 32 MB.
+Stopped workspaces are skipped; a body over 32 MB is forwarded empty.
 
-To use it, expose **one** public URL that forwards to `http://localhost:8766`,
+To use it, expose **one** public URL that forwards to `http://127.0.0.1:8766`,
 then let the provider call `/<repo>/<service>/<their-path>`:
 
 ```bash
-cloudflared tunnel --url http://localhost:8766
+cloudflared tunnel --url http://127.0.0.1:8766
 # or: ngrok http 8766
 ```
 
 ## OAuth callbacks — target one branch
 
 Fan-out is right for **events** (a Stripe charge) that every branch may
-process. An **OAuth callback** (`…/callback?code=…`) is different: the code
+process. An **OAuth callback** (`.../callback?code=...`) is different: the code
 is single-use and must return to the **one** branch that started the flow,
 so it must not be fanned out — and it doesn't go through the relay at all.
 
