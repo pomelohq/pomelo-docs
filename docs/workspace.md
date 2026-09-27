@@ -107,8 +107,7 @@ The tools:
 | `resolve_port_conflict` | Give the workspace's services fresh ports when something else grabbed one |
 | `secrets_list` | List secret names (never values) |
 | `config_get` / `config_validate` / `config_set` | Read and safely edit `pom.yml` - every write is validated before it lands, and new services get ports automatically |
-| `config_files` / `config_file_get` / `config_file_set` | Edit a **split** config: list and edit the individual `pom.d/**` fragments |
-| `config_doctor` / `config_normalize` / `config_split` | Check what keeps the project from running; clean up and split the config |
+| `config_doctor` / `config_normalize` | Check what keeps the project from running; clean up the config |
 
 So mid-task you can say *"the migration failed - check the DB and rerun
 it"* or *"add a worker service and start it"*, and the agent uses these

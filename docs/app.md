@@ -86,7 +86,7 @@ preview and diffs. Split with `cmd-\` and drag tabs between panes. See
 
 The **main** workspace is the prepared source new workspaces copy from, so
 its files are **read-only**: saving there says "main is read-only: make
-changes in a branch workspace". The project config (`pom.yml` and `pom.d/`)
+changes in a branch workspace". The project config (`pom.yml`)
 stays editable from main; every save of it is
 [checked first](./project-config#checked-saves).
 

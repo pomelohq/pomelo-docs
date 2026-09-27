@@ -68,9 +68,9 @@ on your machine.
   `database_ui`, `terminal_ui`, `settings_ui`, `jira_ui`, `markdown` and
   more.
 - **Core crates** hold the logic, with no rendering:
-  - `pom_config` - reads `pom.yml` plus `pom.d/`, resolves
+  - `pom_config` - reads `pom.yml`, resolves
     [templates](../reference/templates), validates, and makes checked edits
-    (split, normalize, rename alias, remove repo).
+    (normalize, rename alias, remove repo).
   - `pom_core` - projects, new-project scaffolding, adding and removing
     repos.
   - `pom_services` - the service runner, env files, ports and the shared

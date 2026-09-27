@@ -4,37 +4,9 @@ The project config. Pomelo walks up from the current directory looking
 for this file - keep it at the project root. To change it from the app, see
 [Project config](../docs/project-config).
 
-## Splitting into multiple files
-
-When one file gets unwieldy, drop a `pom.d/` directory next to `pom.yml`.
-Every `pom.d/**/*.yml` (and `.yaml`; walked recursively, in path order,
-dot-files skipped) is **deep-merged** into the root on load, so the root
-stays a small index and the bulk lives in fragments:
-
-```
-pom.yml                    # session, default_branch - a tiny index
-pom.d/
-  environments.yml
-  presets.yml
-  shared-services.yml
-  repos/
-    01-api.yml             # { repos: { api: ... } } - one repo per file
-    02-web.yml
-```
-
-Maps merge by key (a fragment's repos add to the root's), existing keys keep
-their order and new ones append. Scalars and lists are replaced, not
-concatenated: a later fragment's list wins. Files load in path order (hence
-the `01-`/`02-` prefix), and repo order follows it.
-
-You don't have to split - a single `pom.yml` works the same.
-**Settings > Project > Split into pom.d** (or `pom config split`) does it
-for you and keeps the old file as `pom.yml.bak`.
-
-::: tip Editing a split config
-**Open Project Config** lists `pom.yml` and every `pom.d` fragment; you edit
-one file at a time. Every save is checked against the full merged config
-before it lands. See [Checked saves](../docs/project-config#checked-saves).
+::: tip One file
+The whole config lives in `pom.yml`. A `pom.d/` folder from an older version
+is folded into it on the first load and kept as `pom.d.bak`.
 :::
 
 ## Top level
