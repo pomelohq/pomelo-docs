@@ -48,6 +48,7 @@ export default defineConfig({
   // so base is '/'. (Was '/pomelo-docs/' when hosted under github.io project path.)
   base: '/',
   cleanUrls: true,
+  appearance: 'dark',
   ignoreDeadLinks: true,
 
   head: [
@@ -77,18 +78,14 @@ export default defineConfig({
     logo: '/logo.png',
     nav: [
       { text: 'Docs', link: '/docs/install' },
-      { text: 'Reference', link: '/reference/config' },
       { text: 'Changelog', link: '/docs/changelog' },
+      { text: 'GitHub', link: 'https://github.com/pomelohq/pomelo' },
       { text: 'Download', link: 'https://github.com/pomelohq/pomelo/releases/latest' }
     ],
 
     sidebar: sidebarGroups(),
 
     search: { provider: 'local' },
-
-    socialLinks: [
-      { icon: 'github', link: 'https://github.com/pomelohq/pomelo' }
-    ],
 
     footer: {
       copyright: '© 2026 Pomelo · AGPL-3.0'
