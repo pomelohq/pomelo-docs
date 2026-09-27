@@ -71,7 +71,7 @@ const features = [
   },
   {
     title: 'Project config',
-    body: 'Add or remove repos from Settings, edit pom.yml and its pom.d fragments, and every save is checked before it applies.',
+    body: 'Add or remove repos from Settings, edit pom.yml, and every save is checked before it applies.',
     img: '/shots/project-settings.png',
     alt: 'The Project settings page with repositories and config actions',
     link: '/docs/project-config',
