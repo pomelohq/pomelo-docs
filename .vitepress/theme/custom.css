@@ -103,16 +103,20 @@ html, body { overflow-x: hidden; }
 .pom-landing .VPPage,
 .pom-landing .VPPage .vp-doc { max-width: none !important; padding: 0 !important; }
 .pom-landing .VPPage > .vp-doc > div { width: 100%; }
+.pom-landing .VPFooter { display: none; }
 
-/* Download → a compact accent pill in the top nav. Style the inner .text span
-   (not the full-height <a>) so it fits the bar instead of overflowing it. */
-.VPNavBarMenuLink[href*="releases/latest"] .text {
+/* Download: a compact accent pill in the top nav. Style the inner span (not the
+   full-height <a>) so it fits the bar instead of overflowing it. */
+.VPNavBarMenuLink[href*="releases/latest"] { display: flex; align-items: center; }
+.VPNavBarMenuLink[href*="releases/latest"]::after { display: none !important; }
+.VPNavBarMenuLink[href*="releases/latest"] > span {
   background: var(--vp-c-brand-1); color: #fff !important;
+  display: inline-block; line-height: 20px;
   padding: 7px 15px; border-radius: 20px; border-bottom: 0 !important;
   transition: background 0.16s;
 }
-.dark .VPNavBarMenuLink[href*="releases/latest"] .text { color: #1a0f18 !important; }
-.VPNavBarMenuLink[href*="releases/latest"]:hover .text { background: var(--vp-c-brand-3); }
+.dark .VPNavBarMenuLink[href*="releases/latest"] > span { color: #1a0f18 !important; }
+.VPNavBarMenuLink[href*="releases/latest"]:hover > span { background: var(--vp-c-brand-3); }
 
 .diagram {
   margin: 24px 0;
