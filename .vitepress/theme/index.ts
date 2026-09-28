@@ -1,6 +1,7 @@
 import DefaultTheme from 'vitepress/theme'
 import PomHome from './PomHome.vue'
 import Shot from './Shot.vue'
+import Keys from './Keys.vue'
 import './custom.css'
 
 // Default theme, restyled (custom.css) + a bespoke landing (PomHome) and a
@@ -10,5 +11,6 @@ export default {
   enhanceApp({ app }) {
     app.component('PomHome', PomHome)
     app.component('Shot', Shot)
+    app.component('Keys', Keys)
   },
 }
