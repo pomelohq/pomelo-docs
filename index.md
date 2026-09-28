@@ -1,6 +1,7 @@
 ---
 layout: page
-title: Pomelo | A dev environment per branch
+title: Pomelo - a dev environment per branch
+titleTemplate: false
 pageClass: pom-landing
 ---
 
