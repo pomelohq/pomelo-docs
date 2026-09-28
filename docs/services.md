@@ -105,15 +105,18 @@ its menu. Hover a repo's row to start or stop all of its services.
 
 ### Menus
 
-<AppShot :width="260" :height="304" :window="false" text="A running service's menu"><ContextMenu :width="260" :items='[{"text":"Stop"},{"text":"Restart"},{"text":"Open in Tab"},{"text":"View Logs"},{"text":"Use a New Port..."},{"text":"Mode","submenu":true},{"text":"Env","submenu":true},{"text":"Open in Browser"},{"text":"Copy URL"},{"text":"Copy Command"},{"text":"Ask Claude About This Service","icon":"sparkle"}]' /></AppShot>
+<AppShot :width="270" :height="342" :window="false" text="A running service's menu"><ContextMenu :width="270" header="api &gt; server - pid 48123" :items='[{"text":"Stop","icon":"stop","hint":"S"},{"text":"Restart","icon":"rotate_cw","hint":"R"},{"text":"Open in Tab","icon":"file","hint":"Enter"},{"text":"View Logs","icon":"terminal","hint":"L"},{"text":"Use a New Port...","icon":"server"},"-",{"text":"Mode","icon":"grid","hint":"dev","submenu":true},{"text":"Env","icon":"key","hint":"local","submenu":true},"-",{"text":"Open in Browser","icon":"arrow_up_right"},{"text":"Copy URL","icon":"copy"},{"text":"Copy Command","icon":"copy"},"-",{"text":"Ask Claude About This Service","icon":"sparkle"}]' /></AppShot>
 
 Right-click (or `...`):
 
-- **A service** - **Start** / **Stop** / **Restart**, **Open in Tab**,
-  **View Logs**, **Use a New Port...**, a **Mode** and an **Env** submenu
-  (when there is more than one; picking one restarts a running service),
-  **Open in Browser**, **Copy URL**, **Copy Command**, and **Fix with
-  Claude** when it failed, else **Ask Claude About This Service**.
+- **A service** - headed by its name (and its pid while it runs):
+  **Stop** (`S`) and **Restart** (`R`) while it runs, **Restart** after it
+  failed, else **Start** (`S`); **Open in Tab** (`Enter`), **View Logs**
+  (`L`), **Use a New Port...**; a **Mode** and an **Env** submenu showing the
+  current one (when there is more than one; picking one restarts a running
+  service); **Open in Browser** (only while it runs), **Copy URL**, **Copy
+  Command**; and **Fix with Claude** when it failed, else **Ask Claude About
+  This Service**.
 - **A repo** - **Start All**, **Stop All**, **Restart All**, a **Run Task**
   submenu with the repo's commands, **Environment...** and
   **Collapse**/**Expand**.
@@ -174,7 +177,7 @@ free port. If that still fails, the row shows who holds the port and a
 hostname.
 :::
 
-## Shortcuts
+## Tasks
 
 Declare quick commands per repo and run them from the Services panel:
 pick it from the **Run Task** submenu of the repo's menu, or use
@@ -185,7 +188,7 @@ exported, so `DATABASE_URL` and friends point at the right ports:
 ```yaml
 repos:
   api:
-    shortcuts:
+    tasks:
       - cmd: go run . migrate
         desc: Migrate DB
       - cmd: go test ./...
@@ -193,7 +196,8 @@ repos:
 ```
 
 The menu shows `desc` (else `key`, else `cmd`). A repo's `commands:`
-(`install`, `migrate`, `test`, `lint`, ...) show up as shortcuts too.
+(`install`, `migrate`, `test`, `lint`, ...) show up as tasks too. Configs
+written before still work with the old name, `shortcuts:`.
 
 ## Modes (dev vs build)
 

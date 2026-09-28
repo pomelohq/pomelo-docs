@@ -113,7 +113,7 @@ worktrees, databases, and ports together, so nothing goes stale.
 
 They are generated from the config: at workspace create (Configuring
 repos), whenever a service starts, whenever the config changes (for every
-workspace), and before commands run through Pomelo (shortcuts, agent
+workspace), and before commands run through Pomelo (tasks, agent
 tools). Services also get their env injected directly. Don't hand-edit
 them.
 

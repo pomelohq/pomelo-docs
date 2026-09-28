@@ -27,6 +27,10 @@ for path in sorted((root / "material").glob("*.svg")):
 cleaned = {}
 for name, svg in icons.items():
     svg = re.sub(r"<\?xml[^>]*>|<!--.*?-->", "", svg, flags=re.S).strip()
+    if "viewBox" not in svg:
+        size = re.search(r'width="(\d+)"[^>]*height="(\d+)"', svg) or re.search(r'height="(\d+)"[^>]*width="(\d+)"', svg)
+        if size:
+            svg = svg.replace("<svg ", f'<svg viewBox="0 0 {size.group(1)} {size.group(2)}" ', 1)
     svg = re.sub(r'\s(width|height)="[^"]*"', "", svg, count=2)
     cleaned[name] = svg
 out = Path(__file__).resolve().parent.parent / ".vitepress/theme/app/icons.js"

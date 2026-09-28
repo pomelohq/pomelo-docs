@@ -41,7 +41,7 @@ const testOutput = [
 ]
 const terminalMenu = [
   { text: 'Copy', keys: 'cmd-c' }, { text: 'Paste', keys: 'cmd-v' }, '-',
-  { text: 'Add Selection to Agent', icon: 'sparkle' }, { text: 'Ask Agent about Selection', icon: 'sparkle' },
+  { text: 'Add Selection to Agent', icon: 'sparkle' }, { text: 'Ask Agent about Selection', icon: 'help_circle' },
 ]
 
 export const groups = [

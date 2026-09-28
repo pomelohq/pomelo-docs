@@ -98,7 +98,7 @@ repos:
       commands:                  # named recipe - the pipeline and the agent run these
         install: go mod download
         migrate: go run . migrate
-      shortcuts:                 # the repo menu's Run Task list and the palette
+      tasks:                     # the repo menu's Run Task list and the palette
         - cmd: go test ./...     # runs in the worktree with the workspace's
           desc: Run tests        # env exported
 ```
@@ -127,7 +127,7 @@ keys are also read at the repo's top level; `lifecycle:` wins.
 | `setup` | Ordered steps run right after the worktree is created, in the worktree with the repo's env. Defaults to the `install`, `generate` and `migrate` commands. |
 | `migrate` | Migration steps (used by Prepare Main and Keep Main Fresh). |
 | `seed` | Seed steps for a fresh database (skipped when `seed_from_main`). |
-| `shortcuts` | Quick commands in the Services panel's repo menu (**Run Task**) and the command palette. |
+| `tasks` | Quick commands in the Services panel's repo menu (**Run Task**) and the command palette. `shortcuts` is read as the same key. |
 | `pre_start` | Same as the repo-level `pre_start`. |
 | `pre_delete` | Commands run before the worktree is deleted (failures only warn). |
 

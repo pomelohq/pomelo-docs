@@ -24,16 +24,16 @@ export function Login() {
     if (result.status === 429) setError("Too many attempts, try again in a minute")
   }`
 const editorMenu = [
-  { text: 'Go to Definition', keys: 'f12' }, { text: 'Go to Type Definition', keys: 'cmd-f12' },
-  { text: 'Go to Implementation', keys: 'shift-f12' }, '-',
-  { text: 'Cut', keys: 'cmd-x' }, { text: 'Copy', keys: 'cmd-c' }, { text: 'Paste', keys: 'cmd-v' }, '-',
-  { text: 'Reveal in Finder' }, { text: 'Open in Terminal' }, { text: 'Split Diff' },
+  { text: 'Go to Definition', keys: 'f12' }, { text: 'Go to Declaration', keys: 'ctrl-f12' },
+  { text: 'Go to Type Definition', keys: 'cmd-f12' }, { text: 'Go to Implementation', keys: 'shift-f12' }, '-',
+  { text: 'Cut', keys: 'cmd-x' }, { text: 'Copy', keys: 'cmd-c' }, { text: 'Copy and Trim' }, { text: 'Paste', keys: 'cmd-v' }, '-',
+  { text: 'Reveal in Finder', keys: 'alt-cmd-r' }, { text: 'Open in Terminal' },
 ]
 const terminalMenu = [
   { text: 'Copy', keys: 'cmd-c' }, { text: 'Paste', keys: 'cmd-v' }, { text: 'Select All', keys: 'cmd-a' },
   { text: 'Clear', keys: 'cmd-k' }, '-',
-  { text: 'Add Selection to Agent', icon: 'sparkle' }, { text: 'Ask Agent about Selection', icon: 'sparkle' }, '-',
-  { text: 'Close Terminal Tab', keys: 'cmd-w' },
+  { text: 'Add Selection to Agent', icon: 'sparkle' }, { text: 'Ask Agent about Selection', icon: 'help_circle' }, '-',
+  { text: 'Close Terminal Tab' },
 ]
 const terminal = [
   [['web', 6], [' % ', 'fg'], ['pnpm test', 'fg']],
@@ -87,12 +87,12 @@ const rows = [
             <template #text>Go to definition, type definition and implementation, reveal the file in Finder or open a
               terminal there. Every item shows its key.</template>
             <div class="pp-stage pp-overlay">
-              <div style="width: 100%"><Frame :width="680" :height="330" window>
+              <div style="width: 100%"><Frame :width="680" :height="360" window>
                 <div class="col" style="height: 100%">
                   <TabBar :tabs="[{ title: 'Login.tsx', icon: 'file-react', active: true }]" :buttons="['eye', 'panel_right', 'maximize']" />
                   <CodeView :code="code" language="ts" :active="10" :caret="10" />
                 </div>
-                <div style="position: absolute; left: 300px; top: 70px"><ContextMenu :items="editorMenu" :width="250" /></div>
+                <div style="position: absolute; left: 300px; top: 70px"><ContextMenu :items="editorMenu" :width="260" /></div>
               </Frame></div>
             </div>
           </Step>

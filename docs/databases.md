@@ -112,7 +112,7 @@ Its header names the workspace and has **New Console**, **Refresh** and
 
 ### Menus
 
-<AppShot :width="250" :height="226" :window="false" text="A table's menu"><ContextMenu :width="250" :items='[{"text":"Open Data"},{"text":"New Console with SELECT"},{"text":"Copy Name"},{"text":"Copy SELECT Statement"},{"text":"Show DDL"},{"text":"Truncate...","danger":true},{"text":"Drop Table...","danger":true},{"text":"Ask Claude about this table","icon":"sparkle"}]' /></AppShot>
+<AppShot :width="250" :height="262" :window="false" text="A table's menu"><ContextMenu :width="250" header="users" :items='[{"text":"Open Data","icon":"table"},{"text":"New Console with SELECT","icon":"file"},"-",{"text":"Copy Name","icon":"copy"},{"text":"Copy SELECT Statement","icon":"copy"},{"text":"Show DDL","icon":"file"},"-",{"text":"Truncate...","icon":"trash","danger":true},{"text":"Drop Table...","icon":"trash","danger":true},"-",{"text":"Ask Claude about this table","icon":"sparkle"}]' /></AppShot>
 
 Right-click:
 

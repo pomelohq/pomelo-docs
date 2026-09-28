@@ -103,8 +103,8 @@ The tools:
 | `db_list` / `db_tables` / `db_columns` / `db_query` | Browse and query the branch's Postgres and Redis |
 | `service_start` / `service_stop` / `service_restart` | Bring services up/down (ports are pre-flighted) |
 | `service_logs` | Read a service's recent output (e.g. to spot a crash) |
-| `commands` | List the project's `setup` steps and `shortcuts` plus its package manager - so the agent runs *your* canonical install/migrate/lint/test commands |
-| `run_shortcut` | Run one of those shortcuts in the repo's resolved env |
+| `commands` | List the project's `setup` steps and tasks plus its package manager - so the agent runs *your* canonical install/migrate/lint/test commands |
+| `run_shortcut` | Run one of those tasks in the repo's resolved env |
 | `run_in_env` | Run a command in a worktree with the resolved env - migrations, tests, seeds - and read the result (refused on main) |
 | `resolve_port_conflict` | Give the workspace's services fresh ports when something else grabbed one |
 | `secrets_list` | List secret names (never values) |
