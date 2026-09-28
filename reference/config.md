@@ -98,7 +98,7 @@ repos:
       commands:                  # named recipe - the pipeline and the agent run these
         install: go mod download
         migrate: go run . migrate
-      shortcuts:                 # quick commands in the Services panel and palette
+      shortcuts:                 # the repo menu's Run Task list and the palette
         - cmd: go test ./...     # runs in the worktree with the workspace's
           desc: Run tests        # env exported
 ```
