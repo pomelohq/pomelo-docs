@@ -97,17 +97,60 @@ commands run in that order.
 
 The **Database** panel (`ctrl-shift-d`, or the Database button in the
 status bar) inspects the active workspace's data without a separate DB
-client. Pomelo already knows the connection, so there's nothing to wire up:
+client. Pomelo already knows the connection, so there's nothing to wire up.
 
-- A tree of the workspace's databases, grouped by repo, plus shared Redis.
-  Postgres databases expand to their tables and views, Redis to its
-  keyspaces. A filter field narrows the tree.
-- Click a table to open it as a data grid with WHERE / ORDER BY and paging
-  (100 to 5000 rows a page). **Export CSV** writes the full result to
-  `~/Downloads/<table>.csv`.
-- A SQL console: the editor with SQL highlighting. `cmd-enter` runs the
-  selection or the statement at the caret, `cmd-shift-enter` runs it all,
-  and results show below. Consoles are saved with the project.
+Its header names the workspace and has **New Console**, **Refresh** and
+**Collapse All**; **Filter tables and columns** narrows the tree.
+
+- **Consoles** - your saved SQL consoles.
+- **Databases** - each repo with its databases and the shared services it
+  uses, then **Other services**. Postgres databases expand to their tables
+  and views, and tables to their columns. Redis expands to its keyspaces,
+  MinIO to its buckets, folders and objects.
+
+### Menus
+
+Right-click:
+
+- **A Postgres database** - **New Console**, **Refresh**, **Copy Name**,
+  **Copy Connection URL**, **Open psql in Terminal**, **Copy Data from
+  Main...** and **Reset Database...** (both only in branch workspaces, and
+  both ask first) and **Ask Claude about this schema**.
+- **A table** - **Open Data**, **New Console with SELECT**, **Copy Name**,
+  **Copy SELECT Statement**, **Show DDL**, **Truncate...**, **Drop
+  Table...** and **Ask Claude about this table**.
+- **A column** - **Copy Name**, **Filter Data by this Column** and **Show
+  Distinct Values**.
+- **A console** - **Open**, **Rename**, **Change Database...** and **Delete
+  Console...**.
+- **A Redis keyspace** - **Open Keys**, **Copy Pattern**, **Open redis-cli
+  in Terminal** and **Delete Matching Keys...**.
+- **A MinIO object** - **Open**, **Download**, **Copy Presigned URL**,
+  **Copy Path** and **Delete...**.
+
+### Tables
+
+Click a table to open it as a data grid. Type a **WHERE** and **ORDER BY**
+to narrow and sort it (or click a column's header to sort), page through it
+100, 500, 1000 or 5000 rows at a time (500 by default), drag a column's edge
+to resize it and click a cell to copy it. **Export CSV** writes the full
+result to `~/Downloads/<table>.csv`.
+
+### Consoles
+
+A console is the editor with SQL highlighting, saved with the session
+(`query 1`, `query 2`, ...). Its tab shows the database it runs against,
+which the picker in its bar changes. `cmd-enter` (or **Run**) runs the
+selection or the statement at the caret, `cmd-shift-enter` runs them all,
+and results show below, up to 500 rows. Edits save as you type.
+
+### When a database is missing
+
+When the panel cannot reach a database it says why - `Database
+myproject_feat_login does not exist`, or `Can't reach Postgres at
+localhost:5432` - with what fits: **Create database**, **Copy from main**,
+**Start shared services**, **Retry**, **Edit pom.yml**, **Show full error**,
+**Copy error** and **Fix with Claude**.
 
 Made for the checks you run constantly while coding - inspect a row, confirm
 a migration, tweak a query - right where you work. The workspace's

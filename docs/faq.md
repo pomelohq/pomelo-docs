@@ -14,14 +14,14 @@ from Terminal:
 spctl -a -vv /Applications/Pomelo.app
 ```
 
-## Set up with AI is not offered
+## No agent is offered to set up a project
 
-**Set up with AI** and **Fix with Claude** need Claude Code. The New
-Project form says "Install Claude Code to set up with AI" when Pomelo can't
-find the `claude` CLI (it looks on your `PATH` and in the installer's usual
-locations, such as `~/.local/bin`). Install it with
-`npm install -g @anthropic-ai/claude-code`, or choose **Set up manually**
-and edit `pom.yml` yourself - see the [config reference](../reference/config).
+The **Setup** step lists the agent CLIs Pomelo finds: `claude`, `codex` and
+`gemini`, on your `PATH` and in the installers' usual locations such as
+`~/.local/bin`. With none installed, install one (for Claude Code,
+`npm install -g @anthropic-ai/claude-code`), or write `pom.yml` yourself -
+see the [config reference](../reference/config). **Fix with Claude** needs
+Claude Code.
 
 ## "Project setup needs attention"
 

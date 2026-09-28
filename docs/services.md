@@ -64,36 +64,102 @@ e.g. `[local, staging]`; `local` is always included. Each non-local profile
 can point a service reference at a deployed URL under the top-level
 [`environments`](../reference/config#environments-profiles), so `staging`
 reaches a deployed backend while `local` uses the workspace's own services.
-Switch with `Env: <profile>` in the service's right-click menu; a running
+Switch it from the **Env** submenu of the service's right-click menu; a running
 service restarts, and the choice is kept per workspace.
 
 ## The Services panel
 
-Open it with `ctrl-shift-s` or the Services button in the status bar. It
-shows the active workspace's services as a tree: a **Workspace** group,
-one group per repo, and a **Shared** group (used by all workspaces). Each
-row has a status dot (green running, red crashed, grey stopped) and shows
-its mode and port.
+<Shot src="/shots/services-panel.png" text="The Services panel: the summary, what needs attention, this workspace's services and the shared ones" />
 
-- Hover a row: **Start** when stopped; **Restart**, open in the browser (if
-  it has a port) and **Stop** when running.
-- Hover a repo header to start or stop all of that repo's services.
-- Right-click a service for **Start** / **Restart** / **Stop**, **Use a New
-  Port**, **Mode: ...**, **Env: ...**, **Open in Browser** and **Copy URL**.
-- Click a running service to open its console as a tab, attached to the
-  live process. Click a crashed one to see the output it left. Click a
-  shared service to follow its Docker logs.
-- The header's buttons open the **Environment** tab (each service's
-  resolved env and where each value comes from) and the **Secrets** tab
-  (the project's encrypted `{{secret.NAME}}` values).
+Open it with `ctrl-shift-s` or the Services button in the status bar (its
+tooltip shows the key). The header names the workspace; its two buttons
+open the **Secrets** tab (the project's encrypted `{{secret.NAME}}` values)
+and the **Environment** tab (each service's resolved env and where each
+value comes from).
+
+- **Filter by name** narrows the list by service or repo name, and **All**,
+  **Running**, **Failed** and **Stopped** filter by state, each with its
+  count.
+- **The summary card** says how many services run (`3 of 5 running`), with
+  a bar and a legend of running, busy, needing attention and stopped, and
+  the buttons **Start all**, **Stop all** and, when something failed,
+  **Restart failed**.
+- **Needs attention** has a card per crashed or failed service: what
+  happened (`crashed 2m ago`, `cannot bind :5173`, `failed to start`), the
+  last line it printed, and **View logs**, **Fix with Claude**, a restart
+  button, and **Use a new port** when another process holds its port.
+- **This workspace** lists the services by repo (plus **Workspace** for
+  workspace-level ones). A repo's row shows which shared services it uses,
+  a dot per service and how many run (`2/3`). A service's row shows its
+  state, its mode, and at the right its port (`:5173`), how long it has been
+  up (`up 41m`), or what went wrong.
+- **Shared - all workspaces** stays pinned at the bottom: each shared
+  service with its port and the repos that use it.
+
+Hovering a repo tints the shared services it uses, and hovering a shared
+service tints the repos that use it.
+
+Hover a row for its buttons: **Start** when stopped; **Restart**, open in
+the browser (when it has a port), logs and **Stop** when running; `...` opens
+its menu. Hover a repo's row to start or stop all of its services.
+
+### Menus
+
+Right-click (or `...`):
+
+- **A service** - **Start** / **Stop** / **Restart**, **Open in Tab**,
+  **View Logs**, **Use a New Port...**, a **Mode** and an **Env** submenu
+  (when there is more than one; picking one restarts a running service),
+  **Open in Browser**, **Copy URL**, **Copy Command**, and **Fix with
+  Claude** when it failed, else **Ask Claude About This Service**.
+- **A repo** - **Start All**, **Stop All**, **Restart All**, a **Run Task**
+  submenu with the repo's commands, **Environment...** and
+  **Collapse**/**Expand**.
+- **A shared service** - **Open in Tab**, **Start** or **Restart**,
+  **Stop...** and **View Logs**. One container serves every workspace, so
+  stopping it while other workspaces use it asks first.
+
+### The service tab
+
+<Shot src="/shots/service-tab.png" text="A service tab: its facts and live logs" />
+
+Click a service to open it as a tab (a preview tab, replaced by the next
+one you click; **View logs** keeps it open). The tab has:
+
+- **A header** with the service's name and mode, and **Start**, **Stop**,
+  **Restart**, **Open in browser** and `...` (the service's menu).
+- **What went wrong**, for a crashed or failed service: `Crashed 2m ago -
+  exit 1`, `Port 5173 is already in use` or `Could not start`, the output,
+  and **Use a new port**, **Fix with Claude** and **Restart**.
+- **Facts**: its status and PID, its **URL** (with copy), its **Port**
+  (**Change** moves it to a new free port), its **Mode** and **Env
+  profile** (pickers when there is a choice), its **Env file** (**Open**
+  opens it) and its **Command** (with copy).
+- **Logs**, live while it runs: **Filter lines** (`cmd-f`) highlights and
+  keeps the matching lines, **Pause** holds the view (**Resume (12 new)**
+  shows what arrived meanwhile), **Clear** empties it, **Follow** keeps the
+  newest line in view and **Wrap** wraps long lines. Lines that arrive while
+  the tab is open get their time; errors are red and warnings yellow. With
+  the filter not focused, `cmd-c` copies the last line.
+
+A crashed service's tab shows the output it left. A shared service's tab
+follows its Docker logs. Closing a service's tab never stops the service.
+
+### URLs
+
+A service with a port is reached through the
+[dev-proxy](./network#same-origin-dev-proxy) at
+`http://<service>.<repo>.<workspace>.localhost:8767` - for example
+`http://server.api.feat-login.localhost:8767`. The workspace part is the
+ticket id when the branch has one (`proj-101-add-login` gives `proj-101`),
+else the branch with `/` as `-`. **Open in Browser**, the row's open button
+and **Copy URL** all use this address, so it stays the same when the port
+changes.
 
 Starting a repo service first brings up its shared services and creates the
-workspace's databases if they are missing. Stopping a shared service while
-other workspaces still use it asks first. The command palette has `services:
-start` / `stop` entries, and a workspace's right-click menu has **Stop All
-Services**.
-
-Closing a service's console tab never stops the service.
+workspace's databases if they are missing. The command palette has
+`services: start` / `stop` entries, and a workspace's right-click menu has
+**Stop All Services**.
 
 ::: tip Ports never collide
 Each service with a port gets a **random free port** (10000-65535) reserved
@@ -109,7 +175,7 @@ hostname.
 ## Shortcuts
 
 Declare quick commands per repo and run them from the Services panel:
-right-click a repo's header and pick `Run: <name>`, or use
+pick it from the **Run Task** submenu of the repo's menu, or use
 `run: <repo> <name>` in the command palette. Each runs in a terminal tab in the
 worktree, with the workspace's env files rewritten and the repo's env
 exported, so `DATABASE_URL` and friends point at the right ports:
@@ -142,7 +208,7 @@ services:
     port: true
 ```
 
-Switch with `Mode: <name>` in the service's right-click menu; a running
+Switch it from the **Mode** submenu of the service's right-click menu; a running
 service restarts. The choice lasts until the app quits, then `mode:` applies
 again.
 

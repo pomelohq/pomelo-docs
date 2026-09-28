@@ -18,13 +18,13 @@ Developer ID and notarized, so it opens without Gatekeeper warnings.
 
 ## First run
 
-The first window offers **New Project**, **Open Project** and **Open
-Settings**:
+The first window is the welcome page:
 
-- **Open Project** - pick a folder that already has a `pom.yml`.
-- **New Project** - name it, add your repos (local folders or git URLs), and
-  choose **Set up with AI** or **Set up manually**. Pomelo clones the repos,
-  detects how they run and drafts a `pom.yml`.
+- **New project** - name it, add your repos (local folders or git URLs), and
+  pick who writes `pom.yml`: an agent CLI or you. Pomelo clones the repos,
+  detects how they run and drafts the config.
+- **Open a project folder** - pick a folder that already has a `pom.yml`.
+- **Import a bundle** - start from a config bundle a teammate exported.
 
 Full walkthrough: [Quick Start](./quickstart).
 
@@ -37,7 +37,8 @@ projects use.
 | :--- | :--- | :--- |
 | **git** | Per-branch worktrees (always) | `xcode-select --install` |
 | **docker** | Shared services (Postgres, Redis, MinIO, OpenSearch) | `brew install --cask docker` |
-| **claude** | Set up with AI, the agent, Fix with Claude | `npm i -g @anthropic-ai/claude-code` |
+| **claude** | The agent, setting up a project, Fix with Claude, usage | `npm i -g @anthropic-ai/claude-code` |
+| **codex**, **gemini** | Optional: setting up a project, second opinions | their own installers |
 
 The `pom` CLI ships inside the app at
 `/Applications/Pomelo.app/Contents/MacOS/pom`; add that folder to your

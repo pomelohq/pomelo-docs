@@ -39,9 +39,9 @@ folder the session runs in (`workspace--<branch>`) and writes the state to
 `~/.local/state/pom/agents/state-<branch>.json`.
 
 The app watches that folder, and re-reads it at least every 5 seconds.
-A state shows only while one of the workspace's Claude Code agents (the
-agent dock's, **Fix with Claude** or the onboarder) is still running in its
-holder, so an agent that exits without saying so drops its dot. A working
+The dot follows the workspace's main agent (and the onboarder while a
+project sets up); [side agents](./agents#side-agents) never change it. A
+state shows only while that agent is still running in its holder, so an agent that exits without saying so drops its dot. A working
 state that has not changed for 15 minutes reads as idle. Only a real
 permission or question prompt counts as Awaiting input; Claude's idle
 reminder does not.

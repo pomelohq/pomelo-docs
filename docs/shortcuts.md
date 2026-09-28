@@ -28,6 +28,7 @@ same list, with what each key is bound to right now, is in
 | `ctrl-shift-d` | Database |
 | `ctrl-shift-p` | Pull Requests (the Git panel's pull requests) |
 | `cmd-?` | Agent |
+| `cmd-shift-u` | Agent Usage |
 | `` ctrl-` `` | Terminal |
 | `cmd-t` | New Terminal |
 | `cmd-w` | Close Tab |

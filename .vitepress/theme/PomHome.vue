@@ -42,11 +42,25 @@ const features = [
     link: '/docs/workspace',
   },
   {
-    title: 'Services and their environment',
-    body: 'Start, stop and reattach to every service from the Services panel. See each service\'s resolved env per branch and where each value comes from.',
-    img: '/shots/service-env.png',
-    alt: 'The resolved environment of the web service on the feat-login branch',
+    title: 'Services at a glance',
+    body: 'See what runs, what crashed and why, with a new port, the logs or a fix one click away. Shared Postgres and Redis sit pinned below, used by every workspace.',
+    img: '/shots/services-panel.png',
+    alt: 'The Services panel with a summary, two services that need attention and the shared services',
     link: '/docs/services',
+  },
+  {
+    title: 'A new project, set up for you',
+    body: 'Point Pomelo at your repos. It clones them, detects each stack, and lets Claude Code, Codex or Gemini CLI write pom.yml, then verifies it boots and hands back what fails.',
+    img: '/shots/onboarding.png',
+    alt: 'Setting up myproject: repos cloned, stacks detected and the agent configuring',
+    link: '/docs/quickstart',
+  },
+  {
+    title: 'Agent usage',
+    body: 'Your Claude plan limits in the title bar, and what every workspace\'s agents used by day, read from their transcripts without spending a token.',
+    img: '/shots/agent-usage.png',
+    alt: 'The Agent usage tab with cost, tokens, plan limits and a chart by workspace',
+    link: '/docs/agents#usage-and-plan-limits',
   },
   {
     title: 'Database browser',
@@ -82,7 +96,8 @@ const ai = [
   { title: 'Next to the code', body: 'The agent button opens your AI CLI in the workspace, rooted at its worktrees. It keeps running when you close the tab or quit the app.' },
   { title: 'Status on every workspace', body: 'The sidebar shows what each workspace\'s agent is doing: thinking, using tools, idle or awaiting your input, with a notification when it changes.' },
   { title: 'Tools for the real stack', body: 'pom\'s MCP server gives the agent the workspace\'s services, ports, logs and databases, and lets it start services and run queries.' },
-  { title: 'Fix with Claude, Set up with AI', body: 'When the config doctor finds a problem, Fix with Claude opens an agent on it. A new project can be set up with AI from its repos.' },
+  { title: 'Side agents', body: 'Ask a question, review the branch or fix one thing in a side agent, forked, compacted or fresh, without touching the main conversation. Send its answer to main when it helps.' },
+  { title: 'Fix with Claude', body: 'A crashed service, a failed query or a config problem has Fix with Claude right on it, with the error already attached.' },
 ]
 
 const care = [
@@ -116,6 +131,7 @@ const footer = [
       ['Workspaces', '/docs/workspace'],
       ['Services', '/docs/services'],
       ['Databases', '/docs/databases'],
+      ['Agents', '/docs/agents'],
       ['Agent status', '/docs/agent-status'],
       ['pom.yml reference', '/reference/config'],
     ],

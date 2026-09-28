@@ -59,7 +59,9 @@ workspace services.
 A frontend on `:3000` calling a backend on `:4000` is **cross-origin** — you
 fight CORS, and cookies don't behave like production. Pomelo's **dev-proxy**
 removes that: it fronts every service in a workspace under **one origin**,
-`<service>.<repo>.<branch>.localhost:8767`, and a frontend reaches a backend
+`<service>.<repo>.<workspace>.localhost:8767` (the workspace part is the
+branch's ticket id when it has one, else the branch with `/` as `-`), and a
+frontend reaches a backend
 at the same-origin path `/_pom_dev/<repo>/<service>`. Same origin -> **no
 CORS, cookies behave like production**. `.localhost` resolves to loopback with
 no `/etc/hosts` edits.
@@ -119,7 +121,7 @@ never changes. The dev-proxy is a **reverse proxy**: for each request it
 forwards `/_pom_dev/<repo>/<service>` to the **local** service by default, or
 to a **deployed** backend when a non-local profile is active. So you retarget
 an environment by **flipping a profile** (right-click the frontend service
-in the Services panel > **Env: staging**), and the browser URL — same origin,
+in the Services panel > **Env** > **staging**), and the browser URL — same origin,
 CORS-free — stays exactly the same.
 
 <figure class="diagram">
@@ -275,7 +277,7 @@ it needs no tunnel. Point the OAuth app's redirect URI at the workspace's
 dev-proxy hostname:
 
 ```
-http://<service>.<repo>.<branch>.localhost:8767/oauth/callback
+http://<service>.<repo>.<workspace>.localhost:8767/oauth/callback
 ```
 
 The browser resolves `.localhost` to loopback on its own and hits the
