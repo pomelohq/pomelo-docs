@@ -15,6 +15,8 @@ const rows = [
   [5, '', 10, '', ''],
   [6, '    if user && user.authenticate(params[:password])', 11, '    if user&.authenticate(params[:password])', 'mod'],
   [7, '      session[:user_id] = user.id', 12, '      session[:user_id] = user.id', ''],
+  [8, '      remember(user)', null, '', 'del'],
+  [9, '    end', 13, '    end', ''],
 ]
 const split = ref(true)
 </script>
@@ -26,21 +28,21 @@ const split = ref(true)
       <span class="pa-diff-btn" :class="{ on: split }" @click="split = true"><Icon name="diff_split" :size="14" /></span>
       <span class="pa-sm muted" style="margin-left: 6px">app/controllers/sessions_controller.rb</span>
       <span class="grow" />
-      <span class="mono pa-sm"><span style="color: var(--pa-version-control-added)">+12</span> <span style="color: var(--pa-version-control-deleted)">-1</span></span>
+      <span class="mono pa-sm"><span style="color: var(--pa-version-control-added)">+12</span> <span style="color: var(--pa-version-control-deleted)">-2</span></span>
     </div>
     <div class="pa-diff-body mono">
       <template v-if="split">
         <div v-for="(r, i) in rows" :key="i" class="pa-diff-row">
           <span class="pa-diff-side" :class="{ del: r[4] === 'mod' || r[4] === 'del', empty: r[0] === null }">
             <span class="pa-diff-no">{{ r[0] ?? '' }}</span><span class="pa-diff-text">{{ r[1] }}</span></span>
-          <span class="pa-diff-side" :class="{ add: r[4] === 'add' || r[4] === 'mod' }">
+          <span class="pa-diff-side" :class="{ add: r[4] === 'add' || r[4] === 'mod', empty: r[2] === null }">
             <span class="pa-diff-no">{{ r[2] ?? '' }}</span><span class="pa-diff-text">{{ r[3] }}</span></span>
         </div>
       </template>
       <template v-else>
         <template v-for="(r, i) in rows" :key="i">
-          <div v-if="r[4] === 'mod'" class="pa-diff-row"><span class="pa-diff-side del full"><span class="pa-diff-no">{{ r[0] }}</span><span class="pa-diff-text">{{ r[1] }}</span></span></div>
-          <div class="pa-diff-row"><span class="pa-diff-side full" :class="{ add: r[4] === 'add' || r[4] === 'mod' }">
+          <div v-if="r[4] === 'mod' || r[4] === 'del'" class="pa-diff-row"><span class="pa-diff-side del full"><span class="pa-diff-no">{{ r[0] }}</span><span class="pa-diff-text">{{ r[1] }}</span></span></div>
+          <div v-if="r[4] !== 'del'" class="pa-diff-row"><span class="pa-diff-side full" :class="{ add: r[4] === 'add' || r[4] === 'mod' }">
             <span class="pa-diff-no">{{ r[2] }}</span><span class="pa-diff-text">{{ r[3] }}</span></span></div>
         </template>
       </template>
@@ -60,7 +62,8 @@ const split = ref(true)
 .pa-diff-side.full { flex: 1; }
 .pa-diff-side.add { background: color-mix(in srgb, var(--pa-version-control-added) 14%, transparent); }
 .pa-diff-side.del { background: color-mix(in srgb, var(--pa-version-control-deleted) 14%, transparent); }
-.pa-diff-side.empty { background: repeating-linear-gradient(135deg, transparent 0 6px, color-mix(in srgb, var(--pa-border) 35%, transparent) 6px 7px); }
+/* The side with no line: 45 degree stripes in the panel color, 12px apart, as the app draws them. */
+.pa-diff-side.empty .pa-diff-text { flex: 1; background: repeating-linear-gradient(135deg, var(--pa-panel-background) 0 1px, transparent 1px 8.49px); }
 .pa-diff-no { width: 38px; flex: none; text-align: right; padding-right: 10px; color: var(--pa-editor-line-number); }
 .pa-diff-text { color: var(--pa-editor-foreground); }
 </style>

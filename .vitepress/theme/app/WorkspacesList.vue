@@ -1,7 +1,7 @@
 <script setup>
 import Icon from './Icon.vue'
 
-// agent: idle | thinking | tools | compacting | input. pr: { count, tone: ok|warn|merged|danger, trouble }.
+// agent: idle | thinking | tools | compacting | input. pr: { count, tone: ok|warn|merged|danger, trouble: failed|conflict|changes }.
 defineProps({
   rows: {
     type: Array,
@@ -10,7 +10,7 @@ defineProps({
       { name: 'Login page', branch: 'feat-login', current: true, agent: 'thinking', running: 2,
         pr: { count: 2, tone: 'warn' }, trouble: ['Checks pending', 'warning'] },
       { name: 'Checkout flow', ticket: 'PROJ-101', status: ['In Review', 'accent'], agent: 'input', running: 3,
-        pr: { count: 1, tone: 'danger', trouble: true }, trouble: ['CI failed', 'error'] },
+        pr: { count: 1, tone: 'danger', trouble: 'failed' }, trouble: ['CI failed', 'error'] },
       { name: 'Search filters', ticket: 'PROJ-104', status: ['In Progress', 'accent'], agent: 'tools' },
     ],
   },
@@ -20,6 +20,8 @@ const agentColor = {
   compacting: 'var(--pa-text-accent)', input: 'var(--pa-error)',
 }
 const prColor = { ok: 'var(--pa-success)', warn: 'var(--pa-warning)', merged: 'var(--pa-ansi-5)', danger: 'var(--pa-error)' }
+// A failing PR swaps the PR glyph for the reason's.
+const troubleIcon = { failed: 'close', conflict: 'warning', changes: 'undo' }
 const statusColor = { done: 'var(--pa-success)', accent: 'var(--pa-text-accent)', other: 'var(--pa-text-placeholder)' }
 const second = row => row.ticket || row.running || row.trouble
 </script>
@@ -38,7 +40,8 @@ const second = row => row.ticket || row.running || row.trouble
         <span class="trunc grow pa-ws-name">{{ row.name }}</span>
         <span v-if="row.pr" class="pa-ws-pr" :class="{ trouble: row.pr.trouble }"
           :style="{ color: row.pr.trouble ? 'var(--pa-error)' : undefined }">
-          <Icon name="pull_request" :size="11" :style="{ color: row.pr.trouble ? 'var(--pa-error)' : prColor[row.pr.tone] }" />
+          <Icon :name="row.pr.trouble ? troubleIcon[row.pr.trouble] : 'pull_request'" :size="11"
+            :style="{ color: row.pr.trouble ? 'var(--pa-error)' : prColor[row.pr.tone] }" />
           <span :class="{ muted: !row.pr.trouble }">{{ row.pr.count }}</span>
         </span>
       </div>

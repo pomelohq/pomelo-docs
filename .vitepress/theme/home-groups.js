@@ -29,7 +29,7 @@ const statusRows = [
 const prRows = [
   { name: 'main', agent: 'idle' },
   { name: 'Login page', branch: 'feat-login', current: true, agent: 'idle', running: 2, pr: { count: 1, tone: 'warn' }, trouble: ['Checks pending', 'warning'] },
-  { name: 'Checkout flow', ticket: 'PROJ-101', status: ['In Review', 'accent'], agent: 'input', pr: { count: 1, tone: 'danger', trouble: true }, trouble: ['CI failed', 'error'] },
+  { name: 'Checkout flow', ticket: 'PROJ-101', status: ['In Review', 'accent'], agent: 'input', pr: { count: 1, tone: 'danger', trouble: 'failed' }, trouble: ['CI failed', 'error'] },
   { name: 'Invoice export', ticket: 'PROJ-97', status: ['Done', 'done'], agent: 'idle', pr: { count: 1, tone: 'merged' } },
 ]
 const testOutput = [

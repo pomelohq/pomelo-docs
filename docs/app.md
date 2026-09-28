@@ -149,7 +149,7 @@ two buttons in its tab bar switch between **unified** and **split**
 (side-by-side, when the pane has room for it); the choice is kept for every
 diff and matches **Split Diff** in the editor's menu.
 
-<AppShot :width="720" :height="300" text="A branch diff, split. The two buttons switch to unified."><DiffView /></AppShot>
+<AppShot :width="720" :height="345" text="A branch diff, split. The two buttons switch to unified."><DiffView /></AppShot>
 
 ## Terminal and agent
 
