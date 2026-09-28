@@ -21,12 +21,16 @@ repos:
 
 `{{db.NAME}}` resolves to the named entry above (session-prefixed) — names
 instead of positional indexes, so reordering the map never breaks a
-reference. The env vars produced for a workspace on branch `feat/login`:
+reference. `{{db.NAME.url}}` gives the full `postgres://user:pass@host:port/name`.
+The env vars produced for a workspace on branch `feat/login`:
 
 ```
-DATABASE_URL=postgres://postgres:postgres@localhost:44800/myproject_feat_login
-TEST_DATABASE_URL=postgres://postgres:postgres@localhost:44800/myproject_feat_login_test
+DATABASE_URL=postgres://postgres:postgres@127.0.0.1:5432/myproject_feat_login
+TEST_DATABASE_URL=postgres://postgres:postgres@127.0.0.1:5432/myproject_feat_login_test
 ```
+
+`{{branch.safe}}` only turns `/` into `_`, so a hyphen stays
+(`feat/login-page` gives `myproject_feat_login-page`).
 
 ## Shared service credentials
 
@@ -50,20 +54,24 @@ copies instead of building them from scratch:
 ```yaml
 repos:
   api:
-    seed_from_main: true   # clone api's DBs from main (CREATE DATABASE … TEMPLATE)
+    seed_from_main: true   # clone api's DBs from main (CREATE DATABASE ... TEMPLATE)
 ```
 
-Set up main once (migrate + seed), and each new workspace clones the
-prepared databases in seconds, with main's sample data — the repo's own
-`seed` is skipped. If a main DB is missing, Pomelo falls back to an empty
-create. See [Workspace › Seed from main](./workspace#seed-from-main).
+Set up main once, and each new workspace clones the prepared databases in
+seconds, with main's sample data - the repo's own `seed` is skipped. If a
+main database is missing, or the copy fails, Pomelo creates it empty with a
+warning. See [Workspace > Seed from main](./workspace#seed-from-main).
 
-## Manage
+To (re)build main's data, right-click the **main** workspace and choose
+**Prepare Main...**: it drops and recreates main's databases, runs each
+repo's migrations, then seeds (`pom prepare-main` does the same).
 
-Manage a workspace's databases from its menu in the app — create, drop, or
-reset all databases for that workspace at once. Databases are also created
-automatically when the workspace is created, and dropped when it's
-deleted.
+## Lifecycle
+
+Databases are created when the workspace is created (and again, if missing,
+when one of its services starts), and dropped when you delete the
+workspace. `pom db create|drop|reset [branch]` manages them by hand, and
+`pom db clean` drops this project's databases no workspace uses.
 
 ## Setup hooks
 
@@ -80,23 +88,77 @@ repos:
 ```
 
 These run after the worktree exists, the env file is written, and the
-databases have been created — so `DATABASE_URL` is set correctly.
+databases have been created - so `DATABASE_URL` is set correctly. Repos set
+up in parallel, and a failed setup step warns instead of stopping the
+workspace. With no `setup:`, the repo's `install`, `generate` and `migrate`
+commands run in that order.
 
 ## Browsing data in the app
 
-The **Database** tab (⌘4) inspects a branch's data without a separate DB
-client. Pomelo already knows the connection, so there's nothing to wire up:
+The **Database** panel (`ctrl-shift-d`, or the Database button in the
+status bar) inspects the active workspace's data without a separate DB
+client. Pomelo already knows the connection, so there's nothing to wire up.
 
-<Shot src="/shots/database.png" text="Database browser — tree of per-branch DBs, data grid, SQL console" />
+Its header names the workspace and has **New Console**, **Refresh** and
+**Collapse All**; **Filter tables and columns** narrows the tree.
 
-- A tree of every per-branch database down to its tables (Postgres) and
-  keyspaces (Redis).
-- Click a table to open it as a data grid with WHERE / ORDER BY and paging;
-  a record panel shows one row vertically and export streams the full result
-  to CSV.
-- A SQL console with syntax highlighting and schema-aware autocomplete.
+<AppShot :width="300" :height="420" text="The Database panel. Click a row to fold or open it."><DatabasePanel /></AppShot>
 
-Made for the checks you run constantly while coding — inspect a row, confirm a
-migration, tweak a query — right where you work, no separate client to wire up.
-The workspace's [AI agent](./workspace#agent-tools-mcp) can query the same
+- **Consoles** - your saved SQL consoles.
+- **Databases** - each repo with its databases and the shared services it
+  uses, then **Other services**. Postgres databases expand to their tables
+  and views, and tables to their columns. Redis expands to its keyspaces,
+  MinIO to its buckets, folders and objects.
+
+### Menus
+
+<AppShot :width="250" :height="262" :window="false" text="A table's menu"><ContextMenu :width="250" header="users" :items='[{"text":"Open Data","icon":"table"},{"text":"New Console with SELECT","icon":"file"},"-",{"text":"Copy Name","icon":"copy"},{"text":"Copy SELECT Statement","icon":"copy"},{"text":"Show DDL","icon":"file"},"-",{"text":"Truncate...","icon":"trash","danger":true},{"text":"Drop Table...","icon":"trash","danger":true},"-",{"text":"Ask Claude about this table","icon":"sparkle"}]' /></AppShot>
+
+Right-click:
+
+- **A Postgres database** - **New Console**, **Refresh**, **Copy Name**,
+  **Copy Connection URL**, **Open psql in Terminal**, **Copy Data from
+  Main...** and **Reset Database...** (both only in branch workspaces, and
+  both ask first) and **Ask Claude about this schema**.
+- **A table** - **Open Data**, **New Console with SELECT**, **Copy Name**,
+  **Copy SELECT Statement**, **Show DDL**, **Truncate...**, **Drop
+  Table...** and **Ask Claude about this table**.
+- **A column** - **Copy Name**, **Filter Data by this Column** and **Show
+  Distinct Values**.
+- **A console** - **Open**, **Rename**, **Change Database...** and **Delete
+  Console...**.
+- **A Redis keyspace** - **Open Keys**, **Copy Pattern**, **Open redis-cli
+  in Terminal** and **Delete Matching Keys...**.
+- **A MinIO object** - **Open**, **Download**, **Copy Presigned URL**,
+  **Copy Path** and **Delete...**.
+
+### Tables
+
+<AppShot :width="760" :height="330" text="A table tab. Click a header to sort, a cell to select it."><TableView /></AppShot>
+
+Click a table to open it as a data grid. Type a **WHERE** and **ORDER BY**
+to narrow and sort it (or click a column's header to sort), page through it
+100, 500, 1000 or 5000 rows at a time (500 by default), drag a column's edge
+to resize it and click a cell to copy it. **Export CSV** writes the full
+result to `~/Downloads/<table>.csv`.
+
+### Consoles
+
+A console is the editor with SQL highlighting, saved with the session
+(`query 1`, `query 2`, ...). Its tab shows the database it runs against,
+which the picker in its bar changes. `cmd-enter` (or **Run**) runs the
+selection or the statement at the caret, `cmd-shift-enter` runs them all,
+and results show below, up to 500 rows. Edits save as you type.
+
+### When a database is missing
+
+When the panel cannot reach a database it says why - `Database
+myproject_feat_login does not exist`, or `Can't reach Postgres at
+localhost:5432` - with what fits: **Create database**, **Copy from main**,
+**Start shared services**, **Retry**, **Edit pom.yml**, **Show full error**,
+**Copy error** and **Fix with Claude**.
+
+Made for the checks you run constantly while coding - inspect a row, confirm
+a migration, tweak a query - right where you work. The workspace's
+[AI agent](./workspace#agent-tools-mcp) can list tables and query the same
 databases over MCP while it works.

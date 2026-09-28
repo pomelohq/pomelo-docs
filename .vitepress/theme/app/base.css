@@ -1,0 +1,66 @@
+@import './tokens.css';
+
+@font-face { font-family: 'Lilex'; src: url('/fonts/Lilex-Regular.ttf') format('truetype'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Lilex'; src: url('/fonts/Lilex-Bold.ttf') format('truetype'); font-weight: 700; font-display: swap; }
+
+/* The app window drawn in HTML: the app's UI font at its sizes, colors only from tokens.css. */
+.pa {
+  font-family: 'IBM Plex Sans', system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--pa-text);
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+  cursor: default;
+  text-align: left;
+}
+.pa *, .pa *::before, .pa *::after { box-sizing: border-box; }
+.pa .mono { font-family: 'Lilex', ui-monospace, monospace; }
+.pa .muted { color: var(--pa-text-muted); }
+.pa .placeholder { color: var(--pa-text-placeholder); }
+.pa .trunc { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.pa .row { display: flex; align-items: center; min-width: 0; }
+.pa .col { display: flex; flex-direction: column; min-width: 0; }
+.pa .grow { flex: 1; min-width: 0; }
+
+/* Controls shared by several fragments. */
+.pa-panel-head { flex: none; height: 34px; padding: 0 6px 0 12px; display: flex; align-items: center; gap: 6px; }
+.pa-panel-title { font-size: 13px; font-weight: 500; }
+.pa-panel-branch { font-size: 12px; }
+.pa-icon-btn { width: 20px; height: 20px; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: var(--pa-icon-muted); }
+.pa-icon-btn:hover { background: var(--pa-element-hover); color: var(--pa-icon); }
+.pa-field { height: 26px; padding: 0 8px; gap: 6px; border-radius: 5px; display: flex; align-items: center; font-size: 13px;
+  background: var(--pa-editor-background); border: 1px solid var(--pa-border-variant); }
+.pa .pa-strong { font-weight: 500; }
+.pa .pa-small { font-size: 11.5px; }
+.pa .pa-xs { font-size: 11px; }
+.pa .err { color: var(--pa-error); }
+.pa .warn { color: var(--pa-warning); }
+.pa-btn { height: 22px; padding: 0 7px; gap: 4px; border-radius: 4px; display: inline-flex; align-items: center; font-size: 11.5px;
+  background: var(--pa-element-background); border: 1px solid var(--pa-border-variant); color: var(--pa-text); white-space: nowrap; }
+.pa-btn:hover { background: var(--pa-element-hover); }
+.pa-btn.primary { background: var(--pa-info-background); border-color: var(--pa-info-border); }
+.pa-btn.agent { background: color-mix(in srgb, var(--pa-ansi-5) 12%, transparent);
+  border-color: color-mix(in srgb, var(--pa-ansi-5) 55%, transparent); }
+.pa-mode { height: 16px; padding: 0 4px; border-radius: 3px; border: 1px solid var(--pa-border-variant); font-size: 10.5px;
+  display: inline-flex; align-items: center; color: var(--pa-text-muted); }
+.pa-ob-btn { height: 28px; padding: 0 12px; gap: 6px; border-radius: 5px; display: inline-flex; align-items: center; font-size: 13px;
+  border: 1px solid var(--pa-border); background: var(--pa-element-background); white-space: nowrap; }
+.pa-ob-btn.ghost { border-color: transparent; background: none; color: var(--pa-text-muted); }
+.pa-uc-seg { display: flex; padding: 2px; border-radius: 6px; background: var(--pa-panel-background); font-size: 12px; }
+.pa-uc-seg span { padding: 3px 10px; border-radius: 4px; color: var(--pa-text-muted); cursor: pointer; }
+.pa-uc-seg span.on { background: var(--pa-element-selected); color: var(--pa-text); }
+.pa-access { height: 20px; padding: 0 6px; border-radius: 4px; font-size: 12px; display: inline-flex; align-items: center;
+  color: var(--pa-text-muted); border: 1px solid var(--pa-border-variant); white-space: nowrap; align-self: center; }
+.pa-access.edit { color: var(--pa-warning); border-color: color-mix(in srgb, var(--pa-warning) 50%, transparent); }
+.pa-menu-sep { height: 5px; display: flex; align-items: center; }
+.pa-menu-sep::after { content: ''; flex: 1; height: 1px; background: var(--pa-border); }
+.pa-menu-row { height: 28px; padding: 0 8px; gap: 6px; border-radius: 5px; display: flex; align-items: center; font-size: 13px; }
+.pa-menu-row:hover { background: var(--pa-element-hover); }
+.pa .pa-sm { font-size: 11.5px; }
+.pa .pa-ok { color: var(--pa-success); }
+
+/* Key glyphs as the app draws them in menus: bare, muted, 12px. */
+.pa .pa-keys .pom-stroke { border: 0; background: none; padding: 0; color: var(--pa-text-muted); }
+.pa .pa-keys .pom-glyph { width: 12px; height: 12px; }
+.pa .pa-keys .pom-key { font-size: 12px; min-width: 12px; }

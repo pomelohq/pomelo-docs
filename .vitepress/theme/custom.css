@@ -103,16 +103,20 @@ html, body { overflow-x: hidden; }
 .pom-landing .VPPage,
 .pom-landing .VPPage .vp-doc { max-width: none !important; padding: 0 !important; }
 .pom-landing .VPPage > .vp-doc > div { width: 100%; }
+.pom-landing .VPFooter { display: none; }
 
-/* Download → a compact accent pill in the top nav. Style the inner .text span
-   (not the full-height <a>) so it fits the bar instead of overflowing it. */
-.VPNavBarMenuLink[href*="releases/latest"] .text {
+/* Download: a compact accent pill in the top nav. Style the inner span (not the
+   full-height <a>) so it fits the bar instead of overflowing it. */
+.VPNavBarMenuLink[href*="releases/latest"] { display: flex; align-items: center; }
+.VPNavBarMenuLink[href*="releases/latest"]::after { display: none !important; }
+.VPNavBarMenuLink[href*="releases/latest"] > span {
   background: var(--vp-c-brand-1); color: #fff !important;
+  display: inline-block; line-height: 20px;
   padding: 7px 15px; border-radius: 20px; border-bottom: 0 !important;
   transition: background 0.16s;
 }
-.dark .VPNavBarMenuLink[href*="releases/latest"] .text { color: #1a0f18 !important; }
-.VPNavBarMenuLink[href*="releases/latest"]:hover .text { background: var(--vp-c-brand-3); }
+.dark .VPNavBarMenuLink[href*="releases/latest"] > span { color: #1a0f18 !important; }
+.VPNavBarMenuLink[href*="releases/latest"]:hover > span { background: var(--vp-c-brand-3); }
 
 .diagram {
   margin: 24px 0;
@@ -122,3 +126,19 @@ html, body { overflow-x: hidden; }
   background: var(--vp-c-bg-alt);
 }
 .diagram svg { display: block; width: 100%; height: auto; }
+
+/* Product menu: its three groups side by side, each entry an icon, a title and a line. */
+.VPNavBarMenuGroup .VPMenu:has(.pm-item) { min-width: 900px; padding: 16px 12px; }
+.VPNavBarMenuGroup .VPMenu:has(.pm-item) .items { display: grid; grid-template-columns: repeat(3, 1fr); }
+.VPNavBarMenuGroup .VPMenu:has(.pm-item) .VPMenuGroup { margin: 0; padding: 0 8px; border-top: 0; }
+.VPNavBarMenuGroup .VPMenu:has(.pm-item) .VPMenuGroup + .VPMenuGroup { border-left: 1px solid var(--vp-c-divider); }
+.VPNavBarMenuGroup .VPMenu:has(.pm-item) .VPMenuGroup .title {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--vp-c-text-3); }
+.VPMenu .VPMenuLink:has(.pm-item) .VPLink { padding: 8px 12px; line-height: 1.3; white-space: normal; }
+.pm-item { display: flex; gap: 12px; align-items: flex-start; }
+.pm-icon { width: 16px; height: 16px; flex: none; margin-top: 2px; color: var(--vp-c-brand-1); }
+.pm-icon svg { width: 100%; height: 100%; display: block; }
+.pm-text { display: flex; flex-direction: column; gap: 3px; }
+.pm-text b { font-size: 14px; font-weight: 600; color: var(--vp-c-text-1); }
+.pm-text small { font-size: 12.5px; color: var(--vp-c-text-2); }

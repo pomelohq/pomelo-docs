@@ -5,32 +5,35 @@ ones. If something here is out of date, please open an issue.
 
 ## macOS won't open the app ("unidentified developer" / Gatekeeper)
 
-It shouldn't — the app is signed with an Apple Developer ID and notarized,
+It shouldn't - the app is signed with an Apple Developer ID and notarized,
 so Gatekeeper opens it silently. If a stray copy is quarantined (e.g.
-downloaded oddly), right-click **Pomelo.app** → **Open** once, or verify
+downloaded oddly), right-click **Pomelo.app** > **Open** once, or verify
 from Terminal:
 
 ```bash
 spctl -a -vv /Applications/Pomelo.app
-# → accepted, source=Notarized Developer ID
 ```
 
-## The onboarding agent didn't write a config
+## No agent is offered to set up a project
 
-The onboarding agent uses the `claude` CLI. Install it with
-`npm install -g @anthropic-ai/claude-code`, then create the session again.
-You can always write `pom.yml` by hand — see the
-[config reference](../reference/config).
+The **Setup** step lists the agent CLIs Pomelo finds: `claude`, `codex` and
+`gemini`, on your `PATH` and in the installers' usual locations such as
+`~/.local/bin`. With none installed, install one (for Claude Code,
+`npm install -g @anthropic-ai/claude-code`), or write `pom.yml` yourself -
+see the [config reference](../reference/config). **Fix with Claude** needs
+Claude Code.
 
-## The config doctor says something's missing
+## "Project setup needs attention"
 
-The doctor (at the bottom of the **Project** config editor) reports exactly
-what's blocking the project from running — a tool not installed, docker not
-running, a database not created, a template that doesn't resolve. Fix the
-named item and the strip clears. The doctor is deterministic (no LLM), so
-its verdict is the source of truth for "is this runnable".
+That notice is the config doctor: it found something that keeps the project
+from running - git or Docker missing, Docker not running, a repo not cloned
+into main, a removed config key, an unset `{{secret.*}}`, or a shared
+service nothing is wired to. **Fix with Claude** opens an agent on the
+findings; `pom doctor` prints the full list with a fix for each. A config
+that does not load shows **Invalid pom.yml** instead, with **Open pom.yml**
+at the problem. The doctor is deterministic (no LLM).
 
-## Shared services (Postgres/Redis/…) aren't running
+## Shared services (Postgres/Redis/...) aren't running
 
 They need **docker**. You don't have to start them manually — starting a
 repo service first brings its shared dependencies up. Check `docker ps`,
@@ -39,76 +42,84 @@ and that Docker Desktop is running.
 ## A service starts fine in my terminal but fails in Pomelo
 
 Pomelo runs services in a **login, non-interactive** shell (`zsh -lc`) and
-deliberately **does not source your `~/.zshrc`** — sourcing it can trip a
+deliberately **does not source your `~/.zshrc`** - sourcing it can trip a
 macOS permission prompt (a prompt plugin touching the Media library, etc.).
-Instead it prepends the well-known version-manager bin/shim dirs to `PATH`
-deterministically (nvm, fnm, volta, asdf, rbenv, pyenv, bun, pnpm,
-Homebrew), so `node`, `ruby`, and friends resolve without `.zshrc`.
+Instead it prepends the well-known version-manager and tool dirs to `PATH`
+(pnpm, volta, bun, fnm, asdf, rbenv, pyenv, nvm, `~/.cargo/bin`, Homebrew),
+so `node`, `ruby`, and friends resolve without `.zshrc`.
 
 If a service still can't find a binary, its toolchain isn't on a standard
-manager path — put the setup (a `use`/`export`) in the service's or repo's
+manager path - put the setup (a `use`/`export`) in the service's or repo's
 `pre_start` hook. `pre_start` runs after the `cd` into the worktree and
 before the command.
 
-## PR badges / checks don't show up
+## PR pills / checks don't show up
 
-- Add a GitHub token in **Settings ▸ Integrations ▸ Forge · GitHub** and hit
-  **Test**. Pomelo talks to GitHub directly (no `gh` CLI) — a read-only token
-  is enough (classic `repo`, a fine-grained PAT with Pull requests/Contents/
-  Metadata read, or `export GH_TOKEN=$(gh auth token)`). See
-  [Connecting GitHub](/docs/app#connecting-github).
+- Pomelo talks to GitHub directly (no `gh` CLI). It reads the token from
+  `GH_TOKEN` or `GITHUB_TOKEN` in the environment the app was launched with
+  (an app opened from Finder doesn't see your shell's exports), otherwise
+  from the project's secret named `github`: add it in the Services panel's
+  **Secrets** tab. A read-only token is enough. See
+  [Pull requests](/docs/app#pull-requests).
 - On an **organization**, a fine-grained token must be approved by an org
   admin before it works.
 - The repo needs a GitHub `origin` remote. **SSH host aliases work**
-  (e.g. `git@myalias:owner/repo` from your `~/.ssh/config`) — Pomelo reads
+  (e.g. `git@myalias:owner/repo` from your `~/.ssh/config`) - Pomelo reads
   `owner/repo` from any URL form.
-- A workspace shows **no PR pill** when its branch simply has no open PR.
+- A workspace shows **no PR pill** when its branch has no open or merged PR.
 
-## Where is "Delete workspace"?
+## Where is "Delete Workspace"?
 
-Right-click a workspace in the sidebar → **Delete workspace…**. It's
-offered on branch workspaces only — **main** is the pinned project home and
-can't be deleted (it has **Pull latest** instead). Right-click also has
-**Add repos…** and **Reset databases…**.
+Right-click a workspace in the sidebar > **Delete Workspace** (it asks
+first). It's offered on branch workspaces only - **main** is the project's
+home and can't be deleted; its menu has **Update Main from Origin**,
+**Prepare Main...** and, when repos are missing, **Clone Missing Repos...**
+instead. Branch workspaces also have **Add Repos...**, and every row has
+**Rename...**.
 
 ## How do I add a repo to the project?
 
-Right-click the **main** workspace → **Add repo (clone from URL)…**, paste
-a git URL (SSH or HTTPS; aliases work). Pomelo clones it, registers it in
-`pom.yml`, and reloads. On a **branch** workspace, right-click → **Add
-repos…** adds worktrees for repos already declared in the project.
+**Settings > Project > Add Repository** (or **Add Repository** in the
+command palette): enter a git URL or folder and an optional alias, and tick
+the workspaces that should get it. Pomelo clones it into main, detects its
+services and adds it to the config. On a **branch** workspace, right-click
+> **Add Repos...** adds worktrees for repos already in the project. See
+[Project config](./project-config#repositories).
 
-## How do I delete a session?
+## How do I remove a project from the list?
 
-Open the session switcher (top-left project chip) and **right-click a
-session** → **Remove from list** (unregister, keep the files) or **Delete
-session + files…** (also removes its directory from disk). You can't delete
-the **active** session — switch to another first.
+Open the project switcher (the project name, top-left) and hover the
+project: **Remove from List** unregisters it and leaves the files on disk.
+You can't remove the project open in this window - switch first. To delete
+the files, remove the folder in Finder.
 
 ## Two services grabbed the same port / ports keep changing
 
-Each `port: true` service gets a random free port reserved atomically, and
-keeps it while it runs. On restart it may get a fresh port — harmless,
-because the dev-proxy re-resolves it and shared services keep sticky ports
-for stable connection strings. If a start reports a port in use, something
-outside Pomelo is holding it; free it and start again.
+Each service with a port gets a random free port reserved atomically, and
+keeps it across restarts while it is in use. Shared services keep their
+usual port when it is free, for stable connection strings. If a start
+reports a port in use, something outside Pomelo is holding it: free it, or
+click **Use a new port** on the service's row.
 
 ## I deleted a workspace folder by hand and now create fails
 
-Deleting a `workspace--…` folder with `rm -rf` instead of the **Delete
-workspace** action leaves git with a stale worktree registration. Pomelo
+Deleting a `workspace--...` folder with `rm -rf` instead of the **Delete
+Workspace** action leaves git with a stale worktree registration. Pomelo
 prunes stale registrations automatically before adding a worktree, so a
-retry usually just works. Prefer the **Delete workspace** action — it
-removes worktrees, databases, and ports together, so nothing goes stale.
+retry usually just works. Prefer **Delete Workspace** - it removes
+worktrees, databases, and ports together, so nothing goes stale.
 
 ## When are `.env` files (re)written?
 
-On three events, and only then: **workspace create**, **service start**
-(picks up config edits before launch), and an **env-profile switch**. So
-edit config, then start — the env reflects it.
+They are generated from the config: at workspace create (Configuring
+repos), whenever a service starts, whenever the config changes (for every
+workspace), and before commands run through Pomelo (tasks, agent
+tools). Services also get their env injected directly. Don't hand-edit
+them.
 
 ## How do I update the app?
 
-Pomelo tells you in **Settings › General › Updates** when a new release is
-available. Download the new DMG, drag **Pomelo** over the old app in
-Applications, and relaunch. See [Install › Update](./install#update).
+It updates itself. With **Settings > General > Check for Updates
+Automatically** on, Pomelo installs a newer release on launch and
+relaunches; **Check for Updates** checks right away. See
+[Install > Updates](./install#updates).

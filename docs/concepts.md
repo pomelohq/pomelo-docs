@@ -4,17 +4,17 @@ A short tour of the moving parts before you dive deeper. Pomelo is a
 **native macOS app** that runs a full, isolated dev environment per git
 branch — no browser, no server to point at.
 
-## Session
+## Project
 
-A **session** is a set of repos that belong together, plus its config
-(`pom.yml`). You add repos to a session by folder or git URL; Pomelo keeps
-them together under the session's folder (`~/pom/<name>` for a New session,
-or a folder you choose when you Open a session). Switch sessions from the
-top-left session chip in the app.
+A **project** (also called a session) is a set of repos that belong
+together, plus its config (`pom.yml`). You add repos by folder or git URL;
+Pomelo keeps them together under the project's folder (`~/pom/<name>` for
+**New Project**, or the folder you pick with **Open Project**). Switch
+projects from the project name at the top left of the window.
 
 ## Workspace
 
-A **workspace** is one isolated copy of your session, anchored to a git
+A **workspace** is one isolated copy of your project, anchored to a git
 branch. Pomelo creates it as a sibling folder named `workspace--<branch>/`
 containing one git worktree per repo. Each workspace has its own:
 
@@ -39,7 +39,7 @@ console. Each service runs **natively** on Pomelo's own managed PTY holder
 — a real process in your login shell, **not** a container. That's lighter
 and faster than Dockerizing every service (no image builds, no per-service
 container overhead), and it uses your machine's tools directly (nvm, rbenv,
-…). Logs persist and you can re-attach across restarts.
+...). Logs persist and you can re-attach across restarts.
 
 ```yaml
 services:
@@ -50,7 +50,7 @@ services:
     cmd: go run . worker
 ```
 
-Start and stop services from the **service board** in the app. See
+Start and stop services from the **Services** panel in the app. See
 [Services](./services).
 
 ## Shared services
@@ -61,8 +61,8 @@ these data/infra services** (the things you don't want to install and
 version-manage by hand); your own repo services stay native. One set of
 containers backs every workspace; isolation happens at the *data* layer
 (per-branch databases, capacity slots), not by running N copies. Pomelo
-starts them with docker-compose and exposes them on automatically
-allocated, conflict-free ports.
+starts them with docker compose (one `<project>-shared` project) and
+exposes them on conflict-free ports.
 
 ```yaml
 shared_services:
@@ -80,35 +80,42 @@ instead of migrating from scratch. See [Databases](./databases).
 
 ## Config doctor
 
-The **config doctor** is a deterministic health check (no LLM): it reads
-your `pom.yml` and the real state — tools installed, ports, databases,
-services — and reports exactly what's missing or misconfigured to run the
-session. It lives at the bottom of the **config editor** (Session) as a
-health strip, so you always see whether the session is runnable.
+The **config doctor** is a deterministic health check (no LLM): it checks
+that the config loads and is valid, that git and Docker are installed and
+Docker is running, that main has every repo, and it flags removed config
+keys, unset `{{secret.*}}` values and shared services nothing is wired to.
+When it finds problems the window shows **Project setup needs attention**,
+with **Fix with Claude** (or **Open pom.yml** when Claude Code is not
+installed). The same check is `pom doctor` and the agent's `config_doctor`
+tool.
 
 ## Onboarding agent
 
-When you add repos to a new session, an **onboarding agent** reads the
-code, infers how each repo runs, and writes a runnable `pom.yml` — looping
-the config doctor until it reports clean. It authors config for you instead
-of making you learn the schema up front. See [Quick Start](./quickstart).
+A new project's `pom.yml` is drafted from what Pomelo detects in each repo.
+When you pick an agent CLI (Claude Code, Codex or Gemini CLI) in the
+**Setup** step, an **onboarding agent** turns that draft into a runnable
+config: Pomelo verifies it (the config doctor, the installs, a boot of each
+service) and hands what fails back to the agent to repair, until it comes
+out clean. Choose to write it yourself and you review the draft instead.
+See [Quick Start](./quickstart).
 
 ## AI agent
 
-Each workspace has a built-in **AI agent**, opened as a tab. It runs inside
-the workspace's worktrees and is wired to Pomelo's MCP tools, so it can
-inspect the real running stack (ports, databases, service state) and act on
-it. The same agent powers onboarding above. See [The app](./app).
+Each workspace has a **main agent**, opened in the agent dock. It runs in
+the workspace folder and is wired to Pomelo's MCP tools, so it can inspect
+the real running stack (ports, databases, service state) and act on it.
+**Side agents** answer a question, review the branch or fix one thing next
+to it without touching its conversation. See [Agents](./agents).
 
-**Choosing a provider.** The agent uses your machine's AI CLI, configured in
-**Settings ▸ Integrations ▸ Machine ▸ AI Agent**. **Claude** (the `claude`
-CLI) is the provider today; **Codex** and **Gemini** are coming — the picker
-shows what's supported. You log in to the CLI yourself; Pomelo never stores
-AI credentials.
+**Choosing the CLI.** The agent is the command in **Settings > Agent >
+Agent Command** (`claude` by default). With `claude` it also gets the MCP
+tools, a conversation that resumes per workspace, and Pomelo's system
+prompt; any other CLI runs as-is. You log in to the CLI yourself; Pomelo
+never stores AI credentials.
 
 ## Pipeline
 
 Workspace creation and deletion run as a multi-stage **pipeline**, with
-parallelizable per-repo stages (clone worktrees, run setup, write env,
-create databases). The app surfaces progress live. See
+parallel per-repo stages (create worktrees, write env files, run setup,
+seed). The app shows progress live and can resume a failed run. See
 [Workspace lifecycle](./workspace).

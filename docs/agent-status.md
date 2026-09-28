@@ -1,51 +1,67 @@
 # Agent status
 
-Every workspace card (and the agent terminal header) shows a small status
-orb for the AI agent running in that workspace. Its color tells you what the
-agent is doing without opening the terminal.
+Every workspace row in the WORKSPACES sidebar shows what the coding agent
+running in that workspace is doing: a colored dot next to the name, with a
+soft halo while it works. When the sidebar is folded into its rail, the ring
+around the workspace's badge takes the same color, and hovering the badge
+names the state. You can tell which agent needs you without opening its
+terminal.
 
-## What the colors mean
+<AppShot :width="280" :height="250" text="From the top: idle, thinking, awaiting input, using tools and compacting"><WorkspacesList :rows='[{"name":"main","agent":"idle"},{"name":"Login page","branch":"feat-login","current":true,"agent":"thinking","running":2},{"name":"Checkout flow","ticket":"PROJ-101","status":["In Review","accent"],"agent":"input","running":3},{"name":"Search filters","ticket":"PROJ-104","status":["In Progress","accent"],"agent":"tools","running":1},{"name":"Invoice export","ticket":"PROJ-97","status":["Done","done"],"agent":"compacting"}]' /></AppShot>
+
+## What the states mean
 
 <style>
-.pom-orb { display:inline-block; width:11px; height:11px; border-radius:50%; position:relative; vertical-align:middle; }
-.pom-orb.pom-active::after {
-  content:""; position:absolute; inset:0; border-radius:50%; background:inherit;
-  animation: pom-ping 1.1s ease-out infinite;
-}
-@keyframes pom-ping { from { transform:scale(1); opacity:.5 } to { transform:scale(2.6); opacity:0 } }
-.pom-grey  { background:#8a8f98 }
-.pom-green { background:#30d158 }
-.pom-amber { background:#ff9f0a }
-.pom-blue  { background:#64d2ff }
-.pom-red   { background:#ff453a }
-.pom-purple{ background:#bf5af2 }
-.pom-cell  { text-align:center; }
+.pom-dot { display:inline-block; width:10px; height:10px; border-radius:50%; vertical-align:middle; }
+.pom-green  { background:#a1c181 }
+.pom-yellow { background:#dec184 }
+.pom-blue   { background:#74ade8 }
+.pom-red    { background:#d07277 }
 </style>
 
-| Orb | State | Meaning |
+| Dot | State | Meaning |
 | :---: | --- | --- |
-| <span class="pom-orb pom-grey"></span> | No agent | No agent is running in this workspace, or it is stopped. |
-| <span class="pom-orb pom-green"></span> | Idle | The agent finished its turn and is ready — waiting for you. |
-| <span class="pom-orb pom-amber pom-active"></span> | Thinking | The agent is reasoning about what to do next. |
-| <span class="pom-orb pom-blue pom-active"></span> | Running a tool | The agent is executing a tool: an edit, a shell command, or an MCP call. |
-| <span class="pom-orb pom-purple pom-active"></span> | Compacting | The agent is compacting its context to free up room. |
-| <span class="pom-orb pom-red pom-active"></span> | Needs your input | The agent is blocked on you — a permission prompt or a question. |
+| (none) | (none) | No agent is running in this workspace. |
+| <span class="pom-dot pom-green"></span> | Idle | The agent finished its turn, or just started, and waits for you. |
+| <span class="pom-dot pom-yellow"></span> | Thinking | You sent a prompt and the agent is working on it. |
+| <span class="pom-dot pom-blue"></span> | Using tools | The agent is running a tool: an edit, a shell command or an MCP call. |
+| <span class="pom-dot pom-blue"></span> | Compacting | The agent is compacting its context to free up room. |
+| <span class="pom-dot pom-red"></span> | Awaiting input | The agent is blocked on you: a permission prompt or a question. |
 
-The active states (amber, blue, purple, red) pulse with a ripple, just like in
-the app; idle (green) and no-agent (grey) sit still.
+The colors come from the active theme (success, warning, info, accent and
+error); the swatches above are the default One Dark theme, where Using
+tools and Compacting share the same blue.
 
 ## How it updates
 
-The state comes from the agent's Claude Code hooks (session start, prompt,
-tool use, stop, and notifications), which Pomelo maps to the states above.
-The card polls this every few seconds, so the orb can lag a moment behind
-what you see in the live terminal — that delay is expected.
+On launch Pomelo installs a hook for Claude Code in
+`~/.claude/settings.json` (see **Settings > Agent > Activity Hooks**). Claude
+calls it on session start, prompt submit, tool use, compaction, stop,
+session end and notifications. The hook works out the workspace from the
+folder the session runs in (`workspace--<branch>`) and writes the state to
+`~/.local/state/pom/agents/state-<branch>.json`.
+
+The app watches that folder, and re-reads it at least every 5 seconds.
+The dot follows the workspace's main agent (and the onboarder while a
+project sets up); [side agents](./agents#side-agents) never change it. A
+state shows only while that agent is still running in its holder, so an agent that exits without saying so drops its dot. A working
+state that has not changed for 15 minutes reads as idle. Only a real
+permission or question prompt counts as Awaiting input; Claude's idle
+reminder does not.
 
 ## Get notified on a change
 
-You don't have to watch the orb. Under **Settings > Notifications** each
-transition can play a sound (and show a banner): **Started working**,
-**Finished**, **Needs your input**, and **Compacting**. Pick a sound per
-event — or several, played at random — so you can hear a run finish or ask
-for input from a workspace you're not viewing. See
-[Keyboard shortcuts](/docs/shortcuts) to jump to the agent with `Cmd-I`.
+You don't have to watch the dots. **Settings > Notifications** has:
+
+- **Notify on Claude Activity** - the master switch for banners and sounds
+  (on by default; macOS asks for notification permission).
+- **Alert While Viewing** - also alert for the workspace on screen in the
+  focused window (off by default).
+- **Test Notification** - posts a sample banner.
+- **Alert Sounds** - a macOS sound per event: **Started Working**,
+  **Finished** (Glass by default), **Needs Your Input** (Ping by default)
+  and **Compacting**. Picking a sound plays it; None turns it off.
+
+Finished, needs input and compacting post a banner as well as their sound;
+started working only plays its sound, if one is set. Click a banner to jump
+to that workspace.

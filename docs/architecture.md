@@ -1,84 +1,117 @@
 # Architecture
 
-Pomelo is a **native macOS app** with a **Go core linked in-process** — no
-daemon, no background server, and no `localhost` port between the UI and the
-engine. The core turns your `pom.yml` into running, isolated **per-branch
-environments** and drives the tools already on your machine.
+Pomelo is **one Rust program**. The app and the `pom` CLI are built from the
+same crates, so there is no daemon, no background server and no `localhost`
+port between the UI and the engine. The core turns your `pom.yml` into
+running, isolated **per-branch environments** and drives the tools already
+on your machine.
 
 ## High level
 
 <figure class="diagram">
-<svg viewBox="0 0 760 420" role="img" aria-label="The SwiftUI app talks to the Go core (libpom) over in-process FFI; libpom holds four subsystems — workspaces, services, network, AI agent — on top of Docker, git and your local toolchains." xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <marker id="ar-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
-      <path d="M0,0 L10,5 L0,10 z" fill="#7c7d87"/>
-    </marker>
-  </defs>
+<svg viewBox="0 0 760 440" role="img" aria-label="Pomelo.app holds two binaries built from the same Rust crates: the pomelo app (GPU UI over the feature and core crates) and the pom CLI. The app re-runs its own binary for PTY holders, the MCP server and agent hooks. Underneath are Docker, git and your local toolchains." xmlns="http://www.w3.org/2000/svg">
+  <rect x="24" y="14" width="712" height="266" rx="14" fill="rgba(217,180,91,0.06)" stroke="#d9b45b"/>
+  <text x="44" y="40" fill="#f0d896" font-size="14" font-weight="700">Pomelo.app</text>
+  <text x="44" y="58" fill="#c9a94f" font-size="11">one Rust workspace, two binaries</text>
 
-  <rect x="230" y="14" width="300" height="50" rx="10" fill="#1b1c20" stroke="#33343a"/>
-  <text x="380" y="37" text-anchor="middle" fill="#e6e6e6" font-size="14" font-weight="600">Pomelo.app</text>
-  <text x="380" y="54" text-anchor="middle" fill="#8b8b93" font-size="11">SwiftUI · native macOS UI</text>
+  <rect x="44" y="74" width="440" height="190" rx="10" fill="#1b1c20" stroke="#33343a"/>
+  <text x="64" y="98" fill="#e6e6e6" font-size="13" font-weight="600">pomelo (the app)</text>
 
-  <line x1="380" y1="64" x2="380" y2="100" stroke="#7c7d87" stroke-width="1.5" marker-end="url(#ar-a)"/>
-  <text x="392" y="86" fill="#8b8b93" font-size="11">in-process FFI · no HTTP port</text>
+  <rect x="64" y="110" width="400" height="56" rx="8" fill="none" stroke="#33343a"/>
+  <text x="80" y="132" fill="#e6e6e6" font-size="12">UI: ui (wgpu + winit), workspace, editor</text>
+  <text x="80" y="152" fill="#8b8b93" font-size="11">files_ui, git_ui, services_ui, database_ui, terminal_ui, ...</text>
 
-  <rect x="24" y="100" width="712" height="184" rx="14" fill="rgba(217,180,91,0.06)" stroke="#d9b45b"/>
-  <text x="44" y="126" fill="#f0d896" font-size="14" font-weight="700">libpom · Go core</text>
-  <text x="44" y="144" fill="#c9a94f" font-size="11">orchestrates everything · in-process</text>
+  <rect x="64" y="180" width="400" height="68" rx="8" fill="none" stroke="#33343a"/>
+  <text x="80" y="202" fill="#e6e6e6" font-size="12">Core: pom_config, pom_core, pom_services</text>
+  <text x="80" y="222" fill="#8b8b93" font-size="11">pom_workspace, pom_ptyhost, pom_proxy, pom_mcp</text>
+  <text x="80" y="240" fill="#8b8b93" font-size="11">pom_agent, pom_detect, pom_doctor, auto_update</text>
 
-  <rect x="44" y="164" width="156" height="98" rx="10" fill="#1b1c20" stroke="#33343a"/>
-  <text x="122" y="196" text-anchor="middle" fill="#e6e6e6" font-size="13" font-weight="600">Workspaces</text>
-  <text x="122" y="218" text-anchor="middle" fill="#8b8b93" font-size="11">git worktrees</text>
-  <text x="122" y="236" text-anchor="middle" fill="#8b8b93" font-size="11">per-branch DB · ports</text>
+  <rect x="504" y="74" width="212" height="84" rx="10" fill="#1b1c20" stroke="#33343a"/>
+  <text x="610" y="100" text-anchor="middle" fill="#e6e6e6" font-size="13" font-weight="600">pom (the CLI)</text>
+  <text x="610" y="122" text-anchor="middle" fill="#8b8b93" font-size="11">same core crates</text>
+  <text x="610" y="140" text-anchor="middle" fill="#8b8b93" font-size="11">same holders and state</text>
 
-  <rect x="216" y="164" width="156" height="98" rx="10" fill="#1b1c20" stroke="#33343a"/>
-  <text x="294" y="196" text-anchor="middle" fill="#e6e6e6" font-size="13" font-weight="600">Services</text>
-  <text x="294" y="218" text-anchor="middle" fill="#8b8b93" font-size="11">native PTY holders</text>
-  <text x="294" y="236" text-anchor="middle" fill="#8b8b93" font-size="11">real processes</text>
+  <rect x="504" y="172" width="212" height="92" rx="10" fill="#1b1c20" stroke="#33343a"/>
+  <text x="610" y="196" text-anchor="middle" fill="#e6e6e6" font-size="13" font-weight="600">Re-runs of itself</text>
+  <text x="610" y="218" text-anchor="middle" fill="#8b8b93" font-size="11">pty: service and shell holders</text>
+  <text x="610" y="236" text-anchor="middle" fill="#8b8b93" font-size="11">mcp: tools for agents</text>
+  <text x="610" y="254" text-anchor="middle" fill="#8b8b93" font-size="11">claude-hook: agent state</text>
 
-  <rect x="388" y="164" width="156" height="98" rx="10" fill="#1b1c20" stroke="#33343a"/>
-  <text x="466" y="196" text-anchor="middle" fill="#e6e6e6" font-size="13" font-weight="600">Network</text>
-  <text x="466" y="218" text-anchor="middle" fill="#8b8b93" font-size="11">dev-proxy :8767</text>
-  <text x="466" y="236" text-anchor="middle" fill="#8b8b93" font-size="11">webhook :8766</text>
+  <line x1="380" y1="280" x2="380" y2="330" stroke="#7c7d87" stroke-width="1.5"/>
 
-  <rect x="560" y="164" width="156" height="98" rx="10" fill="#1b1c20" stroke="#33343a"/>
-  <text x="638" y="196" text-anchor="middle" fill="#e6e6e6" font-size="13" font-weight="600">AI agent</text>
-  <text x="638" y="218" text-anchor="middle" fill="#8b8b93" font-size="11">MCP tools</text>
-  <text x="638" y="236" text-anchor="middle" fill="#8b8b93" font-size="11">Claude headless</text>
+  <rect x="24" y="330" width="712" height="96" rx="14" fill="none" stroke="#2c2d33" stroke-dasharray="4 4"/>
+  <text x="44" y="354" fill="#8b8b93" font-size="12" font-weight="600">On your machine</text>
 
-  <line x1="380" y1="284" x2="380" y2="324" stroke="#7c7d87" stroke-width="1.5" marker-end="url(#ar-a)"/>
+  <rect x="40" y="366" width="216" height="44" rx="9" fill="#1b1c20" stroke="#33343a"/>
+  <text x="148" y="392" text-anchor="middle" fill="#e6e6e6" font-size="12">Docker: Postgres, Redis, ...</text>
 
-  <rect x="24" y="324" width="712" height="88" rx="14" fill="none" stroke="#2c2d33" stroke-dasharray="4 4"/>
-  <text x="44" y="346" fill="#8b8b93" font-size="12" font-weight="600">On your machine</text>
+  <rect x="272" y="366" width="216" height="44" rx="9" fill="#1b1c20" stroke="#33343a"/>
+  <text x="380" y="392" text-anchor="middle" fill="#e6e6e6" font-size="12">git: worktrees</text>
 
-  <rect x="40" y="354" width="216" height="44" rx="9" fill="#1b1c20" stroke="#33343a"/>
-  <text x="148" y="380" text-anchor="middle" fill="#e6e6e6" font-size="12">Docker · Postgres/Redis</text>
-
-  <rect x="272" y="354" width="216" height="44" rx="9" fill="#1b1c20" stroke="#33343a"/>
-  <text x="380" y="380" text-anchor="middle" fill="#e6e6e6" font-size="12">git · worktrees</text>
-
-  <rect x="504" y="354" width="216" height="44" rx="9" fill="#1b1c20" stroke="#33343a"/>
-  <text x="612" y="380" text-anchor="middle" fill="#e6e6e6" font-size="12">your toolchains · node/ruby…</text>
+  <rect x="504" y="366" width="216" height="44" rx="9" fill="#1b1c20" stroke="#33343a"/>
+  <text x="612" y="392" text-anchor="middle" fill="#e6e6e6" font-size="12">your toolchains: node, ruby, ...</text>
 </svg>
 </figure>
 
 ## The pieces
 
-- **Pomelo.app** — the SwiftUI UI. It calls the core directly through an
-  in-process **FFI** boundary (`libpom`, a Go c-archive), so there is no
-  daemon and no internal port to secure.
-- **libpom · Go core** — reads `pom.yml`, resolves [templates](../reference/templates),
-  and holds the subsystems below.
-- **Workspaces** — one isolated copy of the project per branch: a
-  [git worktree](./workspace) per repo, its own
-  [databases](./databases) and ports.
-- **Services** — each long-running process runs **natively** on Pomelo's own
-  managed [PTY holders](./services) — real processes, not containers.
-- **Network** — the [dev-proxy](./network) (same-origin URLs, `:8767`) and the
-  [webhook relay](./network#webhook-fan-out) (`:8766`).
-- **AI agent** — a workspace-scoped [MCP server](./workspace#agent-tools-mcp)
-  plus the headless agent driver, so the agent acts on the *real* running
-  stack.
+- **The app** (`crates/pomelo`) is a thin composition root: it opens the
+  windows and wires the feature crates together. It holds no feature logic.
+- **UI toolkit** - `ui` draws everything on the GPU (wgpu + winit) from an
+  element tree, with a bundled UI font so text renders the same on every
+  Mac. `workspace` is the window layout: the WORKSPACES sidebar, docks,
+  pane groups with tabs and splits, the status bar and the keymap. `editor`
+  is the code editor core (rope buffer, tree-sitter highlighting,
+  multi-cursor, undo).
+- **Feature views** - one crate per screen: `files_ui` (the center editor,
+  file finder, project search), `git_ui`, `pull_request_ui`, `services_ui`,
+  `database_ui`, `terminal_ui`, `settings_ui`, `jira_ui`, `markdown` and
+  more.
+- **Core crates** hold the logic, with no rendering:
+  - `pom_config` - reads `pom.yml`, resolves
+    [templates](../reference/templates), validates, and makes checked edits
+    (normalize, rename alias, remove repo).
+  - `pom_core` - projects, new-project scaffolding, adding and removing
+    repos.
+  - `pom_services` - the service runner, env files, ports and the shared
+    Docker services.
+  - `pom_workspace` - the staged [workspace](./workspace) create and delete
+    pipelines.
+  - `pom_ptyhost` - Pomelo's own PTY holders.
+  - `pom_proxy` - the [dev-proxy and webhook relay](./network).
+  - `pom_mcp` - the [MCP server](./workspace#agent-tools-mcp) agents use.
+  - `pom_agent` - launching agents, their hooks and
+    [state](./agent-status).
+  - `pom_detect` - stack detection that drafts a new project's `pom.yml`.
+  - `pom_doctor` - the [config doctor](./concepts#config-doctor).
+  - `auto_update` - verified self-updates.
+- **The `pom` CLI** (`crates/pom_cli`) drives the same crates from a
+  terminal. A service started with `pom start` shows up in the app, and the
+  other way round. It ships inside the app bundle at
+  `Pomelo.app/Contents/MacOS/pom`.
 
-Only genuinely external listeners bind a port — the dev-proxy and the webhook
-relay. Everything between the UI and the core stays in-process.
+## Processes
+
+The app re-runs its own binary for the helpers it needs, so nothing else has
+to be installed:
+
+- **`pty`** - every service, terminal and agent runs in a **PTY holder**: a
+  detached process behind a Unix socket. Holders outlive the app, so
+  services keep running and terminals reattach after a restart.
+- **`mcp`** - the stdio MCP server a coding agent talks to. On launch the
+  app registers it in `~/.claude.json`.
+- **`claude-hook`** - Claude Code's hooks call it on each event to record the
+  agent's state. The app installs the hooks in `~/.claude/settings.json`.
+
+Only the dev-proxy (`127.0.0.1:8767`) and the webhook relay
+(`127.0.0.1:8766`) listen on a port. Set `POM_WEB_PORT` to move them: the
+relay takes that port + 1 and the proxy + 2.
+
+## Where things live
+
+| Path | What |
+| --- | --- |
+| `~/pom/<name>/` | A project created in the app (`pom.yml`, `workspace--<branch>/` folders). `POM_SESSIONS_ROOT` moves it. |
+| `~/.local/state/pom/` | Runtime state: ports, the session list, secrets, agent states. `XDG_STATE_HOME` moves it. |
+| `~/.config/pomelo/settings.json` | App settings. |
+| `~/.config/pomelo/keymap.json` | Your [key bindings](./shortcuts#your-own-bindings). |

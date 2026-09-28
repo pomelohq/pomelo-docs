@@ -1,9 +1,9 @@
 # Quick Start
 
-From zero to a running branch in a few minutes — all in the app, no CLI
+From zero to a running branch in a few minutes - all in the app, no CLI
 required.
 
-<Shot src="/shots/hero.png" text="The Pomelo window — sidebar of workspaces + service board" />
+<AppShot :width="1440" :height="860" :window="false" text="The Pomelo window: workspaces, the Services panel, the editor and a terminal"><HeroWindow /></AppShot>
 
 ## 1. Install and open
 
@@ -12,84 +12,132 @@ Download **`Pomelo-<version>.dmg`** from the
 drag **Pomelo** into **Applications**, and open it. See
 [Install](./install) for details.
 
-## 2. Open or start a session
+## 2. The welcome page
 
-On first launch Pomelo shows a welcome screen with two choices:
+<Shot src="/shots/welcome.png" text="The welcome page" />
 
-- **Open a session** — pick a folder that already has a `pom.yml`.
-- **New session** — start fresh: add your repos and Pomelo scaffolds a
-  runnable session for you under `~/pom/<name>`.
+With no project open, the window shows the welcome page:
 
-A **session** is one `pom.yml` — your repos and every
-`workspace--<branch>/` worktree live under it.
+- **New project** (`cmd-shift-n`) - start from your repos.
+- **Open a project folder** (`cmd-o`) - a folder that already has a
+  `pom.yml`.
+- **Import a bundle** - a teammate's exported config; it imports into the
+  project open in the window, so open or create one first.
+- **Recent** - the projects you created or opened.
+- **This Mac** - whether **Docker** runs, which **git** you have, and which
+  **Agent CLI**s are installed (Claude Code, Codex, Gemini CLI). **Start
+  Docker** opens Docker Desktop or OrbStack; **Check again** re-checks.
 
-<Shot src="/shots/welcome.png" text="First-run welcome — Open a session / New session" />
+A **project** is one `pom.yml` - your repos and every
+`workspace--<branch>/` worktree live under it. **New session...** in the
+project menu (click the project name, top left) starts one from any window.
 
-## 3. New session — add your repos
+## 3. New project - Repositories
 
-From the welcome screen (or the session menu) click **New session**, give it
-a name, and add your repos. Each repo is either:
+**New project** opens as a tab in three steps. The first asks for:
 
-- a **local folder** already on disk, or
-- a **git URL** (SSH or HTTPS) that Pomelo clones for you.
+- a **Session name** - the project is created at `~/pom/<name>`, shown
+  under the field,
+- the **Default branch** (`main` unless you change it) - main's branch in
+  every repo,
+- your **Repositories**: under **Folders**, **Choose folders...** takes a
+  folder with a `.git` inside, or a folder of repos; under **Git URLs**,
+  paste one or several URLs (SSH or HTTPS) and **Add**.
 
-A session can hold one repo or several — a whole multi-repo codebase.
+Each repo shows the alias it will get (edit it), the stacks Pomelo detected
+in it, its compose file and how many gitignored `.env` files it has. A URL is
+only scanned once it is cloned. Below, **Shared services found in compose
+files** lists the containers one set of which will serve every workspace.
 
-<Shot src="/shots/new-session.png" text="New session sheet — add repos by folder or git URL" />
+## 4. Setup - who writes pom.yml
 
-## 4. Let the onboarding agent write `pom.yml`
+- **Set up with an agent CLI** (recommended) - the agent reads every repo
+  and writes a complete `pom.yml` (services, setup, migrations, env
+  wiring); Pomelo then checks it installs and boots and hands problems back
+  to it until it is clean. Pick **Claude Code**, **Codex** or **Gemini CLI**;
+  only installed ones can be picked.
+- **Set up manually** - Pomelo drafts `pom.yml` from what it detected (no
+  tokens) and you finish it.
 
-After you add repos, an **onboarding agent** reads each one, infers how it
-runs (package manager, services, databases, env), and writes a runnable
-`pom.yml`. It then loops the [config doctor](./concepts#config-doctor)
-until it reports clean — so you get a working config without learning the
-schema first.
+**Options:**
 
-::: tip Requires Claude
-The onboarding agent uses the `claude` CLI. Install it with
-`npm install -g @anthropic-ai/claude-code`. You can also write `pom.yml`
-by hand — see the [config reference](../reference/config).
-:::
+- **Import gitignored .env values as secrets** - their values stay
+  encrypted on this Mac; the agent only sees their names.
+- **Start the shared services when done**.
+- **Create a first workspace** on the branch you type.
 
-## 5. Doctor clean
+**Review** sums up what will happen. Nothing in your repos changes: Pomelo
+works in its own clones under the session folder. **Create** (`cmd-enter`)
+starts it; your agent-or-manual choice is remembered for next time.
 
-Open **Project** (top bar) to see the config editor and its **config
-doctor** health strip at the bottom. When the doctor is clean, the session
-is runnable. If anything is missing (a tool not installed, docker not
-running, a database not created), the doctor names it and points at the
-fix.
+## 5. Setting up
+
+<AppShot :width="720" :height="640" text="Setting up a project: cloned, scanned, and the agent configuring it"><Onboarding /></AppShot>
+
+The tab follows the setup, phase by phase:
+
+1. **Clone repositories** - each repo with its progress: local repos are
+   *linked* (cloned with their uncommitted work), URLs *cloned*.
+2. **Scan** - how each repo runs, its shared services and env files. No
+   tokens.
+3. **Configure with** the agent (**Configure with Claude Code**) - the agent CLI runs in the agent dock:
+   watch it, type to it, or stop it. The tab lists what `pom.yml` sets up
+   so far. **Skip the agent - finish manually** stops it and goes on with
+   the draft; **Let the agent finish it after all** brings it back. Claude
+   Code says when it is done; for Codex and Gemini CLI press **It is done -
+   verify**. With **Set up manually** this phase is **Draft pom.yml**.
+4. **Verify** - the config doctor, then each repo's setup and migrations in
+   main, then every service booted once (it must answer on its port, or stay
+   up if it has none) and stopped again.
+5. **Repair** - the first check that fails shows with its output:
+   **Fix with Claude Code** (or the agent you picked) sends it to the agent and verifies again once the
+   agent is done; **Fix manually** offers **Open pom.yml** and a terminal in
+   the repo, then **Verify again**; **Skip this service** leaves a service
+   that will not boot out of the checks.
+
+**Pause** holds the setup between steps; **Cancel** stops it and removes
+what it created: the session folder, its secrets and its services.
+
+When every check passes, the tab shows the project **is ready**: how many
+repos, services, shared services and databases it has, what each repo
+runs, and what to do next - open the first workspace (or **Create a
+workspace**), **Start main's services**, or **Open pom.yml**.
+
+If something still keeps a project from running later (a tool not
+installed, Docker not running, a secret not set), a **Project setup needs
+attention** notice names it, with **Fix with Claude**. The config stays
+editable from main; every save is [checked](./project-config#checked-saves)
+before it is written.
 
 ## 6. Start services
 
-On the **service board**, start a service from its card. Starting a repo
-service brings up its shared services (Postgres, Redis, …) automatically.
-Each service's live output previews on its card; click the card to attach
-a full terminal.
+Open the **Services** panel (`ctrl-shift-s`) and start a service from its
+row. Starting a repo service brings up its shared services (Postgres,
+Redis, ...) automatically. Click a running service to open its console.
 
-<Shot src="/shots/isolation.png" text="Service board — services running with live previews" />
-
-To work on a feature, create a workspace for a branch (see
-[Workspace lifecycle](./workspace)) and start its services the same way —
-every branch gets its own ports, databases, and env, so you can run
-several at once.
+To work on a feature, create a workspace for a branch with **+** in the
+WORKSPACES sidebar (see [Workspace lifecycle](./workspace)) and start its
+services the same way - every branch gets its own ports, databases, and
+env, so you can run several at once.
 
 ## 7. Browse the database
 
-Open the **Database** tab (⌘4) to inspect a branch's data without leaving
-the app or launching a separate client. Pomelo already knows the connection,
-so there's nothing to configure:
+Open the **Database** panel (`ctrl-shift-d`) to inspect a branch's data
+without a separate client. Pomelo already knows the connection: browse
+tables and Redis keyspaces, open a table as a grid, or run SQL in a
+console. See [Databases](./databases#browsing-data-in-the-app).
 
-- A tree of every per-branch database down to its tables (Postgres) and
-  keyspaces (Redis).
-- Click a table to open it as a data grid with WHERE / ORDER BY and paging,
-  a record panel that shows one row vertically, and streamed CSV export.
-- Or run SQL in a console with syntax highlighting and schema-aware
-  autocomplete.
+## From a terminal
 
-Made for the checks you run constantly while coding — inspect a row, confirm a
-migration, tweak a query — right where you work, no separate client to wire up.
-The workspace's Claude agent can query the same databases over MCP while it
-builds.
+The same flow works with the `pom` CLI (inside the app at
+`Pomelo.app/Contents/MacOS/pom`):
+
+```bash
+pom init [name] [--ai]            # a project from the git repo you are in
+pom onboard --new myproject --repo ./api --repo ./web [--no-ai]
+pom onboard [session]             # let Claude finish an existing project
+pom config edit                   # edit pom.yml, then check it still loads
+```
 
 ## Writing `pom.yml` by hand
 

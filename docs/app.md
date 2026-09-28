@@ -1,130 +1,225 @@
 # The app
 
-Pomelo is a **native macOS app** — the primary way to drive Pomelo day to
-day. It links the Go core directly (in-process, no port, no browser), so
-everything you see is the real state of your worktrees, services, and
-agents. This page is the conceptual tour.
+Pomelo is a **native macOS app**, and the primary way to drive Pomelo day
+to day. It is one Rust program with a GPU-rendered UI and the core built
+in (no port, no browser), so everything you see is the real state of your
+worktrees, services and agents. This page is the tour.
 
-<Shot src="/shots/hero.png" text="The full app window — sidebar, service board, tabs" />
+<AppShot :width="1440" :height="860" :window="false" text="The Pomelo window: workspaces, the Services panel, the editor and a terminal"><HeroWindow /></AppShot>
 
 ## Layout
 
-The window is three columns plus a top bar:
+- **Title bar** - the project name (click it to switch projects), the
+  active workspace's branch, and at the right the agents'
+  [usage chip](./agents#usage-and-plan-limits) and the app menu.
+- **WORKSPACES sidebar** - every workspace of the project, on the left.
+- **Center** - the editor: tabs and splits for files, diffs, tickets and
+  other items.
+- **Docks** - function panels (Files, Services, Git, Database), the
+  terminal and the agent live in docks around the center. By default the
+  panels open in the left dock, the terminal in the bottom dock and the
+  agent in the right dock.
+- **Status bar** - a button per panel, the terminal and the agent (hover
+  one for its name and key), today's agent usage, diagnostics, the cursor
+  position and the file's language.
 
-- **Sidebar** — every workspace as a row: its branch, how many services
-  are running, uncommitted-change count, a PR pill, and the AI agent
-  state. Switch sessions from the session chip at the top-left.
-- **Service board** — the selected workspace's services, laid out as
-  **columns per repo** with a **card per service**. Each card has
-  start/stop, a live output preview, its port, and a bolt **⚡ menu** of
-  that repo's shortcuts.
-- **Tabs** — terminals, the AI agent tab, and other views open across
-  the main area and persist as you move between workspaces.
+Right-click a status bar button to move its panel (**Dock Left**, **Dock
+Right**, **Dock Bottom**) or **Hide Button**. **Settings > Window &
+Layout** sets the sidebar, agent and terminal sides and what the status and
+title bars show.
 
-## Top bar
+## Projects
 
-The top bar carries the app-wide surfaces:
+A project is one `pom.yml` and its workspaces. Click the project name in
+the title bar to search your projects, switch the window to another one, and
+reach **New session...** (the new project page), **Open a session...** and
+**Edit pom.yml**. Hovering a project offers
+**Open in New Window**, **Open in This Window**, **Reveal in Finder** and
+**Remove from List** (which keeps the files). **New Project**
+(`cmd-shift-n`) and **Open Project** (`cmd-o`) are in the command palette
+and on the welcome page, next to **Import a bundle** and your recent
+projects. See [Quick Start](./quickstart).
 
-| Button | What it opens |
-| :-- | :-- |
-| **Shared services** | Start / stop / restart the Postgres/Redis/… containers, plus start-all / tear-down. |
-| **Activity monitor** | Live CPU / RAM of Pomelo's service holders. |
-| **Session** | The `pom.yml` **config editor** + an **ENV inspector** (the resolved env for each repo/workspace). The config editor has the [config doctor](./concepts#config-doctor) health strip at its bottom. |
-| **Theme** | Switch dark / light / sepia. |
-| **Settings** (⌘,) | App settings, including **Diagnostics** — the app log and dev-proxy routing. |
+## WORKSPACES sidebar
 
-::: tip Where the doctor and logs live
-The config doctor is **not** a separate top-bar button — it sits under the
-config editor (Session). Logs live in **Settings › Diagnostics**.
-:::
+Each row is a workspace:
 
-## Service board
+- its name (the display name, or the branch) and a **PR pill** with the
+  number of pull requests, colored by their state; click it to open the Git
+  panel,
+- the agent's state as a colored dot: **Thinking**, **Using tools**,
+  **Compacting**, **Awaiting input** or **Idle** (see
+  [Agent status](./agent-status)),
+- under the name, the ticket key and its status (colored by category), or
+  the branch, then how many services run (`2 running`) and what is wrong
+  with the pull request (`Checks pending`, `CI failed`, `Conflict`).
 
-The board groups services by repo, one column each. On a service card:
+<AppShot :width="280" :height="210" text="Workspace rows"><WorkspacesList /></AppShot>
 
-- **Start / stop** the service in place. Starting a repo service first
-  brings up its shared services (Postgres, Redis, …) automatically.
-- **Live preview** — the card body shows the service's recent output;
-  click it to attach a full terminal tab.
-- **Port** — shown per service, resolved on demand; you rarely need it
-  directly since the [dev-proxy](./network#same-origin-dev-proxy)
-  gives each service a stable hostname.
-- **⚡ menu** — run any of the repo's `shortcuts` (install, migrate, lint,
-  test…) in the resolved workspace env.
+Click a row to switch to it. Each workspace keeps its own tabs,
+terminals and agent; switching never restarts anything. Drag rows to
+reorder them; **main** always stays first. The **+** in the header opens
+**New Workspace** (`cmd-n`), and workspaces being created or deleted show
+their stages and progress at the top, with **Retry** when one fails.
 
-<Shot src="/shots/isolation.png" text="Service board — columns per repo, cards per service" />
+Main's row warns `not cloned: ...` when the config names repos main has no
+clone of.
 
-## Terminals
+Right-click a row for:
 
-Open a terminal on any workspace or attach a service's output as a tab.
-Terminals are live PTY sessions — a real shell, mirrored in the app, not a
-polled log buffer. A terminal keeps running independently of its tab:
-closing the tab never stops the shell, so you can declutter without losing
-work.
+| Item | Shown | Does |
+| --- | --- | --- |
+| **Rename...** | always | Sets the display name (the branch stays). |
+| **Open Ticket** | the branch names a Jira ticket | Opens the ticket in a tab. |
+| **Stop All Services** | services run | Stops every service of that workspace. |
+| **Clone Missing Repos...** | main lacks repos | Clones them into main. |
+| **Add Repos...** | branch workspaces | Checks out more of the config's repos there. |
+| **Update Main from Origin** | main | Brings main's repos to their default branch as origin has it and migrates the ones that moved; repos with uncommitted work are left alone. |
+| **Prepare Main...** | main | Resets main's databases, migrates and seeds. |
+| **Delete Workspace** | branch workspaces | Stops it and removes its worktrees, databases and folder. |
 
-## AI agent
+Fold the sidebar (`cmd-b`, or the button in its footer) to a **rail** of
+round badges: the ticket number or a short name inside, the **ring colored
+by the agent's state**, and small dots for running services plus a pull
+request mark underneath.
 
-Each workspace has a built-in **AI agent** tab. It runs rooted at the
-workspace (across all its repos' worktrees) and is wired to Pomelo's
-[MCP tools](./workspace#agent-tools-mcp), so mid-task it can inspect which
-port a service got, which database to migrate, whether a service is up —
-and act on the real stack instead of guessing.
+## Editor
 
-The tab surfaces the agent's live state — **idle**, **working**, or
-**awaiting input** — on the tab and the sidebar, so you can tell at a
-glance when an agent needs a reply. Use the controls on its tab to
-**Restart** or **Stop**.
+The center is a full code editor: tree-sitter highlighting, language
+servers (found on your `PATH`), multiple cursors, find and replace, go to
+file (`cmd-p`), project search (`cmd-shift-f`), an outline, Markdown
+preview and diffs. Split with `cmd-\` and drag tabs between panes. See
+[Keyboard shortcuts](./shortcuts).
 
-The provider is set in **Settings ▸ Integrations ▸ Machine ▸ AI Agent** —
-**Claude** (the `claude` CLI) today, with **Codex** and **Gemini** coming.
-You log in to that CLI yourself; Pomelo never stores AI credentials.
+The **main** workspace is the prepared source new workspaces copy from, so
+its files are **read-only**: saving there says "main is read-only: make
+changes in a branch workspace". The project config (`pom.yml`)
+stays editable from main; every save of it is
+[checked first](./project-config#checked-saves).
 
-<Shot src="/shots/agent.png" text="AI agent tab — working inside a workspace" />
+**Open in External Editor** (command palette) opens the active file in the
+app chosen in **Settings > Editor > External Editor**.
+
+## Panels
+
+- **Files** (`cmd-shift-e`) - the workspace's file tree across all its
+  repos, tinted by git status. Right-click for **New File** / **New
+  Folder**, **Reveal in Finder**, **Open in Default App**, **Open in
+  Terminal**, cut, copy, **Duplicate** and paste, **Copy Path** / **Copy
+  Relative Path**, **Restore File**, **Add to .gitignore**, rename, trash
+  or delete, and **Expand All** / **Collapse All**.
+- **Services** (`ctrl-shift-s`) - what runs, what failed and why, with
+  start, stop, restart and the logs a click away. Its header opens the
+  **Secrets** and **Environment** tabs. See [Services](./services).
+- **Git** (`ctrl-shift-g`) - see [below](#git). Hidden on main, which is
+  never committed to.
+- **Database** (`ctrl-shift-d`) - browse and query the workspace's
+  databases. See [Databases](./databases).
+
+A green dot on the Services button means a service of the active workspace
+is running.
+
+## Git
+
+The Git panel works on all of the workspace's repos at once, in three tabs:
+
+- **Changes** - the files the branch changed, **Staged** and **Not
+  staged**, by repo. Type a message and **Commit** makes one commit per
+  repo that has staged files, all with the same message; **Amend** amends
+  them. The overflow menu has **Stash All**, **Stash Pop**, **Discard
+  Tracked Changes**, the commit options **Amend**, **Signoff** and **Skip
+  Hooks**, and **Pull**, **Push** and **Fetch All**; the view options show
+  the files **By Repo** or as **One Timeline**, as a tree or a list.
+- **Remote** - per repo, what is **Not pushed**, **Not published** or **On
+  origin, not pulled**, the files changed on the branch, and the branch's
+  pull request: its title, checks, reviews, and **Merge conflict** when it
+  has one. **Create Pull Request** opens GitHub's page for a pushed branch.
+- **History** - the branch's commits.
+
+The sync button follows the branch: **Publish**, **Push**, **Pull**,
+**Sync** or **Up to date**. Right-click a file for **Open Diff**, **Open
+File**, **Mark as Reviewed**, **Copy Path**, **Copy Relative Path** and
+**Discard Uncommitted Changes**, and a repo's remote for **Fetch**,
+**Pull**, **Pull (Rebase)**, **Push** and **Force Push**.
+
+<AppShot :width="360" :height="470" text="The Changes tab: one commit per repo from the staged files. Click a file to stage it."><GitPanel /></AppShot>
+
+**View Diff** opens the branch's whole diff with every hunk expanded. The
+two buttons in its tab bar switch between **unified** and **split**
+(side-by-side, when the pane has room for it); the choice is kept for every
+diff and matches **Split Diff** in the editor's menu.
+
+<AppShot :width="720" :height="345" text="A branch diff, split. The two buttons switch to unified."><DiffView /></AppShot>
+
+## Terminal and agent
+
+The terminal dock (`` ctrl-` ``, new terminal `cmd-t`) holds real shells
+in the workspace, in panes with tabs. Each runs in a PTY holder, so it keeps
+running and reattaches when the app restarts; closing its tab ends the
+shell. Right-click a terminal for **Copy**, **Paste**, **Select All**,
+**Clear**, **Add Selection to Agent**, **Ask Agent about Selection** (or
+**...about This Output**) and **Close Terminal Tab**.
+
+The **agent** button (`cmd-?`) opens the workspace's main agent in the
+agent dock, and **+** there starts side agents next to it. See
+[Agents](./agents).
 
 ## Notifications
 
-Long agent runs mean you're often doing something else while the agent works.
-Pomelo posts a native macOS notification — a sound and a banner — when an
-agent **finishes**, **asks for input**, or **compacts** its context, but only
-for a workspace you're **not** currently viewing (no pings for what's already
-on screen). Click the notification to jump straight to that workspace.
+Pomelo posts macOS notifications when a workspace's Claude finishes, needs
+input or compacts, with a sound per event. Configure them in **Settings >
+Notifications**; see [Agent status](./agent-status#get-notified-on-a-change).
 
-Turn it on with **Notify on Claude activity** in **Settings** (macOS asks for
-notification permission the first time); there's a **Send test notification**
-button to confirm it's working.
+Inside the window, notices appear for things that need a look:
 
-## Reviewing code & PRs
+- **Invalid pom.yml** - the config does not load; **Open pom.yml** jumps to
+  the problem.
+- **Project setup needs attention** - the config doctor found problems;
+  **Fix with Claude** opens an agent on them (or **Open pom.yml** when
+  Claude Code is not installed).
+- **N services still run the old config** - after a config change;
+  **Restart** restarts them.
 
-The sidebar PR pill pulls status straight from GitHub: per-branch checks,
-review state, and **mergeability** (can it merge, and if not, why). Pomelo
-never merges for you — it shows you where each PR stands and links out to
-GitHub. PR data is fetched by exact head branch, cached, and served stale
-while refreshing, so the UI never blocks on GitHub.
+## Command palette
 
-Pomelo talks to GitHub **directly over the GraphQL/REST API** — no `gh` CLI
-required. Diffs, changed files and commits are read from your local git
-worktree (fast, offline, no API cost); only PR list, description, reviewers,
-comments and check status come from the API.
+`cmd-shift-p` lists the window's commands (as `workspace: <name>`, with
+their keys), each panel's commands and the editor's. Commands with no
+default key, such as **Open Project Config** or **Add Repository**, live
+here.
 
-### Connecting GitHub
+## Pull requests
 
-Pomelo only ever **reads** PRs, so it needs a read-only token. Add one in
-**Settings ▸ Integrations ▸ Forge · GitHub**, then hit **Test**. Any of these
-works:
+PR data comes from GitHub's API directly, no `gh` CLI needed. Diffs and
+changed files are read from your local worktrees. Pomelo reads the token
+from `GH_TOKEN` or `GITHUB_TOKEN` in its environment, otherwise from the
+project's secret named `github`: add it in the Services panel's **Secrets**
+tab, for example with the value of `gh auth token`. The token only needs to
+read the repositories' pull requests. After a push, the Git panel offers
+**Create Pull Request**, which opens GitHub's page.
 
-- **`gh auth token`** — if you already use the GitHub CLI, paste its token
-  (or `export GH_TOKEN=$(gh auth token)` in your shell). Nothing else to set up.
-- **Classic PAT** — scope `repo` (needed to read private repositories).
-- **Fine-grained PAT** — repository access to the repos you work on, with
-  **Pull requests: Read-only**, **Contents: Read-only**, **Metadata:
-  Read-only**. On an organization these require the org to approve the token.
+## The app menu
 
-The token is read from `GH_TOKEN`/`GITHUB_TOKEN` in your environment first,
-otherwise from the encrypted app-local secret you saved. It is never written
-to `pom.yml`.
+The chevron at the far right of the title bar opens the app menu: the
+Claude account signed in on this Mac, **Updating to v...** while a new
+version downloads, **Settings**, **Keymap**, **Next Theme**, **Agent Usage**
+and **Panel Layout**.
 
-## Themes
+## Settings
 
-The app ships **three themes** — dark, light, and sepia — switchable from
-the top bar. If your OS is set to minimize motion, the app honors it and
-collapses animation.
+`cmd-,` opens Settings in its own window:
+
+| Page | What's there |
+| --- | --- |
+| **General** | Start at Login; version and updates. |
+| **Appearance** | Theme (One Dark, One Light, Ayu Mirage, Gruvbox Dark; `cmd-k cmd-t` cycles) and UI font. |
+| **Window & Layout** | Status bar and title bar items, window size, dock sides, agent and terminal buttons. |
+| **Editor** | Font size, soft wrap, diff view, external editor. |
+| **Terminal** | Font size, shell, scrollback. |
+| **Keymap** | Every window action and its binding; opens `keymap.json`. |
+| **Agent** | Agent command; Claude Code MCP server and activity hooks, with **Reinstall**. |
+| **Notifications** | Banners and a sound per agent event. |
+| **Network** | Dev-proxy and webhook relay status and ports, recent proxied requests. |
+| **Integrations** | Jira (site, email, API token, test connection) and **Keep Main Fresh**. |
+| **Project** | Repositories, config files and config bundles. See [Project config](./project-config). |
+
+Settings are saved to `~/.config/pomelo/settings.json`.
