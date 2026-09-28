@@ -47,7 +47,7 @@ The value is used as written (no templates).
 **`profiles:`** (repo or service level) picks which of those environments the
 repo offers. `local` is always included. A service-level list replaces the
 repo's for that service. Switch the active one from the service's menu in
-the Services panel (`Env: <profile>`).
+the Services panel (**Env** > the profile).
 
 ```yaml
 repos:
@@ -127,7 +127,7 @@ keys are also read at the repo's top level; `lifecycle:` wins.
 | `setup` | Ordered steps run right after the worktree is created, in the worktree with the repo's env. Defaults to the `install`, `generate` and `migrate` commands. |
 | `migrate` | Migration steps (used by Prepare Main and Keep Main Fresh). |
 | `seed` | Seed steps for a fresh database (skipped when `seed_from_main`). |
-| `shortcuts` | Quick commands in the Services panel's repo menu (**Run: ...**) and the command palette. |
+| `shortcuts` | Quick commands in the Services panel's repo menu (**Run Task**) and the command palette. |
 | `pre_start` | Same as the repo-level `pre_start`. |
 | `pre_delete` | Commands run before the worktree is deleted (failures only warn). |
 

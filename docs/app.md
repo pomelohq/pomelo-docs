@@ -9,8 +9,9 @@ worktrees, services and agents. This page is the tour.
 
 ## Layout
 
-- **Top bar** - the project name (click it to switch projects) and the
-  active workspace's branch.
+- **Title bar** - the project name (click it to switch projects), the
+  active workspace's branch, and at the right the agents'
+  [usage chip](./agents#usage-and-plan-limits) and the app menu.
 - **WORKSPACES sidebar** - every workspace of the project, on the left.
 - **Center** - the editor: tabs and splits for files, diffs, tickets and
   other items.
@@ -18,8 +19,9 @@ worktrees, services and agents. This page is the tour.
   terminal and the agent live in docks around the center. By default the
   panels open in the left dock, the terminal in the bottom dock and the
   agent in the right dock.
-- **Status bar** - a button per panel, the terminal and the agent, plus
-  diagnostics, the cursor position and the file's language.
+- **Status bar** - a button per panel, the terminal and the agent (hover
+  one for its name and key), today's agent usage, diagnostics, the cursor
+  position and the file's language.
 
 Right-click a status bar button to move its panel (**Dock Left**, **Dock
 Right**, **Dock Bottom**) or **Hide Button**. **Settings > Window &
@@ -29,12 +31,14 @@ title bars show.
 ## Projects
 
 A project is one `pom.yml` and its workspaces. Click the project name in
-the top bar to search your projects, switch the window to another one, and
-reach **Open a session...** and **Edit pom.yml**. Hovering a project offers
+the title bar to search your projects, switch the window to another one, and
+reach **New session...** (the new project page), **Open a session...** and
+**Edit pom.yml**. Hovering a project offers
 **Open in New Window**, **Open in This Window**, **Reveal in Finder** and
 **Remove from List** (which keeps the files). **New Project**
 (`cmd-shift-n`) and **Open Project** (`cmd-o`) are in the command palette
-and on the welcome page. See [Quick Start](./quickstart).
+and on the welcome page, next to **Import a bundle** and your recent
+projects. See [Quick Start](./quickstart).
 
 ## WORKSPACES sidebar
 
@@ -96,37 +100,62 @@ app chosen in **Settings > Editor > External Editor**.
 ## Panels
 
 - **Files** (`cmd-shift-e`) - the workspace's file tree across all its
-  repos, tinted by git status. Right-click for new file or folder, copy
-  path, reveal in Finder, open in terminal, restore or add to `.gitignore`.
-- **Services** (`ctrl-shift-s`) - start, stop and restart the workspace's
-  services and see their output. Its **Environment** tab shows each
-  service's resolved env and **Secrets** holds the project's encrypted
-  secrets. See [Services](./services).
-- **Git** (`ctrl-shift-g`) - per repo, the files the branch changed since
-  it left the default branch, committed or not: stage, commit, amend,
-  push, pull and fetch. Its **Pull Requests** (`ctrl-shift-p`) list the
-  branch's pull requests with checks, reviewers and the conversation.
+  repos, tinted by git status. Right-click for **New File** / **New
+  Folder**, **Reveal in Finder**, **Open in Default App**, **Open in
+  Terminal**, cut, copy, **Duplicate** and paste, **Copy Path** / **Copy
+  Relative Path**, **Restore File**, **Add to .gitignore**, rename, trash
+  or delete, and **Expand All** / **Collapse All**.
+- **Services** (`ctrl-shift-s`) - what runs, what failed and why, with
+  start, stop, restart and the logs a click away. Its header opens the
+  **Secrets** and **Environment** tabs. See [Services](./services).
+- **Git** (`ctrl-shift-g`) - see [below](#git). Hidden on main, which is
+  never committed to.
 - **Database** (`ctrl-shift-d`) - browse and query the workspace's
   databases. See [Databases](./databases).
 
 A green dot on the Services button means a service of the active workspace
 is running.
 
+## Git
+
+The Git panel works on all of the workspace's repos at once, in three tabs:
+
+- **Changes** - the files the branch changed, **Staged** and **Not
+  staged**, by repo. Type a message and **Commit** makes one commit per
+  repo that has staged files, all with the same message; **Amend** amends
+  them. The overflow menu has **Stash All**, **Stash Pop**, **Discard
+  Tracked Changes**, the commit options **Amend**, **Signoff** and **Skip
+  Hooks**, and **Pull**, **Push** and **Fetch All**; the view options show
+  the files **By Repo** or as **One Timeline**, as a tree or a list.
+- **Remote** - per repo, what is **Not pushed**, **Not published** or **On
+  origin, not pulled**, the files changed on the branch, and the branch's
+  pull request: its title, checks, reviews, and **Merge conflict** when it
+  has one. **Create Pull Request** opens GitHub's page for a pushed branch.
+- **History** - the branch's commits.
+
+The sync button follows the branch: **Publish**, **Push**, **Pull**,
+**Sync** or **Up to date**. Right-click a file for **Open Diff**, **Open
+File**, **Mark as Reviewed**, **Copy Path**, **Copy Relative Path** and
+**Discard Uncommitted Changes**, and a repo's remote for **Fetch**,
+**Pull**, **Pull (Rebase)**, **Push** and **Force Push**.
+
+**View Diff** opens the branch's whole diff with every hunk expanded. The
+two buttons in its tab bar switch between **unified** and **split**
+(side-by-side, when the pane has room for it); the choice is kept for every
+diff and matches **Split Diff** in the editor's menu.
+
 ## Terminal and agent
 
 The terminal dock (`` ctrl-` ``, new terminal `cmd-t`) holds real shells
 in the workspace, in panes with tabs. Each runs in a PTY holder, so it keeps
 running and reattaches when the app restarts; closing its tab ends the
-shell.
+shell. Right-click a terminal for **Copy**, **Paste**, **Select All**,
+**Clear**, **Add Selection to Agent**, **Ask Agent about Selection** (or
+**...about This Output**) and **Close Terminal Tab**.
 
-The **agent** button (`cmd-?`) opens the command set in **Settings >
-Agent > Agent Command** (`claude` by default) in the agent dock, rooted at
-the workspace. Claude Code resumes the workspace's conversation and gets
-Pomelo's [MCP tools](./workspace#agent-tools-mcp), so mid-task it can check
-ports, databases and services and act on the real stack. The agent runs in
-its own holder: closing its tab or quitting the app leaves it running, and
-the tab reattaches. Pomelo never stores AI credentials; you log in to the
-CLI yourself.
+The **agent** button (`cmd-?`) opens the workspace's main agent in the
+agent dock, and **+** there starts side agents next to it. See
+[Agents](./agents).
 
 ## Notifications
 
@@ -148,8 +177,8 @@ Inside the window, notices appear for things that need a look:
 
 `cmd-shift-p` lists the window's commands (as `workspace: <name>`, with
 their keys), each panel's commands and the editor's. Commands with no
-default key, such as **Open Project Config**, **Add Repository** or **Set
-Up Project with AI**, live here.
+default key, such as **Open Project Config** or **Add Repository**, live
+here.
 
 ## Pull requests
 
@@ -159,7 +188,14 @@ from `GH_TOKEN` or `GITHUB_TOKEN` in its environment, otherwise from the
 project's secret named `github`: add it in the Services panel's **Secrets**
 tab, for example with the value of `gh auth token`. The token only needs to
 read the repositories' pull requests. After a push, the Git panel offers
-**Create Pull Request**, which opens the host's page.
+**Create Pull Request**, which opens GitHub's page.
+
+## The app menu
+
+The chevron at the far right of the title bar opens the app menu: the
+Claude account signed in on this Mac, **Updating to v...** while a new
+version downloads, **Settings**, **Keymap**, **Next Theme**, **Agent Usage**
+and **Panel Layout**.
 
 ## Settings
 

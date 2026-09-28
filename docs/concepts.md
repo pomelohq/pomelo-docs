@@ -92,17 +92,20 @@ tool.
 ## Onboarding agent
 
 A new project's `pom.yml` is drafted from what Pomelo detects in each repo.
-With **Set up with AI**, an **onboarding agent** (Claude, in a terminal
-where you approve each step) turns that draft into a runnable config,
-looping the config doctor until it reports clean. With **Set up manually**
-you review the draft yourself. See [Quick Start](./quickstart).
+When you pick an agent CLI (Claude Code, Codex or Gemini CLI) in the
+**Setup** step, an **onboarding agent** turns that draft into a runnable
+config: Pomelo verifies it (the config doctor, the installs, a boot of each
+service) and hands what fails back to the agent to repair, until it comes
+out clean. Choose to write it yourself and you review the draft instead.
+See [Quick Start](./quickstart).
 
 ## AI agent
 
-Each workspace has an **AI agent**, opened in the agent dock. It runs in
+Each workspace has a **main agent**, opened in the agent dock. It runs in
 the workspace folder and is wired to Pomelo's MCP tools, so it can inspect
-the real running stack (ports, databases, service state) and act on it. See
-[The app](./app#terminal-and-agent).
+the real running stack (ports, databases, service state) and act on it.
+**Side agents** answer a question, review the branch or fix one thing next
+to it without touching its conversation. See [Agents](./agents).
 
 **Choosing the CLI.** The agent is the command in **Settings > Agent >
 Agent Command** (`claude` by default). With `claude` it also gets the MCP
