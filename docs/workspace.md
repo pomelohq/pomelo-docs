@@ -22,6 +22,8 @@ Workspace**:
 Pomelo builds the workspace through a staged pipeline and shows each stage
 on a card at the top of the sidebar:
 
+<AppShot :width="280" :height="236" :window="false" text="A workspace being created"><WorkspaceCreate /></AppShot>
+
 1. Validating config and hosts
 2. Provisioning workspace
 3. Starting shared services and databases

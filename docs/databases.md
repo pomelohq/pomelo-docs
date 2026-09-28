@@ -102,6 +102,8 @@ client. Pomelo already knows the connection, so there's nothing to wire up.
 Its header names the workspace and has **New Console**, **Refresh** and
 **Collapse All**; **Filter tables and columns** narrows the tree.
 
+<AppShot :width="300" :height="420" text="The Database panel. Click a row to fold or open it."><DatabasePanel /></AppShot>
+
 - **Consoles** - your saved SQL consoles.
 - **Databases** - each repo with its databases and the shared services it
   uses, then **Other services**. Postgres databases expand to their tables
@@ -109,6 +111,8 @@ Its header names the workspace and has **New Console**, **Refresh** and
   MinIO to its buckets, folders and objects.
 
 ### Menus
+
+<AppShot :width="250" :height="226" :window="false" text="A table's menu"><ContextMenu :width="250" :items='[{"text":"Open Data"},{"text":"New Console with SELECT"},{"text":"Copy Name"},{"text":"Copy SELECT Statement"},{"text":"Show DDL"},{"text":"Truncate...","danger":true},{"text":"Drop Table...","danger":true},{"text":"Ask Claude about this table","icon":"sparkle"}]' /></AppShot>
 
 Right-click:
 
@@ -129,6 +133,8 @@ Right-click:
   **Copy Path** and **Delete...**.
 
 ### Tables
+
+<AppShot :width="760" :height="330" text="A table tab. Click a header to sort, a cell to select it."><TableView /></AppShot>
 
 Click a table to open it as a data grid. Type a **WHERE** and **ORDER BY**
 to narrow and sort it (or click a column's header to sort), page through it

@@ -47,6 +47,8 @@ begins with:
   commits, changes) for it to read. A second opinion always starts fresh:
   another CLI cannot read Claude's session.
 
+<AppShot :width="380" :height="700" :window="false" text="The + popover. Pick a type and what it starts with."><AgentPopover /></AppShot>
+
 Double-click a type to start it right away. The popover also offers **New
 agent in a new workspace**, for parallel code changes that need their own
 branch, ports and database.
@@ -54,6 +56,8 @@ branch, ports and database.
 Read-only agents run in Claude Code's plan mode; a Fix agent may edit files.
 
 ### The side agent bar
+
+<AppShot :width="560" :height="40" :window="false"><SideAgentBar role="Ask" started="Auto: fork - 9.3k" /></AppShot>
 
 A side agent's tab shows a bar above its terminal: its type, **read-only**
 or **can edit**, what it started with, and two buttons:
@@ -85,7 +89,7 @@ no tokens are spent to know it.
 
 ### In the title bar
 
-<Shot src="/shots/usage-card.png" text="The usage chip and its card" />
+<AppShot :width="300" :height="222" :window="false" text="The usage chip's card"><UsageCard /></AppShot>
 
 The chip at the right of the title bar shows the Claude account signed in
 on this Mac, a bar of its **5-hour** window and both windows' use:

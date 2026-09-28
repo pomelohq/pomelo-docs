@@ -3,7 +3,7 @@
 From zero to a running branch in a few minutes - all in the app, no CLI
 required.
 
-<Shot src="/shots/app.png" text="The Pomelo window: workspaces, the Files panel, the editor and a terminal" />
+<AppShot :width="1440" :height="860" :window="false" text="The Pomelo window: workspaces, the Services panel, the editor and a terminal"><HeroWindow /></AppShot>
 
 ## 1. Install and open
 
@@ -72,7 +72,7 @@ starts it; your agent-or-manual choice is remembered for next time.
 
 ## 5. Setting up
 
-<Shot src="/shots/onboarding.png" text="Setting up a project: cloned, scanned, and the agent configuring it" />
+<AppShot :width="720" :height="640" text="Setting up a project: cloned, scanned, and the agent configuring it"><Onboarding /></AppShot>
 
 The tab follows the setup, phase by phase:
 

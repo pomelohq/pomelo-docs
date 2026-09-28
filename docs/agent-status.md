@@ -1,10 +1,13 @@
 # Agent status
 
 Every workspace row in the WORKSPACES sidebar shows what the coding agent
-running in that workspace is doing: a colored dot next to the name and a
-state label under it. When the sidebar is folded into its rail, the ring
-around the workspace's badge takes the same color. You can tell which agent
-needs you without opening its terminal.
+running in that workspace is doing: a colored dot next to the name, with a
+soft halo while it works. When the sidebar is folded into its rail, the ring
+around the workspace's badge takes the same color, and hovering the badge
+names the state. You can tell which agent needs you without opening its
+terminal.
+
+<AppShot :width="280" :height="250" text="From the top: idle, thinking, awaiting input, using tools and compacting"><WorkspacesList :rows='[{"name":"main","agent":"idle"},{"name":"Login page","branch":"feat-login","current":true,"agent":"thinking","running":2},{"name":"Checkout flow","ticket":"PROJ-101","status":["In Review","accent"],"agent":"input","running":3},{"name":"Search filters","ticket":"PROJ-104","status":["In Progress","accent"],"agent":"tools","running":1},{"name":"Invoice export","ticket":"PROJ-97","status":["Done","done"],"agent":"compacting"}]' /></AppShot>
 
 ## What the states mean
 
@@ -16,7 +19,7 @@ needs you without opening its terminal.
 .pom-red    { background:#d07277 }
 </style>
 
-| Dot | Label | Meaning |
+| Dot | State | Meaning |
 | :---: | --- | --- |
 | (none) | (none) | No agent is running in this workspace. |
 | <span class="pom-dot pom-green"></span> | Idle | The agent finished its turn, or just started, and waits for you. |

@@ -69,7 +69,7 @@ service restarts, and the choice is kept per workspace.
 
 ## The Services panel
 
-<Shot src="/shots/services-panel.png" text="The Services panel: the summary, what needs attention, this workspace's services and the shared ones" />
+<AppShot :width="330" :height="880" text="The Services panel. The filter and the hover buttons work."><ServicesPanel /></AppShot>
 
 Open it with `ctrl-shift-s` or the Services button in the status bar (its
 tooltip shows the key). The header names the workspace; its two buttons
@@ -105,6 +105,8 @@ its menu. Hover a repo's row to start or stop all of its services.
 
 ### Menus
 
+<AppShot :width="260" :height="304" :window="false" text="A running service's menu"><ContextMenu :width="260" :items='[{"text":"Stop"},{"text":"Restart"},{"text":"Open in Tab"},{"text":"View Logs"},{"text":"Use a New Port..."},{"text":"Mode","submenu":true},{"text":"Env","submenu":true},{"text":"Open in Browser"},{"text":"Copy URL"},{"text":"Copy Command"},{"text":"Ask Claude About This Service","icon":"sparkle"}]' /></AppShot>
+
 Right-click (or `...`):
 
 - **A service** - **Start** / **Stop** / **Restart**, **Open in Tab**,
@@ -121,7 +123,7 @@ Right-click (or `...`):
 
 ### The service tab
 
-<Shot src="/shots/service-tab.png" text="A service tab: its facts and live logs" />
+<AppShot :width="760" :height="380" text="A service tab. Type in Filter lines to try it."><ServiceTab /></AppShot>
 
 Click a service to open it as a tab (a preview tab, replaced by the next
 one you click; **View logs** keeps it open). The tab has:

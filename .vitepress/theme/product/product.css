@@ -1,0 +1,39 @@
+/* Product pages: a hero window, then numbered steps with the UI fragment they describe. */
+.pp { width: 100vw; margin-left: calc(50% - 50vw); padding-bottom: 96px; }
+.pp-wrap { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
+@media (max-width: 640px) { .pp-wrap { padding: 0 16px; } }
+.pp h1, .pp h2, .pp h3 { border: 0; padding: 0; margin: 0; color: var(--vp-c-text-1); }
+.pp-hero { padding-top: clamp(48px, 8vw, 96px); text-align: center; }
+.pp-eyebrow { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 12px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--vp-c-brand-1); }
+.pp-hero h1 { margin-top: 14px; font-size: clamp(2.2rem, 5.4vw, 3.8rem); font-weight: 700; letter-spacing: -0.035em; line-height: 1.06; }
+.pp-lead { max-width: 60ch; margin: 18px auto 0; font-size: clamp(16px, 1.5vw, 18px); line-height: 1.6; color: var(--vp-c-text-2); }
+.pp-hero-window { margin-top: clamp(36px, 5vw, 64px); filter: drop-shadow(0 50px 80px rgba(166, 61, 158, 0.25)); }
+.pp-section { padding-top: clamp(72px, 9vw, 120px); }
+.pp-section > .pp-wrap > h2 { font-size: clamp(1.7rem, 3.2vw, 2.4rem); font-weight: 700; letter-spacing: -0.03em; line-height: 1.12; }
+.pp-sub { margin: 12px 0 0; max-width: 62ch; font-size: 16px; line-height: 1.6; color: var(--vp-c-text-2); }
+.pp-steps { margin-top: 40px; border-top: 1px solid var(--vp-c-divider); }
+.pp-step { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 48px; padding: 40px 0;
+  border-bottom: 1px solid var(--vp-c-divider); align-items: center; }
+.pp-step-n { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 12px; color: var(--vp-c-text-3); }
+.pp-step h3 { margin-top: 10px; font-size: 20px; font-weight: 600; line-height: 1.3; }
+.pp-step p { margin: 10px 0 0; font-size: 15px; line-height: 1.65; color: var(--vp-c-text-2); }
+.pp-more { display: inline-block; margin-top: 18px; padding: 7px 12px; border: 1px solid var(--vp-c-border); border-radius: 8px;
+  font-size: 13.5px; font-weight: 500; color: var(--vp-c-text-1); text-decoration: none; }
+.pp-more:hover { border-color: var(--vp-c-brand-1); color: var(--vp-c-brand-1); }
+.pp-step-visual { display: flex; justify-content: center; min-width: 0; }
+.pp-stage { position: relative; width: 100%; border-radius: 14px; border: 1px solid var(--vp-c-divider);
+  background: radial-gradient(120% 120% at 70% 0%, var(--vp-c-brand-soft), transparent 60%), var(--vp-c-bg-alt);
+  padding: 28px; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+.pp-grid { margin-top: 40px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.pp-card { border: 1px solid var(--vp-c-divider); border-radius: 14px; background: var(--vp-c-bg-alt); overflow: hidden;
+  display: flex; flex-direction: column; }
+.pp-card .pp-stage { border: 0; border-radius: 0; border-bottom: 1px solid var(--vp-c-divider); }
+.pp-card-text { padding: 18px 22px 22px; }
+.pp-card-text h3 { font-size: 16px; font-weight: 600; }
+.pp-card-text p { margin: 6px 0 0; font-size: 14.5px; line-height: 1.6; color: var(--vp-c-text-2); }
+@media (max-width: 860px) {
+  .pp-step { grid-template-columns: 1fr; gap: 24px; }
+  .pp-grid { grid-template-columns: 1fr; }
+  .pp-stage { padding: 16px; }
+}

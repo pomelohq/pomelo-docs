@@ -5,7 +5,7 @@ to day. It is one Rust program with a GPU-rendered UI and the core built
 in (no port, no browser), so everything you see is the real state of your
 worktrees, services and agents. This page is the tour.
 
-<Shot src="/shots/app.png" text="The Pomelo window: workspaces on the left, the Files panel, the editor and a terminal" />
+<AppShot :width="1440" :height="860" :window="false" text="The Pomelo window: workspaces, the Services panel, the editor and a terminal"><HeroWindow /></AppShot>
 
 ## Layout
 
@@ -47,11 +47,14 @@ Each row is a workspace:
 - its name (the display name, or the branch) and a **PR pill** with the
   number of pull requests, colored by their state; click it to open the Git
   panel,
-- the agent's state - a dot, and a label: **Thinking**, **Using tools**,
+- the agent's state as a colored dot: **Thinking**, **Using tools**,
   **Compacting**, **Awaiting input** or **Idle** (see
   [Agent status](./agent-status)),
-- how many services run (`2 running`),
-- its Jira ticket status, colored by category; click it to open the ticket.
+- under the name, the ticket key and its status (colored by category), or
+  the branch, then how many services run (`2 running`) and what is wrong
+  with the pull request (`Checks pending`, `CI failed`, `Conflict`).
+
+<AppShot :width="280" :height="210" text="Workspace rows"><WorkspacesList /></AppShot>
 
 Click a row to switch to it. Each workspace keeps its own tabs,
 terminals and agent; switching never restarts anything. Drag rows to
@@ -139,10 +142,14 @@ File**, **Mark as Reviewed**, **Copy Path**, **Copy Relative Path** and
 **Discard Uncommitted Changes**, and a repo's remote for **Fetch**,
 **Pull**, **Pull (Rebase)**, **Push** and **Force Push**.
 
+<AppShot :width="360" :height="470" text="The Changes tab: one commit per repo from the staged files. Click a file to stage it."><GitPanel /></AppShot>
+
 **View Diff** opens the branch's whole diff with every hunk expanded. The
 two buttons in its tab bar switch between **unified** and **split**
 (side-by-side, when the pane has room for it); the choice is kept for every
 diff and matches **Split Diff** in the editor's menu.
+
+<AppShot :width="720" :height="300" text="A branch diff, split. The two buttons switch to unified."><DiffView /></AppShot>
 
 ## Terminal and agent
 

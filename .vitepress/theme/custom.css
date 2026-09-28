@@ -126,3 +126,19 @@ html, body { overflow-x: hidden; }
   background: var(--vp-c-bg-alt);
 }
 .diagram svg { display: block; width: 100%; height: auto; }
+
+/* Product menu: its three groups side by side, each entry an icon, a title and a line. */
+.VPNavBarMenuGroup .VPMenu:has(.pm-item) { min-width: 900px; padding: 16px 12px; }
+.VPNavBarMenuGroup .VPMenu:has(.pm-item) .items { display: grid; grid-template-columns: repeat(3, 1fr); }
+.VPNavBarMenuGroup .VPMenu:has(.pm-item) .VPMenuGroup { margin: 0; padding: 0 8px; border-top: 0; }
+.VPNavBarMenuGroup .VPMenu:has(.pm-item) .VPMenuGroup + .VPMenuGroup { border-left: 1px solid var(--vp-c-divider); }
+.VPNavBarMenuGroup .VPMenu:has(.pm-item) .VPMenuGroup .title {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--vp-c-text-3); }
+.VPMenu .VPMenuLink:has(.pm-item) .VPLink { padding: 8px 12px; line-height: 1.3; white-space: normal; }
+.pm-item { display: flex; gap: 12px; align-items: flex-start; }
+.pm-icon { width: 16px; height: 16px; flex: none; margin-top: 2px; color: var(--vp-c-brand-1); }
+.pm-icon svg { width: 100%; height: 100%; display: block; }
+.pm-text { display: flex; flex-direction: column; gap: 3px; }
+.pm-text b { font-size: 14px; font-weight: 600; color: var(--vp-c-text-1); }
+.pm-text small { font-size: 12.5px; color: var(--vp-c-text-2); }

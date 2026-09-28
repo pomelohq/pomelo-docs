@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import HeroWindow from './app/HeroWindow.vue'
 
 const GH = 'https://github.com/pomelohq/pomelo'
 const RELEASES = `${GH}/releases`
@@ -33,73 +34,7 @@ const values = [
   },
 ]
 
-const features = [
-  {
-    title: 'Workspaces per branch',
-    body: 'Create a workspace from a branch or a ticket. Pomelo checks out the worktrees, starts shared services, runs setup and seeds databases, with each step shown as it goes.',
-    img: '/shots/workspace-create.png',
-    alt: 'A workspace being created, with its setup stages, next to the WORKSPACES list',
-    link: '/docs/workspace',
-  },
-  {
-    title: 'Services at a glance',
-    body: 'See what runs, what crashed and why, with a new port, the logs or a fix one click away. Shared Postgres and Redis sit pinned below, used by every workspace.',
-    img: '/shots/services-panel.png',
-    alt: 'The Services panel with a summary, two services that need attention and the shared services',
-    link: '/docs/services',
-  },
-  {
-    title: 'A new project, set up for you',
-    body: 'Point Pomelo at your repos. It clones them, detects each stack, and lets Claude Code, Codex or Gemini CLI write pom.yml, then verifies it boots and hands back what fails.',
-    img: '/shots/onboarding.png',
-    alt: 'Setting up myproject: repos cloned, stacks detected and the agent configuring',
-    link: '/docs/quickstart',
-  },
-  {
-    title: 'Agent usage',
-    body: 'Your Claude plan limits in the title bar, and what every workspace\'s agents used by day, read from their transcripts without spending a token.',
-    img: '/shots/agent-usage.png',
-    alt: 'The Agent usage tab with cost, tokens, plan limits and a chart by workspace',
-    link: '/docs/agents#usage-and-plan-limits',
-  },
-  {
-    title: 'Database browser',
-    body: 'Open a branch database as a data grid with filters, sorting and CSV export, or run SQL in a console saved with the project. Redis keyspaces sit in the same tree.',
-    img: '/shots/database-table.png',
-    alt: 'The users table of a branch database in a data grid',
-    link: '/docs/databases',
-  },
-  {
-    title: 'Git and pull requests',
-    body: 'Stage, commit and publish from the Git panel. The pull request for a branch opens in a tab with its reviewers, checks and conversation.',
-    img: '/shots/pull-request.png',
-    alt: 'A pull request tab with reviewers, labels and description',
-    link: '/docs/app#pull-requests',
-  },
-  {
-    title: 'Jira tickets',
-    body: 'Pick a ticket when you create a workspace and the branch is named after it. The ticket opens in a tab and its status shows in the sidebar.',
-    img: '/shots/jira-ticket.png',
-    alt: 'A Jira ticket tab with description, acceptance criteria and comments',
-    link: '/docs/workspace#create',
-  },
-  {
-    title: 'Project config',
-    body: 'Add or remove repos from Settings, edit pom.yml, and every save is checked before it applies.',
-    img: '/shots/project-settings.png',
-    alt: 'The Project settings page with repositories and config actions',
-    link: '/docs/project-config',
-  },
-]
-
-const ai = [
-  { title: 'Next to the code', body: 'The agent button opens your AI CLI in the workspace, rooted at its worktrees. It keeps running when you close the tab or quit the app.' },
-  { title: 'Status on every workspace', body: 'The sidebar shows what each workspace\'s agent is doing: thinking, using tools, idle or awaiting your input, with a notification when it changes.' },
-  { title: 'Tools for the real stack', body: 'pom\'s MCP server gives the agent the workspace\'s services, ports, logs and databases, and lets it start services and run queries.' },
-  { title: 'Side agents', body: 'Ask a question, review the branch or fix one thing in a side agent, forked, compacted or fresh, without touching the main conversation. Send its answer to main when it helps.' },
-  { title: 'Fix with Claude', body: 'A crashed service, a failed query or a config problem has Fix with Claude right on it, with the error already attached.' },
-]
-
+import { groups } from './home-groups.js'
 const care = [
   ['Tabs and splits', 'drag a tab to split the center into panes'],
   ['Tree-sitter highlighting', 'with folding and an outline (cmd-shift-o)'],
@@ -116,6 +51,14 @@ const care = [
 ]
 
 const footer = [
+  {
+    title: 'Product',
+    links: [
+      ['Dev environment', '/product/environments'],
+      ['Agents', '/product/agents'],
+      ['Editor', '/product/editor'],
+    ],
+  },
   {
     title: 'Get started',
     links: [
@@ -160,8 +103,7 @@ const footer = [
       <a class="btn ghost" :href="GH">View source</a>
     </div>
     <p class="meta">Available for macOS 14+ on Apple Silicon<span v-if="version"> - v{{ version }}</span></p>
-    <img class="shot hero-shot" src="/shots/main-window.png"
-      alt="The Pomelo window: workspaces on the left, the Files panel, the editor and a terminal" />
+    <div class="hero-shot"><HeroWindow /></div>
   </section>
 
   <section class="wrap sec">
@@ -173,42 +115,23 @@ const footer = [
     </div>
   </section>
 
-  <section class="wrap sec">
-    <div class="head">
-      <h2>Pomelo runs the whole project.</h2>
-      <p class="sub">Point it at your repos once. Every branch after that comes up ready to run.</p>
-    </div>
-    <div class="cards">
-      <article v-for="f in features" :key="f.title" class="card">
-        <div class="card-media"><img :src="f.img" :alt="f.alt" loading="lazy" /></div>
-        <div class="card-text">
-          <h3>{{ f.title }}</h3>
-          <p>{{ f.body }}</p>
-          <a class="more" :href="f.link">Learn more &gt;</a>
-        </div>
-      </article>
-    </div>
-  </section>
-
-  <section class="wrap sec">
-    <div class="split">
+  <section v-for="group in groups" :key="group.id" class="wrap sec">
+    <div class="head head-row">
       <div>
-        <h2>An agent that works the way you work.</h2>
-        <p class="sub">No chat window bolted on. Your AI CLI runs in a real terminal in the
-          workspace and sees the same stack you do.</p>
-        <div class="ai-list">
-          <div v-for="a in ai" :key="a.title" class="ai-item">
-            <h3>{{ a.title }}</h3>
-            <p>{{ a.body }}</p>
-          </div>
-        </div>
-        <div class="actions">
-          <a class="btn ghost" href="/docs/agent-status">Agent status</a>
-          <a class="btn ghost" href="/docs/quickstart">Quick Start</a>
-        </div>
+        <div class="eyebrow">{{ group.eyebrow }}</div>
+        <h2>{{ group.title }}</h2>
+        <p class="sub">{{ group.sub }}</p>
       </div>
-      <img class="shot" src="/shots/agent-settings.png" loading="lazy"
-        alt="Agent settings: the agent command, the pom MCP server and activity hooks" />
+      <a class="btn ghost" :href="group.link">Explore {{ group.eyebrow }}</a>
+    </div>
+    <div class="cards" :class="'cards-' + group.cards.length">
+      <a v-for="card in group.cards" :key="card.title" class="card" :href="card.link">
+        <div class="card-media"><component :is="card.visual" /></div>
+        <div class="card-text">
+          <h3>{{ card.title }}</h3>
+          <p>{{ card.body }}</p>
+        </div>
+      </a>
     </div>
   </section>
 
@@ -277,7 +200,7 @@ h3 { font-size: 16px; font-weight: 600; line-height: 1.35; }
 .btn.ghost:hover { border-color: var(--vp-c-brand-1); color: var(--vp-c-brand-1); }
 
 .shot { display: block; width: 100%; height: auto; border-radius: 14px; border: 1px solid var(--vp-c-border); }
-.hero-shot { margin-top: clamp(40px, 6vw, 72px); box-shadow: 0 60px 140px -70px rgba(166, 61, 158, 0.65); }
+.hero-shot { margin-top: clamp(40px, 6vw, 72px); filter: drop-shadow(0 50px 80px rgba(166, 61, 158, 0.28)); }
 
 .sec { padding-top: clamp(72px, 10vw, 136px); }
 .head { margin-bottom: 40px; }
@@ -290,10 +213,17 @@ h3 { font-size: 16px; font-weight: 600; line-height: 1.35; }
 .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
 .card { display: flex; flex-direction: column; border: 1px solid var(--vp-c-divider); border-radius: 16px;
   background: var(--vp-c-bg-alt); overflow: hidden; }
-.card-media { aspect-ratio: 16 / 10; overflow: hidden; background: var(--vp-c-bg-soft);
-  border-bottom: 1px solid var(--vp-c-divider); }
-/* Zoomed to the top-left so the UI text stays legible at card size. */
-.card-media img { width: 165%; max-width: none; height: auto; display: block; }
+.card { text-decoration: none; color: inherit; transition: border-color 0.16s; }
+.card:hover { border-color: var(--vp-c-brand-1); }
+.card-media { position: relative; aspect-ratio: 16 / 11; overflow: hidden; border-bottom: 1px solid var(--vp-c-divider);
+  background: radial-gradient(120% 120% at 70% 0%, var(--vp-c-brand-soft), transparent 60%), var(--vp-c-bg-soft);
+  display: flex; align-items: safe center; justify-content: center; padding: 24px 24px 0;
+  -webkit-mask-image: linear-gradient(to bottom, #000 78%, transparent); mask-image: linear-gradient(to bottom, #000 78%, transparent); }
+.card-media > * { width: 100%; }
+.cards-4 { grid-template-columns: repeat(2, 1fr); }
+.eyebrow { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 12px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--vp-c-brand-1); margin-bottom: 12px; }
+.head-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; flex-wrap: wrap; }
 .card-text { display: flex; flex-direction: column; flex: 1; padding: 20px 22px 22px; }
 .card-text p { margin: 8px 0 0; flex: 1; font-size: 14.5px; line-height: 1.6; color: var(--vp-c-text-2); }
 .more { margin-top: 16px; font-size: 14px; font-weight: 600; color: var(--vp-c-brand-1); text-decoration: none; }
@@ -317,7 +247,7 @@ h3 { font-size: 16px; font-weight: 600; line-height: 1.35; }
   border-top: 1px solid var(--vp-c-divider); display: flex; justify-content: space-between; gap: 40px; flex-wrap: wrap; }
 .foot-brand { display: flex; align-items: center; gap: 10px; font-weight: 600; color: var(--vp-c-text-1); }
 .foot-brand img { width: 28px; height: 28px; }
-.foot-cols { display: grid; grid-template-columns: repeat(3, minmax(140px, auto)); gap: 32px 56px; }
+.foot-cols { display: grid; grid-template-columns: repeat(4, minmax(130px, auto)); gap: 32px 56px; }
 .foot-cols h4 { font-size: 13px; font-weight: 600; margin-bottom: 12px; color: var(--vp-c-text-1); }
 .foot-cols a { display: block; font-size: 14px; line-height: 2; color: var(--vp-c-text-2); text-decoration: none; }
 .foot-cols a:hover { color: var(--vp-c-brand-1); }
