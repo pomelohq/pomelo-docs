@@ -26,7 +26,8 @@ for path in sorted((root / "material").glob("*.svg")):
     icons["file-" + path.stem] = path.read_text()
 cleaned = {}
 for name, svg in icons.items():
-    svg = re.sub(r"<\?xml[^>]*>|<!--.*?-->", "", svg, flags=re.S).strip()
+    # A <title> inside inline SVG reads as the page title to some link-preview crawlers.
+    svg = re.sub(r"<\?xml[^>]*>|<!--.*?-->|<title>.*?</title>", "", svg, flags=re.S).strip()
     if "viewBox" not in svg:
         size = re.search(r'width="(\d+)"[^>]*height="(\d+)"', svg) or re.search(r'height="(\d+)"[^>]*width="(\d+)"', svg)
         if size:
