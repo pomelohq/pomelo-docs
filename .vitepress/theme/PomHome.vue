@@ -115,6 +115,16 @@ const footer = [
     </div>
   </section>
 
+  <section id="film" class="wrap sec">
+    <div class="head film-head">
+      <h2>See it in 74 seconds.</h2>
+      <p class="sub">Three agents, three branches, one laptop. The same night, with and without Pomelo.</p>
+    </div>
+    <video class="film" controls playsinline preload="none" poster="/film/poster.jpg">
+      <source src="/film/pomelo-film.mp4" type="video/mp4" />
+    </video>
+  </section>
+
   <section v-for="group in groups" :key="group.id" class="wrap sec">
     <div class="head head-row">
       <div>
@@ -203,6 +213,10 @@ h3 { font-size: 16px; font-weight: 600; line-height: 1.35; }
 .hero-shot { margin-top: clamp(40px, 6vw, 72px); filter: drop-shadow(0 50px 80px rgba(166, 61, 158, 0.28)); }
 
 .sec { padding-top: clamp(72px, 10vw, 136px); }
+.film-head { text-align: center; }
+.film-head .sub { margin-left: auto; margin-right: auto; }
+.film { display: block; width: 100%; aspect-ratio: 16 / 9; border-radius: 16px; background: #0d0710;
+  border: 1px solid var(--vp-c-divider); filter: drop-shadow(0 40px 70px rgba(166, 61, 158, 0.22)); }
 .head { margin-bottom: 40px; }
 
 .values { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; }
