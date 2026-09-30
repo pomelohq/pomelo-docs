@@ -49,6 +49,7 @@ const GROUPS = [
     text: 'Using Pomelo',
     items: [
       { text: 'The app', link: '/docs/app' },
+      { text: 'Themes and fonts', link: '/docs/themes' },
       { text: 'Workspaces', link: '/docs/workspace' },
       { text: 'Project config', link: '/docs/project-config' },
       { text: 'Agents', link: '/docs/agents' },
