@@ -85,10 +85,11 @@ request mark underneath.
 
 ## Editor
 
-The center is a full code editor: tree-sitter highlighting, language
-servers (found on your `PATH`), multiple cursors, find and replace, go to
-file (`cmd-p`), project search (`cmd-shift-f`), an outline, Markdown
-preview and diffs. Split with `cmd-\` and drag tabs between panes. See
+The center is a full code editor: tree-sitter highlighting,
+[language servers](#language-servers), multiple cursors, find and replace,
+go to file (`cmd-p`), project search (`cmd-shift-f`),
+[project diagnostics](#project-diagnostics) (`cmd-shift-m`), an outline,
+Markdown preview and diffs. Split with `cmd-\` and drag tabs between panes. See
 [Keyboard shortcuts](./shortcuts).
 
 Large files open without a wait: files of millions of lines (a big CSV or
@@ -124,6 +125,62 @@ Click it to open the outline. On its right:
   - **Inline Diagnostics** (off at first): each line's most severe problem
     at the end of that line.
   - **Line Numbers**, **Inline Git Blame**, **Soft Wrap**.
+
+### Language servers
+
+Go to definition (`cmd`-click, or `F12`), hover, completions and the
+squiggles under problems come from a language server for the file's
+language:
+
+| Language | Server |
+| --- | --- |
+| TypeScript, TSX, JavaScript | vtsls, or typescript-language-server |
+| Python | basedpyright, pyright or ty |
+| Rust | rust-analyzer |
+| Go | gopls |
+| C, C++ | clangd |
+| Ruby | solargraph (ruby-lsp when you name it, see below) |
+
+Pomelo looks for the server on your login shell's `PATH` first. vtsls,
+basedpyright and pyright are downloaded when they are missing (with your
+`node` and `npm`) into `~/Library/Application Support/Pomelo/languages`,
+and kept up to date there. The others you install yourself (for example
+`gem install solargraph`).
+
+The **bolt** button in the status bar lists the servers of the open folder,
+each with a dot: green running, amber starting (or downloading), grey
+stopped, red failed. A server's menu has **View Message** (when it has one),
+**Restart Server**, **Stop Server**, and a line with its version and memory;
+hover that line for the program that runs it. **Restart All Servers** and
+**Stop All Servers** are at the bottom. Next to the diagnostics counts, one
+line says what the servers are doing: indexing progress, a download, an
+update check, or a failure (click it to see the error).
+
+**Settings > Languages & Tools** turns servers on or off, for all languages
+or one (**Languages**, then **Configure**). **Language Servers** is a list in
+`settings.json`: a name puts that server first, `!name` turns it off, and
+`...` stands for the rest of the language's servers:
+
+```json
+"languages": {
+  "Python": { "language_servers": ["ty", "!basedpyright", "..."] },
+  "Ruby": { "language_servers": ["ruby-lsp", "..."] }
+}
+```
+
+### Project diagnostics
+
+Click the error and warning counts in the status bar, or press
+`cmd-shift-m`, to open the **Diagnostics** tab. Every file with errors is
+listed by path, each problem as the lines of code around it with its message
+underneath (and its source and code, such as `ts 2322`), plus a button that
+copies the message. Click any line to open the file there. The tab's title
+shows the counts, or **No problems**.
+
+The toolbar's **warning** button shows or hides warnings; opening the tab
+from the status bar when there are only warnings shows them. Refresh reloads
+the list. It updates as the servers report, and shows what they reported:
+some (vtsls, for one) report only on the files you have open.
 
 ## Panels
 
@@ -256,6 +313,7 @@ Layout**. While an update downloads, the title bar shows its progress; see
 | **Appearance** | Theme (built-in or [your own](./themes), static or following macOS light and dark; `cmd-k cmd-t` cycles); every font: the **Buffer Font** (the editor's family, size, weight, line height, [features and fallbacks](./themes#fonts)), the **UI Font**, the **Agent Panel Font** (the agent tabs' text size) and the **Terminal Font**; and the cursor: **Multi Cursor Modifier** (Alt-click adds a caret or drops the one there, Cmd-click goes to definition; Cmd Or Ctrl swaps them), **Cursor Blink**, **Cursor Animation** (the caret glides to where it moves, trailing on long jumps), **Cursor Shape** (bar, block, underline or hollow), **Hide Mouse** (the pointer hides while you type or use the keyboard, until the mouse moves) and **Reduce Motion** (holds loading shimmers, pulsing placeholders and the caret's glide still). |
 | **Window & Layout** | Status bar and title bar items, including a toggle per status bar button (Files, Services, Git, Database, Terminal, Agent), plus dock sides and agent/terminal buttons. A button's right-click menu moves its panel to another side. Each window reopens where you left it (position, size, maximized or full screen). |
 | **Editor** | Soft wrap, diff view, external editor. |
+| **Languages & Tools** | Language servers on or off, which ones, and in what order (see [Language servers](#language-servers)); **Go To Definition Scroll Strategy**; completions on or off and how long to wait for them; the least severe diagnostic shown; inline diagnostics on for new editors, their padding and minimum column; **File Type Associations** (`settings.json`); and per language, under **Languages**, its own servers and completions. |
 | **Terminal** | Shell, scrollback. |
 | **Keymap** | Every window action and its binding; opens `keymap.json`. |
 | **Agent** | Agent command; Claude Code MCP server and activity hooks, with **Reinstall**. |

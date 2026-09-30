@@ -16,6 +16,7 @@ shows the keys they will use, with `ctrl` in place of `cmd`.
 | Command Palette | <Keys k="cmd-shift-p"/> | <Keys pc k="ctrl-shift-p"/> |
 | Go to File | <Keys k="cmd-p"/> | <Keys pc k="ctrl-p"/> |
 | Find in Project | <Keys k="cmd-shift-f"/> | <Keys pc k="ctrl-shift-f"/> |
+| Project Diagnostics | <Keys k="cmd-shift-m"/> | <Keys pc k="ctrl-shift-m"/> |
 | Open Settings | <Keys k="cmd-,"/> | <Keys pc k="ctrl-,"/> |
 | Open Keymap (Settings > Keymap) | <Keys k="cmd-k cmd-s"/> | <Keys pc k="ctrl-k ctrl-s"/> |
 | Open Project | <Keys k="cmd-o"/> | <Keys pc k="ctrl-o"/> |
