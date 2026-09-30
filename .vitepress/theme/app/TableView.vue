@@ -1,6 +1,14 @@
 <script setup>
 import { computed, nextTick, ref } from 'vue'
 import Icon from './Icon.vue'
+// Where the fragment starts, so one page can show each of the tab's states.
+const props = defineProps({
+  view: { type: String, default: 'data' },
+  side: { type: String, default: 'value' },
+  cell: { type: Array, default: () => [1, 5] },
+  edited: { type: Boolean, default: false },
+  review: { type: Boolean, default: false },
+})
 
 const columns = [
   { name: 'id', type: 'bigint', width: 90, pk: true },
@@ -23,14 +31,14 @@ const loaded = people.map((name, i) => [
 ])
 const references = [['orders.user_id', i => 3 + (i % 4)], ['login_tokens.user_id', i => i % 3]]
 
-const view = ref('data')
-const side = ref('value')
+const view = ref(props.view)
+const side = ref(props.side)
 const details = ref(true)
-const selected = ref([1, 5])
+const selected = ref(props.cell)
 const filters = ref({})
-const edits = ref({})
+const edits = ref(props.edited ? { '3.4': 'admin', '6.2': 'Ken T.' } : {})
 const editing = ref(null)
-const review = ref(false)
+const review = ref(props.review)
 const open = ref(new Set(['$']))
 const more = ref(new Set())
 const flash = ref('')

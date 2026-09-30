@@ -157,6 +157,10 @@ lists the columns (type, NULL, default, primary and foreign keys), the
 indexes, and the tables whose foreign keys point here; click one to open it.
 DDL is the `CREATE TABLE`, with **Copy**.
 
+<AppShot :width="1080" :height="360" text="Structure: the columns, indexes and the foreign keys that point here."><TableView view="structure" /></AppShot>
+
+<AppShot :width="1080" :height="300" text="DDL: the table's CREATE TABLE."><TableView view="ddl" /></AppShot>
+
 #### Details
 
 The side next to the grid (**Details**, or `shift-enter`) follows the
@@ -170,6 +174,8 @@ selected cell:
 - **Row** - the selected row as a record, the chosen column lit, then
   **Referenced by**: every table with a foreign key to this one and how many
   of its rows point at this row. Click one to open those rows.
+
+<AppShot :width="1080" :height="400" text="The Row side: the selected row as a record, the foreign key with its name, and the tables pointing at it."><TableView side="row" :cell="[1, 3]" /></AppShot>
 
 Value or Row stays as you left it while you move around. In the grid a
 JSON cell over 2 KB reads as its summary (`{ 9 keys } 21.3 KB`), and a
@@ -187,6 +193,8 @@ them, naming the database they go into.
 - **Discard** drops them.
 - **Apply** (`cmd-s`) runs them all in one transaction, each row found by its
   primary key: if one fails, none is saved.
+
+<AppShot :width="1080" :height="440" text="Two staged changes, with Review SQL open. Try Discard or Apply, or double-click another cell."><TableView :edited="true" :review="true" :cell="[3, 4]" /></AppShot>
 
 Primary key columns, views and tables without a primary key are read-only,
 and the side says why. **Open in tab** opens a value in the editor (JSON
