@@ -9,15 +9,30 @@ a git worktree per repo, with its own ports, env, and databases.
 Click **+** in the WORKSPACES header (or `cmd-n`) to open **Create
 Workspace**:
 
-- **Ticket** - when the project has Jira set up, pick a ticket from the
-  sprint or type a key. Picking one fills the name with its summary and the
-  branch with its key (for example `proj-101`). **Only Show My Tickets** in
-  Settings > Integrations narrows the list.
+- **Ticket** - when the project has Jira set up, focus the field to see a
+  list of tickets, filter it by typing, or type a key. The select next to
+  **Ticket** picks where they come from: a board's current sprint, that
+  board's backlog, or **Assigned to me** (your open tickets on any board).
+  Picking one fills the name with its summary and the branch with its key
+  (for example `proj-101`), marked "from PROJ-101" until you edit them.
+  **Only Show My Tickets** in Settings > Integrations narrows the sprint and
+  backlog lists. `escape` closes the list before it closes the form.
 - **Name** - the display name. The **Branch** follows it as a slug unless
   you edit it. **Refine name & branch with Claude** asks Claude for a better
   pair.
 - **Repos** - tick the repos this work needs; with none ticked, all of them
-  are used. More can be added later.
+  are used. More can be added later. Each row says whether its
+  `node_modules` will be instant (from the shared store), installed once
+  (then kept for the next workspace), or handled by the package manager's
+  own store.
+- **Environment** - when the config defines `environments`, the profile the
+  services point at (`local` by default).
+- **Data** - when a ticked repo has `seed_from_main`, choose **Copy from
+  main** or **Empty, run seeds** (start every database empty and seed it).
+  From the CLI: `pom ws create <branch> --fresh-db`.
+
+The footer sums up what **Create** will make, for example
+`3 repos - 1 installs once - databases copied from main - local`.
 
 Pomelo builds the workspace through a staged pipeline and shows each stage
 on a card at the top of the sidebar:
