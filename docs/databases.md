@@ -134,13 +134,114 @@ Right-click:
 
 ### Tables
 
-<AppShot :width="760" :height="330" text="A table tab. Click a header to sort, a cell to select it."><TableView /></AppShot>
+<AppShot :width="1080" :height="400" text="A table tab with the Details side. Click a cell, the row numbers, the JSON folds, a filter box, Value or Row; double-click a name to edit it."><TableView /></AppShot>
 
 Click a table to open it as a data grid. Type a **WHERE** and **ORDER BY**
 to narrow and sort it (or click a column's header to sort), page through it
 100, 500, 1000 or 5000 rows at a time (500 by default), drag a column's edge
 to resize it and click a cell to copy it. **Export CSV** writes the full
 result to `~/Downloads/<table>.csv`.
+
+**Filter boxes** under the column headers narrow by one column, together
+with the WHERE (press `enter` to run):
+
+| Typed | Keeps rows where the column |
+| --- | --- |
+| `ann` | contains `ann` (any case) |
+| `= 42` | is exactly `42` |
+| `!= admin` | is anything but `admin` |
+| `null` / `not null` | is NULL / is not NULL |
+
+**Data**, **Structure** and **DDL** switch what the tab shows. Structure
+lists the columns (type, NULL, default, primary and foreign keys), the
+indexes, and the tables whose foreign keys point here; click one to open it.
+DDL is the `CREATE TABLE`, with **Copy**.
+
+<AppShot :width="1080" :height="360" text="Structure: the columns, indexes and the foreign keys that point here."><TableView view="structure" /></AppShot>
+
+<AppShot :width="1080" :height="300" text="DDL: the table's CREATE TABLE."><TableView view="ddl" /></AppShot>
+
+#### Details
+
+The side next to the grid (**Details**, or `shift-enter`) follows the
+selected cell:
+
+- **Value** - the whole value, however long. JSON opens as a tree in the
+  order it was written: the first level is open, a folded object reads
+  `{ 9 keys }`, a long list shows 50 items then **show N more**, and
+  **Expand all** / **Collapse** open or fold everything. A foreign key also
+  shows the row it points at, with **Open this row**.
+- **Row** - the selected row as a record, the chosen column lit, then
+  **Referenced by**: every table with a foreign key to this one and how many
+  of its rows point at this row. Click one to open those rows.
+
+<AppShot :width="1080" :height="400" text="The Row side: the selected row as a record, the foreign key with its name, and the tables pointing at it."><TableView side="row" :cell="[1, 3]" /></AppShot>
+
+Value or Row stays as you left it while you move around. In the grid a
+JSON cell over 2 KB reads as its summary (`{ 9 keys } 21.3 KB`), and a
+foreign key cell has an arrow that opens the row it points at, in that
+table's tab.
+
+#### Editing
+
+Double-click a cell (or press `enter`) to change it; a long or JSON value is
+edited in the Details side instead, where **Set NULL** and **Revert** are
+too. JSON opens there indented and colored, with line numbers, and goes back
+on one line when you keep it (`cmd-enter`), so only what you changed shows. Changes are not saved right away: they turn yellow and a bar counts
+them, naming the database they go into.
+
+- **Review SQL** opens the `UPDATE` statements in an editor tab, one per
+  paragraph, to read before they run.
+- **Discard** drops them.
+- **Apply** (`cmd-s`) runs them all in one transaction, each row found by its
+  primary key: if one fails, none is saved.
+
+<AppShot :width="1080" :height="440" text="Two staged changes. Try Discard or Apply, or double-click another cell."><TableView :edited="true" :cell="[3, 4]" /></AppShot>
+
+Primary key columns, views and tables without a primary key are read-only,
+and the side says why. **Open in tab** opens a value in the editor (JSON
+indented, keys in their order); saving that tab stages the change here, and
+text that is no longer valid JSON is refused.
+
+### Redis keys
+
+Click a keyspace (`session:*`) to open its keys in a tab. **MATCH** is the
+pattern they are scanned with; change it and press `enter`. The keys are
+grouped by their next part (`bull:mail:`, `bull:sms:`), each with its type
+and how long it has left.
+
+The selected key's value shows the way its type holds it:
+
+- **string** - the text, or a JSON tree when it is JSON.
+- **hash** - its fields and values.
+- **list** - each item with its index.
+- **zset** - each member with its score.
+- **set** - its members.
+
+A long value shows its first 1000 items. **TTL** changes when the key
+expires (a number of seconds, or empty for never); **Delete key** and
+**Delete all matching...** ask first.
+
+<AppShot :width="1080" :height="420" text="A keyspace tab. Click a key, fold a group, or change the pattern."><KeyspaceView /></AppShot>
+
+<AppShot :width="1080" :height="300" text="A hash, as fields and values."><KeyspaceView selected="bull:mail:meta" /></AppShot>
+
+### Object storage
+
+Click a bucket or a folder to open it as a folder tab; the chevron beside it
+only folds the tree. Clicking an object opens its folder with it chosen.
+
+The tab lists the folders (how many files each holds and their size) and the
+objects (size, when they changed). Click a folder to go in and the path
+above to come back up (or `cmd-backspace`); **find** narrows the folder by
+name, and **Upload here** puts the files you pick into it. The side previews
+the chosen object (an image, or the first 64 KB of text) with **Download**,
+**Copy URL (1 hour)**, **Copy Path** and **Delete...**; double-click an
+object to open it in its own tab.
+
+<AppShot :width="1080" :height="400" text="A folder of a bucket. Click a folder, the path above, or a file."><BucketView /></AppShot>
+
+<AppShot :width="1080" :height="320" text="An image, previewed at the side."><BucketView folder="avatars/" selected="avatars/user-104.png" /></AppShot>
 
 ### Consoles
 
