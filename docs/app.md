@@ -254,7 +254,7 @@ Layout**. While an update downloads, the title bar shows its progress; see
 | --- | --- |
 | **General** | Start at Login; the version, with **Check Now**, **Restart to Update** or **Try Again**. |
 | **Appearance** | Theme (built-in or [your own](./themes), static or following macOS light and dark; `cmd-k cmd-t` cycles); every font: the **Buffer Font** (the editor's family, size, weight, line height, [features and fallbacks](./themes#fonts)), the **UI Font**, the **Agent Panel Font** (the agent tabs' text size) and the **Terminal Font**; and the cursor: **Multi Cursor Modifier** (Alt-click adds a caret or drops the one there, Cmd-click goes to definition; Cmd Or Ctrl swaps them), **Cursor Blink**, **Cursor Animation** (the caret glides to where it moves, trailing on long jumps), **Cursor Shape** (bar, block, underline or hollow), **Hide Mouse** (the pointer hides while you type or use the keyboard, until the mouse moves) and **Reduce Motion** (holds loading shimmers, pulsing placeholders and the caret's glide still). |
-| **Window & Layout** | Status bar and title bar items, dock sides, agent and terminal buttons. Each window reopens where you left it (position, size, maximized or full screen). |
+| **Window & Layout** | Status bar and title bar items, including a toggle per status bar button (Files, Services, Git, Database, Terminal, Agent), plus dock sides and agent/terminal buttons. A button's right-click menu moves its panel to another side. Each window reopens where you left it (position, size, maximized or full screen). |
 | **Editor** | Soft wrap, diff view, external editor. |
 | **Terminal** | Shell, scrollback. |
 | **Keymap** | Every window action and its binding; opens `keymap.json`. |
