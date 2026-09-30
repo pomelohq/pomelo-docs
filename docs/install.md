@@ -53,11 +53,30 @@ Normalize** removes them (see [Project config](./project-config)).
 
 ## Updates
 
-Pomelo updates itself. With **Settings > General > Check for Updates
-Automatically** on (the default), the installed app looks for a newer
-release on launch, downloads it, checks its signature against the release
-key built into the app, and only then swaps itself and relaunches. **Check
-for Updates** on the same page checks right away.
+Pomelo updates itself, in the background and on your schedule. With
+**Settings > General > Check for Updates Automatically** on (the default),
+the installed app looks for a newer release at launch and every hour, and
+stays quiet unless it finds one.
+
+A new version downloads while you work. The title bar shows **Downloading
+0.7.4** with its progress (hover it for the percentage), then **Verifying**
+while its signature is checked against the release key built into the app,
+then **Restart to Update**. Nothing is installed until you choose:
+
+- **Restart to Update** swaps in the new version and reopens Pomelo.
+  Services and terminals keep running across the restart.
+- **Quit** installs a downloaded update too, so the next launch is the new
+  version.
+- The **x** on the button hides it; **Restart to Update** stays in the app
+  menu.
+
+If a step fails the title bar says **Update failed**; hover it for the
+reason, and **Try Again** in Settings retries. **Check for Updates** (the
+app menu, or **Check Now** in **Settings > General**) checks right away and
+says what it found: checking, up to date, or the download.
+
+After an update, a notification offers the release notes; **Release
+Notes** in the app menu shows them any time.
 
 Installs of 0.6.x and older (the previous app) update to 0.7.0 through
 their existing updater, with no manual download.
