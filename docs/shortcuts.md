@@ -126,13 +126,21 @@ defaults, so they win, and `null` unbinds a key:
     "context": "Workspace",
     "bindings": {
       "cmd-shift-g": "git_panel::ToggleFocus",
+      "secondary-shift-t": "workspace::NewTerminal",
+      "cmd-alt-1": ["pane::ActivateItem", 0],
       "cmd-r": null
     }
   }
 ]
 ```
 
+`secondary` is Command on macOS and Control on Windows and Linux, so one
+file works on every platform. Going to a tab takes its position from 0:
+`["pane::ActivateItem", 0]` is the first tab.
+
 Each action's name (such as `git_panel::ToggleFocus`) is listed under its
 label in **Settings > Keymap**, which also shows any mistakes found in the
-file. Only the `Workspace` context is read; editor and terminal keys are
-fixed.
+file. Only the `Workspace` context is read; editor and terminal keys, and
+the split and pane keys in the tables above, are fixed. The
+[menu bar](./app#the-menu-bar) shows the keys currently bound, including
+yours.
