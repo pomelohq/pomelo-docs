@@ -21,6 +21,9 @@ import ContextMenu from './app/ContextMenu.vue'
 import TerminalView from './app/TerminalView.vue'
 import TabBar from './app/TabBar.vue'
 import CodeView from './app/CodeView.vue'
+import DevRequests from './app/DevRequests.vue'
+import ModuleStore from './app/ModuleStore.vue'
+import CreateWorkspaceForm from './app/CreateWorkspaceForm.vue'
 import './custom.css'
 
 // Default theme, restyled (custom.css), a bespoke landing (PomHome), and the app's own UI drawn in
@@ -31,6 +34,6 @@ export default {
     app.component('PomHome', PomHome)
     app.component('Shot', Shot)
     app.component('Keys', Keys)
-    for (const [name, component] of Object.entries({ AppShot, HeroWindow, ServicesPanel, ServiceTab, DatabasePanel, TableView, AgentPopover, SideAgentBar, UsageCard, UsageChart, WorkspacesList, WorkspaceCreate, Onboarding, GitPanel, DiffView, ContextMenu, TerminalView, TabBar, CodeView })) app.component(name, component)
+    for (const [name, component] of Object.entries({ AppShot, HeroWindow, ServicesPanel, ServiceTab, DatabasePanel, TableView, AgentPopover, SideAgentBar, UsageCard, UsageChart, WorkspacesList, WorkspaceCreate, Onboarding, GitPanel, DiffView, ContextMenu, TerminalView, TabBar, CodeView, DevRequests, ModuleStore, CreateWorkspaceForm })) app.component(name, component)
   },
 }
