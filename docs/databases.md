@@ -134,13 +134,64 @@ Right-click:
 
 ### Tables
 
-<AppShot :width="760" :height="330" text="A table tab. Click a header to sort, a cell to select it."><TableView /></AppShot>
+<AppShot :width="1080" :height="400" text="A table tab with the Details side. Click a cell, the row numbers, the JSON folds, a filter box, Value or Row; double-click a name to edit it."><TableView /></AppShot>
 
 Click a table to open it as a data grid. Type a **WHERE** and **ORDER BY**
 to narrow and sort it (or click a column's header to sort), page through it
 100, 500, 1000 or 5000 rows at a time (500 by default), drag a column's edge
 to resize it and click a cell to copy it. **Export CSV** writes the full
 result to `~/Downloads/<table>.csv`.
+
+**Filter boxes** under the column headers narrow by one column, together
+with the WHERE (press `enter` to run):
+
+| Typed | Keeps rows where the column |
+| --- | --- |
+| `ann` | contains `ann` (any case) |
+| `= 42` | is exactly `42` |
+| `!= admin` | is anything but `admin` |
+| `null` / `not null` | is NULL / is not NULL |
+
+**Data**, **Structure** and **DDL** switch what the tab shows. Structure
+lists the columns (type, NULL, default, primary and foreign keys), the
+indexes, and the tables whose foreign keys point here; click one to open it.
+DDL is the `CREATE TABLE`, with **Copy**.
+
+#### Details
+
+The side next to the grid (**Details**, or `shift-enter`) follows the
+selected cell:
+
+- **Value** - the whole value, however long. JSON opens as a tree in the
+  order it was written: the first level is open, a folded object reads
+  `{ 9 keys }`, a long list shows 50 items then **show N more**, and
+  **Expand all** / **Collapse** open or fold everything. A foreign key also
+  shows the row it points at, with **Open this row**.
+- **Row** - the selected row as a record, the chosen column lit, then
+  **Referenced by**: every table with a foreign key to this one and how many
+  of its rows point at this row. Click one to open those rows.
+
+Value or Row stays as you left it while you move around. In the grid a
+JSON cell over 2 KB reads as its summary (`{ 9 keys } 21.3 KB`), and a
+foreign key cell has an arrow that opens the row it points at, in that
+table's tab.
+
+#### Editing
+
+Double-click a cell (or press `enter`) to change it; a long or JSON value is
+edited in the Details side instead, where **Set NULL** and **Revert** are
+too. Changes are not saved right away: they turn yellow and a bar counts
+them, naming the database they go into.
+
+- **Review SQL** lists the `UPDATE` statements.
+- **Discard** drops them.
+- **Apply** (`cmd-s`) runs them all in one transaction, each row found by its
+  primary key: if one fails, none is saved.
+
+Primary key columns, views and tables without a primary key are read-only,
+and the side says why. **Open in tab** opens a value in the editor (JSON
+indented, keys in their order); saving that tab stages the change here, and
+text that is no longer valid JSON is refused.
 
 ### Consoles
 
