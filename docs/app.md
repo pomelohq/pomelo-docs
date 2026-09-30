@@ -233,10 +233,10 @@ Layout**. While an update downloads, the title bar shows its progress; see
 | Page | What's there |
 | --- | --- |
 | **General** | Start at Login; the version, with **Check Now**, **Restart to Update** or **Try Again**. |
-| **Appearance** | Theme (One Dark, One Light, Ayu Mirage, Gruvbox Dark; `cmd-k cmd-t` cycles) and UI font. |
+| **Appearance** | Theme (built-in or [your own](./themes), static or following macOS light and dark; `cmd-k cmd-t` cycles) and the UI font. |
 | **Window & Layout** | Status bar and title bar items, window size, dock sides, agent and terminal buttons. |
-| **Editor** | Font size, soft wrap, diff view, external editor. |
-| **Terminal** | Font size, shell, scrollback. |
+| **Editor** | The buffer font (family, size, weight, line height, [features and fallbacks](./themes#fonts)), soft wrap, diff view, external editor. |
+| **Terminal** | The terminal font (family, size, weight, line height, features, fallbacks), shell, scrollback. |
 | **Keymap** | Every window action and its binding; opens `keymap.json`. |
 | **Agent** | Agent command; Claude Code MCP server and activity hooks, with **Reinstall**. |
 | **Notifications** | Banners and a sound per agent event. |
