@@ -92,6 +92,14 @@ go to file (`cmd-p`), project search (`cmd-shift-f`),
 Markdown preview and diffs. Split with `cmd-\` and drag tabs between panes. See
 [Keyboard shortcuts](./shortcuts).
 
+A single click on a file in the Files tree opens it as a **preview tab**,
+with its title in italics: the next file you preview replaces it, so
+browsing does not pile up tabs. It becomes a tab of its own when you edit
+it, pin it, drag it, double-click its tab, or open the file another way
+(double-click in the tree, go to file, search). Go to definition into
+another file also opens that file as the preview, and keeps the preview
+you came from. Tab titles longer than 24 characters end in `...`.
+
 Large files open without a wait: files of millions of lines (a big CSV or
 log) load in the background on every core, then scroll and take typing as
 smoothly as a small one.
@@ -140,21 +148,45 @@ language:
 | Go | gopls |
 | C, C++ | clangd |
 | Ruby | solargraph (ruby-lsp when you name it, see below) |
+| TypeScript, TSX, JavaScript, CSS, HTML, Svelte, PHP | also tailwindcss-language-server |
+
+A file can have several servers at once, such as vtsls and the Tailwind
+server for a `.tsx` file. Their problems show together, their completions
+are merged into one menu, hover shows each server's answer, and go to
+definition lists the targets from all of them.
+
+Each server runs in the folder of the project the file belongs to, so a
+workspace with several repos gets one server per repo: the folder with the
+nearest `Gemfile` (Ruby), `pyproject.toml`, `setup.py`, `setup.cfg`,
+`requirements.txt` or `pyrightconfig.json` (Python), or
+`compile_commands.json`, `CMakeLists.txt` or `.clangd` (C, C++); the
+outermost `package.json`, `tsconfig.json` or `jsconfig.json` (TypeScript,
+JavaScript, Tailwind), `Cargo.toml` (Rust), or `go.work` or `go.mod` (Go).
+A file outside any of these uses the workspace folder.
 
 Pomelo looks for the server on your login shell's `PATH` first. vtsls,
-basedpyright and pyright are downloaded when they are missing (with your
-`node` and `npm`) into `~/Library/Application Support/Pomelo/languages`,
-and kept up to date there. The others you install yourself (for example
-`gem install solargraph`).
+basedpyright, pyright and the Tailwind server are downloaded when they are
+missing (with your `node` and `npm`) into
+`~/Library/Application Support/Pomelo/languages`, and kept up to date there.
+The others you install yourself (for example `gem install solargraph`). When
+a project's `Gemfile` lists a server (such as `ruby-lsp`), the version locked
+in its `Gemfile.lock` is the one that runs.
 
 The **bolt** button in the status bar lists the servers of the open folder,
-each with a dot: green running, amber starting (or downloading), grey
+grouped under the folder each one runs in, each with a dot: green running, amber starting (or downloading), grey
 stopped, red failed. A server's menu has **View Message** (when it has one),
 **Restart Server**, **Stop Server**, and a line with its version and memory;
 hover that line for the program that runs it. **Restart All Servers** and
 **Stop All Servers** are at the bottom. Next to the diagnostics counts, one
 line says what the servers are doing: indexing progress, a download, an
 update check, or a failure (click it to see the error).
+
+Messages a server sends you show as a notification with the server's name,
+an icon for how serious it is and a copy button; when the server asks a
+question, each answer is a button, and closing the notification answers
+none. When solargraph says the workspace is too large to index, the
+notification offers **Use ruby-lsp**, which makes ruby-lsp the Ruby server
+(it writes the `languages` setting below) and restarts it.
 
 **Settings > Languages & Tools** turns servers on or off, for all languages
 or one (**Languages**, then **Configure**). **Language Servers** is a list in
@@ -261,6 +293,14 @@ Inside the window, notices appear for things that need a look:
   Claude Code is not installed).
 - **N services still run the old config** - after a config change;
   **Restart** restarts them.
+- **Invalid settings.json** - a hand edit of `settings.json` does not parse;
+  the settings stay as they were, and **Open settings.json** jumps to the
+  line. It goes away once the file parses again.
+- **A language server's message** - see
+  [Language servers](#language-servers).
+
+Language server notices wait their turn: the next one shows when you close
+the current notice.
 
 ## Command palette
 
@@ -322,4 +362,7 @@ Layout**. While an update downloads, the title bar shows its progress; see
 | **Integrations** | Jira (site, email, API token, test connection) and **Keep Main Fresh**. |
 | **Project** | Repositories, config files and config bundles. See [Project config](./project-config). |
 
-Settings are saved to `~/.config/pomelo/settings.json`.
+Settings are saved to `~/.config/pomelo/settings.json`. **Edit in
+settings.json** opens it in a tab in the window. Edits you make to the file
+yourself apply while the app runs, within a second of saving. Keys the app
+does not know, such as ones a newer version added, are kept when it saves.
