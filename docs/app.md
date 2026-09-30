@@ -234,7 +234,7 @@ Layout**. While an update downloads, the title bar shows its progress; see
 | --- | --- |
 | **General** | Start at Login; the version, with **Check Now**, **Restart to Update** or **Try Again**. |
 | **Appearance** | Theme (built-in or [your own](./themes), static or following macOS light and dark; `cmd-k cmd-t` cycles) the UI font, and **Hide Mouse** (the pointer hides while you type or use the keyboard, until the mouse moves). |
-| **Window & Layout** | Status bar and title bar items, dock sides, agent and terminal buttons. Each window reopens where you left it (position, size, maximized or full screen). |
+| **Window & Layout** | Which status bar buttons show (Files, Services, Git, Database, Terminal, Agent) and its other items, and the title bar items. A button's right-click menu moves its panel to another side. Each window reopens where you left it (position, size, maximized or full screen). |
 | **Editor** | The buffer font (family, size, weight, line height, [features and fallbacks](./themes#fonts)), soft wrap, diff view, external editor. |
 | **Terminal** | The terminal font (family, size, weight, line height, features, fallbacks), shell, scrollback. |
 | **Keymap** | Every window action and its binding; opens `keymap.json`. |
