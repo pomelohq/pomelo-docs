@@ -140,12 +140,18 @@ one you click; **View logs** keeps it open). The tab has:
   (**Change** moves it to a new free port), its **Mode** and **Env
   profile** (pickers when there is a choice), its **Env file** (**Open**
   opens it) and its **Command** (with copy).
-- **Logs**, live while it runs: **Filter lines** (`cmd-f`) highlights and
-  keeps the matching lines, **Pause** holds the view (**Resume (12 new)**
-  shows what arrived meanwhile), **Clear** empties it, **Follow** keeps the
-  newest line in view and **Wrap** wraps long lines. Lines that arrive while
-  the tab is open get their time; errors are red and warnings yellow. With
-  the filter not focused, `cmd-c` copies the last line.
+- **The console**, while it runs: the tab is the service's live terminal.
+  Click in it and type, and the keys, paste and the mouse go to the
+  process, so prompts, REPLs and interactive CLIs work as in a terminal.
+- **Logs**: typing in **Filter lines** (`cmd-f`) switches to the log list,
+  which highlights and keeps the matching lines; clear the filter to get the
+  console back. A stopped or crashed service shows the log list. **Pause**
+  holds the view (**Resume (12 new)** shows what arrived meanwhile),
+  **Clear** empties it, **Follow** keeps the newest line in view and
+  **Wrap** wraps long lines. Unwrapped, the time column stays put and long
+  lines scroll sideways with the trackpad or shift and the wheel. Lines that
+  arrive while the tab is open get their time; errors are red and warnings
+  yellow. With the filter not focused, `cmd-c` copies the last line.
 
 A crashed service's tab shows the output it left. A shared service's tab
 follows its Docker logs. Closing a service's tab never stops the service.

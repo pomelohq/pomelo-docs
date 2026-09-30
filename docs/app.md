@@ -91,9 +91,14 @@ file (`cmd-p`), project search (`cmd-shift-f`), an outline, Markdown
 preview and diffs. Split with `cmd-\` and drag tabs between panes. See
 [Keyboard shortcuts](./shortcuts).
 
+Large files open without a wait: files of millions of lines (a big CSV or
+log) load in the background on every core, then scroll and take typing as
+smoothly as a small one.
+
 The **main** workspace is the prepared source new workspaces copy from, so
-its files are **read-only**: saving there says "main is read-only: make
-changes in a branch workspace". The project config (`pom.yml`)
+its files are **read-only**: their tabs show a lock in place of the file
+icon, and saving there says "main is read-only: make changes in a branch
+workspace". The project config (`pom.yml`)
 stays editable from main; every save of it is
 [checked first](./project-config#checked-saves).
 
@@ -200,9 +205,11 @@ read the repositories' pull requests. After a push, the Git panel offers
 ## The app menu
 
 The chevron at the far right of the title bar opens the app menu: the
-Claude account signed in on this Mac, **Updating to v...** while a new
-version downloads, **Settings**, **Keymap**, **Next Theme**, **Agent Usage**
-and **Panel Layout**.
+Claude account signed in on this Mac, **Check for Updates...** (or
+**Restart to Update 0.7.4** once one is ready), **Release Notes**,
+**Settings**, **Keymap**, **Next Theme**, **Agent Usage** and **Panel
+Layout**. While an update downloads, the title bar shows its progress; see
+[Install > Updates](./install#updates).
 
 ## Settings
 
@@ -210,7 +217,7 @@ and **Panel Layout**.
 
 | Page | What's there |
 | --- | --- |
-| **General** | Start at Login; version and updates. |
+| **General** | Start at Login; the version, with **Check Now**, **Restart to Update** or **Try Again**. |
 | **Appearance** | Theme (One Dark, One Light, Ayu Mirage, Gruvbox Dark; `cmd-k cmd-t` cycles) and UI font. |
 | **Window & Layout** | Status bar and title bar items, window size, dock sides, agent and terminal buttons. |
 | **Editor** | Font size, soft wrap, diff view, external editor. |

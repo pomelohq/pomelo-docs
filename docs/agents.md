@@ -150,6 +150,7 @@ Only Claude Code sessions are counted for now.
 ## The app menu
 
 The chevron at the far right of the title bar opens the app menu: the
-signed-in account (click it for Agent Usage), **Updating to v...** while a
-new version downloads, **Settings**, **Keymap**, **Next Theme**, **Agent
-Usage** and **Panel Layout** (the agent dock on the right or the left).
+signed-in account (click it for Agent Usage), **Check for Updates...** (or
+**Restart to Update** once one is ready), **Release Notes**, **Settings**,
+**Keymap**, **Next Theme**, **Agent Usage** and **Panel Layout** (the agent
+dock on the right or the left).

@@ -119,7 +119,7 @@ them.
 
 ## How do I update the app?
 
-It updates itself. With **Settings > General > Check for Updates
-Automatically** on, Pomelo installs a newer release on launch and
-relaunches; **Check for Updates** checks right away. See
-[Install > Updates](./install#updates).
+It updates itself. A newer release downloads in the background and waits:
+the title bar shows **Restart to Update** when it is ready, and quitting
+installs it too. **Check for Updates** in the app menu checks right away.
+See [Install > Updates](./install#updates).
