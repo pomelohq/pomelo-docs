@@ -79,9 +79,18 @@ listens on that port + 1 and the proxy on + 2.
 
 The **Dev Requests** tab (**Open Requests** in Settings, or `Dev Requests` in
 the command palette) lists every request the proxy handled and every webhook
-the relay fanned out, newest first. Filter by kind or to errors only, and click
-a row for its details: the profile and target of a proxied request, or which
-workspaces a webhook reached and what each answered.
+the relay fanned out, newest first. Filter by kind, to errors only, or by path
+or service. Select a row to see it beside the list:
+
+- **Request** - the headers and body that came in (JSON is indented, keys in
+  the order they were sent; **Copy** puts the body on the clipboard).
+- **Fan-out** (webhooks) - each workspace it was handed to, with the status it
+  answered and how long it took, or why it could not be reached.
+- **Response** - the headers and body sent back.
+
+Bodies are kept in memory for the session only: the first 256 KB of each, and
+64 MB for the whole log (the oldest are dropped first). Authorization, cookie
+and token headers stay hidden until you click **Show Hidden**.
 
 <figure class="diagram">
 <svg viewBox="0 0 760 350" role="img" aria-label="Same-origin dev-proxy: the browser loads one origin; the dev-proxy routes / to the frontend and /_pom_dev/api/server to the backend." xmlns="http://www.w3.org/2000/svg">
