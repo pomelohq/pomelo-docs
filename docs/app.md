@@ -202,6 +202,21 @@ tab, for example with the value of `gh auth token`. The token only needs to
 read the repositories' pull requests. After a push, the Git panel offers
 **Create Pull Request**, which opens GitHub's page.
 
+## The menu bar
+
+Pomelo's menus in the macOS menu bar hold every window command, with the
+key bound to it right now (your `keymap.json` included):
+
+| Menu | What's there |
+| --- | --- |
+| **Pomelo** | About, **Check for Updates...**, **Release Notes**, **Settings...**, **Keymap**, Hide, Quit. |
+| **File** | **New Workspace**, **New Project...**, **Open Project...**, **Save**, **Close Tab**, **Close All Tabs**, **Close Window**. |
+| **Edit** | Undo, Redo, Cut, Copy, Paste, Select All, **Find**, **Find in Project**; they act on whatever has focus, the editor, a terminal or a text field. |
+| **View** | The docks, **Files**, **Git**, **Services**, **Database**, **Pull Requests**, **Agent**, **Terminal**, **Split Right**, **Markdown Preview**, **Next Theme**. |
+| **Go** | **Command Palette...**, **Go to File...**, **Go to Line...**, **Back**, **Forward**, **Previous Tab**, **Next Tab**, **Switch Workspace...**. |
+| **Window** | Minimize, Zoom, Bring All to Front and the open windows. |
+| **Help** | The docs, **Keyboard Shortcuts**, **Release Notes**, **Report an Issue...**. |
+
 ## The app menu
 
 The chevron at the far right of the title bar opens the app menu: the

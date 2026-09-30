@@ -6,36 +6,39 @@ the same keys are written `cmd-shift-p` and `cmd-k cmd-s` (hover a key here
 to see how). The same list, with what each key is bound to right now, is in
 **Settings > Keymap**.
 
+Pomelo runs on macOS today. Windows and Linux are coming soon; their column
+shows the keys they will use, with `ctrl` in place of `cmd`.
+
 ## Window
 
-| Keys | Action |
-| --- | --- |
-| <Keys k="cmd-shift-p"/> | Command Palette |
-| <Keys k="cmd-p"/> | Go to File |
-| <Keys k="cmd-shift-f"/> | Find in Project |
-| <Keys k="cmd-,"/> | Open Settings |
-| <Keys k="cmd-k cmd-s"/> | Open Keymap (Settings > Keymap) |
-| <Keys k="cmd-o"/> | Open Project |
-| <Keys k="cmd-shift-n"/> | New Project |
-| <Keys k="cmd-n"/> | New Workspace |
-| <Keys k="ctrl-shift-w"/> | Switch Workspace |
-| <Keys k="cmd-k cmd-t"/> | Next Theme |
-| <Keys k="cmd-b"/> | Toggle Left Dock |
-| <Keys k="cmd-r"/> | Toggle Right Dock |
-| <Keys k="cmd-j"/> | Toggle Bottom Dock |
-| <Keys k="cmd-shift-e"/> | Files |
-| <Keys k="ctrl-shift-g"/> | Git |
-| <Keys k="ctrl-shift-s"/> | Services |
-| <Keys k="ctrl-shift-d"/> | Database |
-| <Keys k="ctrl-shift-p"/> | Pull Requests (the Git panel's pull requests) |
-| <Keys k="cmd-?"/> | Agent |
-| <Keys k="cmd-shift-u"/> | Agent Usage |
-| <Keys k="ctrl-&#96;"/> | Terminal |
-| <Keys k="cmd-t"/> | New Terminal |
-| <Keys k="cmd-w"/> | Close Tab |
-| <Keys k="cmd-alt-w"/> | Close All Tabs |
-| <Keys k="cmd-shift-v"/> | Markdown Preview |
-| <Keys k="cmd-k v"/> | Markdown Preview to the Side |
+| Action | macOS | Windows / Linux (coming soon) |
+| --- | --- | --- |
+| Command Palette | <Keys k="cmd-shift-p"/> | <Keys pc k="ctrl-shift-p"/> |
+| Go to File | <Keys k="cmd-p"/> | <Keys pc k="ctrl-p"/> |
+| Find in Project | <Keys k="cmd-shift-f"/> | <Keys pc k="ctrl-shift-f"/> |
+| Open Settings | <Keys k="cmd-,"/> | <Keys pc k="ctrl-,"/> |
+| Open Keymap (Settings > Keymap) | <Keys k="cmd-k cmd-s"/> | <Keys pc k="ctrl-k ctrl-s"/> |
+| Open Project | <Keys k="cmd-o"/> | <Keys pc k="ctrl-o"/> |
+| New Project | <Keys k="cmd-shift-n"/> | <Keys pc k="ctrl-shift-n"/> |
+| New Workspace | <Keys k="cmd-n"/> | <Keys pc k="ctrl-n"/> |
+| Switch Workspace | <Keys k="cmd-alt-o"/> | <Keys pc k="ctrl-alt-o"/> |
+| Next Theme | <Keys k="cmd-k cmd-t"/> | <Keys pc k="ctrl-k ctrl-t"/> |
+| Toggle Left Dock | <Keys k="cmd-b"/> | <Keys pc k="ctrl-b"/> |
+| Toggle Right Dock | <Keys k="cmd-r"/> | <Keys pc k="ctrl-r"/> |
+| Toggle Bottom Dock | <Keys k="cmd-j"/> | <Keys pc k="ctrl-j"/> |
+| Files | <Keys k="cmd-shift-e"/> | <Keys pc k="ctrl-shift-e"/> |
+| Git | <Keys k="cmd-shift-c"/> | <Keys pc k="ctrl-shift-c"/> |
+| Services | <Keys k="cmd-shift-s"/> | <Keys pc k="ctrl-shift-s"/> |
+| Database | <Keys k="cmd-shift-d"/> | <Keys pc k="ctrl-shift-d"/> |
+| Pull Requests (the Git panel's pull requests) | <Keys k="cmd-shift-r"/> | <Keys pc k="ctrl-shift-r"/> |
+| Agent | <Keys k="cmd-?"/> | <Keys pc k="ctrl-?"/> |
+| Agent Usage | <Keys k="cmd-shift-u"/> | <Keys pc k="ctrl-shift-u"/> |
+| Terminal | <Keys k="ctrl-&#96;"/> | <Keys pc k="ctrl-&#96;"/> |
+| New Terminal | <Keys k="cmd-t"/> | <Keys pc k="ctrl-t"/> |
+| Close Tab | <Keys k="cmd-w"/> | <Keys pc k="ctrl-w"/> |
+| Close All Tabs | <Keys k="cmd-alt-w"/> | <Keys pc k="ctrl-alt-w"/> |
+| Markdown Preview | <Keys k="cmd-shift-v"/> | <Keys pc k="ctrl-shift-v"/> |
+| Markdown Preview to the Side | <Keys k="cmd-k v"/> | <Keys pc k="ctrl-k v"/> |
 
 These have no default key; run them from the command palette or bind them
 yourself: **Open in External Editor**, **Open Project Config**, **Set Up
@@ -44,18 +47,18 @@ Project with AI**, **Add Repository**, **Clone Missing Repos into Main**,
 
 ## Tabs and splits
 
-| Keys | Action |
-| --- | --- |
-| <Keys k="cmd-\"/> | Split the editor to the right |
-| <Keys k="cmd-k"/> then an arrow | Split the editor in that direction |
-| <Keys k="cmd-k"/> then <Keys k="cmd-left"/> (any arrow) | Move focus to the pane in that direction |
-| <Keys k="cmd-k"/> then <Keys k="shift-left"/> (any arrow) | Swap with the pane in that direction |
-| <Keys k="cmd-k shift-enter"/> | Pin or unpin the tab |
-| <Keys k="shift-escape"/> | Zoom the pane |
-| <Keys k="cmd-alt-left"/> / <Keys k="cmd-alt-right"/> | Previous / next tab |
-| <Keys k="cmd-shift-["/> / <Keys k="cmd-shift-]"/> | Previous / next tab |
-| <Keys k="ctrl-1"/> to <Keys k="ctrl-9"/> | Go to tab 1 to 9 |
-| <Keys k="ctrl-0"/> | Go to the last tab |
+| Action | macOS | Windows / Linux (coming soon) |
+| --- | --- | --- |
+| Split the editor to the right | <Keys k="cmd-\"/> | <Keys pc k="ctrl-\"/> |
+| Split the editor in that direction | <Keys k="cmd-k"/> then an arrow | <Keys pc k="ctrl-k"/> then an arrow |
+| Move focus to the pane in that direction | <Keys k="cmd-k"/> then <Keys k="cmd-left"/> | <Keys pc k="ctrl-k"/> then <Keys pc k="ctrl-left"/> |
+| Swap with the pane in that direction | <Keys k="cmd-k"/> then <Keys k="shift-left"/> | <Keys pc k="ctrl-k"/> then <Keys pc k="shift-left"/> |
+| Pin or unpin the tab | <Keys k="cmd-k shift-enter"/> | <Keys pc k="ctrl-k shift-enter"/> |
+| Zoom the pane | <Keys k="shift-escape"/> | <Keys pc k="shift-escape"/> |
+| Previous / next tab | <Keys k="cmd-alt-left"/> / <Keys k="cmd-alt-right"/> | <Keys pc k="ctrl-pageup"/> / <Keys pc k="ctrl-pagedown"/> |
+| Previous / next tab | <Keys k="cmd-shift-["/> / <Keys k="cmd-shift-]"/> | <Keys pc k="ctrl-shift-["/> / <Keys pc k="ctrl-shift-]"/> |
+| Go to tab 1 to 9 | <Keys k="cmd-1"/> to <Keys k="cmd-9"/> | <Keys pc k="ctrl-1"/> to <Keys pc k="ctrl-9"/> |
+| Go to the last tab | <Keys k="cmd-0"/> | <Keys pc k="ctrl-0"/> |
 
 In a terminal, `cmd-d` or `ctrl-alt`-arrow splits the terminal pane.
 
@@ -123,13 +126,21 @@ defaults, so they win, and `null` unbinds a key:
     "context": "Workspace",
     "bindings": {
       "cmd-shift-g": "git_panel::ToggleFocus",
+      "secondary-shift-t": "workspace::NewTerminal",
+      "cmd-alt-1": ["pane::ActivateItem", 0],
       "cmd-r": null
     }
   }
 ]
 ```
 
+`secondary` is Command on macOS and Control on Windows and Linux, so one
+file works on every platform. Going to a tab takes its position from 0:
+`["pane::ActivateItem", 0]` is the first tab.
+
 Each action's name (such as `git_panel::ToggleFocus`) is listed under its
 label in **Settings > Keymap**, which also shows any mistakes found in the
-file. Only the `Workspace` context is read; editor and terminal keys are
-fixed.
+file. Only the `Workspace` context is read; editor and terminal keys, and
+the split and pane keys in the tables above, are fixed. The
+[menu bar](./app#the-menu-bar) shows the keys currently bound, including
+yours.
