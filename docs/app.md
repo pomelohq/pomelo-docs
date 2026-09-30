@@ -240,7 +240,7 @@ Layout**. While an update downloads, the title bar shows its progress; see
 | **Keymap** | Every window action and its binding; opens `keymap.json`. |
 | **Agent** | Agent command; Claude Code MCP server and activity hooks, with **Reinstall**. |
 | **Notifications** | Banners and a sound per agent event. |
-| **Dev Services** | Turn the [dev-proxy and webhook relay](./network) on or off, set their ports, see their status and **Restart** them. **Open Requests** opens the Dev Requests tab. |
+| **Dev Services** | Turn the [dev-proxy and webhook relay](./network) on or off, set their ports, see their status and **Restart** them. **Open Requests** opens the Dev Requests tab. The [shared node_modules store](./workspace#shared-node-modules): on or off, the fallback where cloning is impossible, size limit, and **Open Store**. |
 | **Integrations** | Jira (site, email, API token, test connection) and **Keep Main Fresh**. |
 | **Project** | Repositories, config files and config bundles. See [Project config](./project-config). |
 
