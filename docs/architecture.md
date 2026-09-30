@@ -104,8 +104,9 @@ to be installed:
   agent's state. The app installs the hooks in `~/.claude/settings.json`.
 
 Only the dev-proxy (`127.0.0.1:8767`) and the webhook relay
-(`127.0.0.1:8766`) listen on a port. Set `POM_WEB_PORT` to move them: the
-relay takes that port + 1 and the proxy + 2.
+(`127.0.0.1:8766`) listen on a port. Settings > Dev Services moves or turns
+them off; `POM_WEB_PORT` overrides both: the relay takes that port + 1 and the
+proxy + 2.
 
 ## Where things live
 
