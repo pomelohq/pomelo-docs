@@ -89,9 +89,21 @@ what to do where cloning is not possible (**Hard Links**, **Copy** or **Run
 Install**), and sets a **Size Limit** (20 GB) and **Remove Unused After** (14
 days); copies over the limit or unused that long are removed after each new
 workspace. **Open Store** (or `node_modules Store` in the command palette)
-lists every copy with its size, when it was last used and the workspaces that
-took it, with **Delete**, **Prune** and **Clear All**. Removing a copy never
-breaks a workspace: each keeps its own. From a terminal:
+shows each repo of the open project by lockfile version:
+
+- **Current on main** - the copy for main's lockfile, with the workspaces using
+  it. Marked **New workspaces** when new workspaces get it instantly, or
+  **Installs once** when there is no copy yet.
+- **Changed on a branch** - a branch that changed the lockfile has its own copy.
+- **Has its own copy** - a workspace that installed on its own although a copy
+  matches. **Use Shared Copy** swaps its `node_modules` for the shared one and
+  frees its size (stop its services first).
+- **Save to Store** - keeps an install that has no copy yet (main's first) as
+  the shared one.
+- **Old versions** - copies no workspace's lockfile matches any more, with
+  **Free**. **Free ... Unused** at the top removes all of them.
+
+Removing a copy never breaks a workspace: each keeps its own. From a terminal:
 
 ```sh
 pom modules          # list the copies
