@@ -33,6 +33,24 @@ const current = computed(() => requests[selected.value])
 const failed = computed(() => (current.value.fanout || []).filter(([, status]) => !status || status >= 400).length)
 const statusClass = s => s >= 500 ? 'err' : s >= 400 ? 'warn' : 'ok'
 const pick = i => { selected.value = i; tab.value = 'request'; reveal.value = false }
+// The same captures the app colors JSON with; anything else stays plain.
+const isJson = text => { try { JSON.parse(text); return true } catch { return false } }
+function runs(line) {
+  const out = []
+  const re = /(\s+)|("(?:[^"\\]|\\.)*")(\s*:)?|([{}\[\]])|([,:])|(true|false)|(null)|(-?\d[\d.eE+-]*)|([^\s,:"{}\[\]]+)/g
+  let m
+  while ((m = re.exec(line))) {
+    if (m[1]) out.push(['', m[1]])
+    else if (m[2]) { out.push([m[3] ? 'property' : 'string', m[2]]); if (m[3]) { const colon = m[3]; out.push(['', colon.slice(0, -1)], ['punctuation-delimiter', ':']) } }
+    else if (m[4]) out.push(['punctuation-bracket', m[4]])
+    else if (m[5]) out.push(['punctuation-delimiter', m[5]])
+    else if (m[6]) out.push(['boolean', m[6]])
+    else if (m[7]) out.push(['constant', m[7]])
+    else if (m[8]) out.push(['number', m[8]])
+    else out.push(['', m[9]])
+  }
+  return out
+}
 const bytes = text => text ? `${new TextEncoder().encode(text).length} B` : ''
 </script>
 
@@ -93,7 +111,8 @@ const bytes = text => text ? `${new TextEncoder().encode(text).length} B` : ''
           <template v-if="current.body">
             <div class="row pa-dr-sec"><span class="pa-dr-label">BODY</span><span class="muted pa-dr-meta">JSON - {{ bytes(current.body) }}</span>
               <span class="grow" /><span class="pa-dr-link">Copy</span></div>
-            <pre class="mono pa-dr-code">{{ current.body }}</pre>
+            <pre class="mono pa-dr-code"><template v-for="(line, i) in current.body.split('\n')" :key="i"><span v-for="(run, j) in runs(line)" :key="j"
+              :style="run[0] ? { color: `var(--pa-syntax-${run[0]})` } : undefined">{{ run[1] }}</span>{{ '\n' }}</template></pre>
           </template>
           <div v-else class="muted pa-dr-note">No body.</div>
         </template>
@@ -105,7 +124,9 @@ const bytes = text => text ? `${new TextEncoder().encode(text).length} B` : ''
           </div>
         </div>
         <template v-else>
-          <pre v-if="current.response" class="mono pa-dr-code">{{ current.response }}</pre>
+          <pre v-if="current.response && isJson(current.response)" class="mono pa-dr-code"><template v-for="(line, i) in current.response.split('\n')" :key="i"><span v-for="(run, j) in runs(line)" :key="j"
+            :style="run[0] ? { color: `var(--pa-syntax-${run[0]})` } : undefined">{{ run[1] }}</span>{{ '\n' }}</template></pre>
+          <pre v-else-if="current.response" class="mono pa-dr-code">{{ current.response }}</pre>
           <div v-else class="muted pa-dr-note">Not captured (binary asset).</div>
         </template>
         <div class="muted pa-dr-note">Kept in memory for this session only.</div>
