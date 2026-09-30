@@ -52,10 +52,12 @@ run each repo's migrations, then seed.
 - **Databases** - `seed_from_main: true` on a repo clones its databases
   from main's counterparts (`CREATE DATABASE ... TEMPLATE`) in seconds, with
   main's sample data, rather than creating them empty and re-seeding.
-- **node_modules** - a fresh worktree gets `node_modules` copied
-  copy-on-write from a store keyed by the hash of `yarn.lock` or
-  `package-lock.json` (or from main when the lockfile matches), so the
-  install is a near-no-op. Repos with `pnpm-lock.yaml` are skipped.
+- **node_modules** - a fresh worktree takes `node_modules` from a shared
+  store instead of installing, when a stored copy has the same lockfile
+  (`package-lock.json`, `yarn.lock`, `bun.lock`), `patches/` folder, package
+  manager, Node major version and platform. The first workspace fills the
+  store from main (when main's lockfile matches) or after its own install, so
+  the next install is a near-no-op. See [Shared node_modules](#shared-node-modules).
 
 **Keep Main Fresh** (Settings > Integrations > Main Workspace) pulls every
 repo of main from origin and migrates the ones that moved on a schedule
@@ -63,6 +65,57 @@ repo of main from origin and migrates the ones that moved on a schedule
 **Update Main from Origin** in main's menu runs it now.
 
 See [Databases > Seed from main](./databases#seed-from-main).
+
+## Shared node_modules
+
+How a stored copy reaches a workspace depends on the drive:
+
+| Drive | Method | Extra disk |
+| --- | --- | --- |
+| APFS (macOS), Btrfs, XFS | Copy-on-write clone | About none until a file changes |
+| ext4 and others | Hard links (default) | About none |
+| Store on another drive than the project | Copy, or a normal install | The full size |
+
+With hard links a workspace's package files are the store's files under a
+second name, so they are made **read-only**: a tool that edits one in place
+(hand edits, a patch that is not in the stored copy) fails instead of changing
+it for every workspace. Reinstalling and upgrading packages work as usual.
+
+pnpm and Yarn's hard-link and Plug'n'Play modes share packages themselves and
+are left alone.
+
+**Settings > Dev Services > Shared node_modules** turns the store off, picks
+what to do where cloning is not possible (**Hard Links**, **Copy** or **Run
+Install**), and sets a **Size Limit** (20 GB) and **Remove Unused After** (14
+days); copies over the limit or unused that long are removed after each new
+workspace. **Open Store** (or `node_modules Store` in the command palette)
+shows each repo of the open project by lockfile version:
+
+- **Current on main** - the copy for main's lockfile, with the workspaces using
+  it. Marked **New workspaces** when new workspaces get it instantly, or
+  **Installs once** when there is no copy yet.
+- **Changed on a branch** - a branch that changed the lockfile has its own copy.
+- **Has its own copy** - a workspace that installed on its own although a copy
+  matches. **Use Shared Copy** swaps its `node_modules` for the shared one and
+  frees its size (stop its services first).
+- **Save to Store** - keeps an install that has no copy yet (main's first) as
+  the shared one.
+- **Old versions** - copies no workspace's lockfile matches any more, with
+  **Free**. **Free ... Unused** at the top removes all of them.
+
+**Optimize** does all of it in one go: it keeps an install for each lockfile
+with no copy yet, moves every workspace that has its own copy onto the shared
+one (its services are stopped and started again around the swap), then frees
+the unused copies. It shows the plan and how much it frees at most before it
+starts.
+
+Removing a copy never breaks a workspace: each keeps its own. From a terminal:
+
+```sh
+pom modules          # list the copies
+pom modules prune    # apply the size limit and unused-days rule now
+pom modules clear    # remove every copy
+```
 
 ## Switch
 

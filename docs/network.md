@@ -69,9 +69,28 @@ no `/etc/hosts` edits.
 In the hostname, `<repo>` is the repo's alias or name, and `<branch>` is the
 branch lowercased with anything outside `a-z`, `0-9` and `-` turned into `-`
 (`feat/login` becomes `feat-login`), or just its leading ticket key (such as
-`proj-101`) when no other workspace shares it. Both ports can be moved with
-`POM_WEB_PORT`: the relay listens on that port + 1 and the proxy on + 2.
-Settings > Network shows their status and the recent proxied requests.
+`proj-101`) when no other workspace shares it.
+
+**Settings > Dev Services** turns the proxy and the relay on or off and sets
+their ports (8767 and 8766 by default). Service URLs in env files use the
+proxy port too, so restart running services after changing it. `POM_WEB_PORT`
+overrides both, so a second copy of the app can run beside the first: the relay
+listens on that port + 1 and the proxy on + 2.
+
+The **Dev Requests** tab (**Open Requests** in Settings, or `Dev Requests` in
+the command palette) lists every request the proxy handled and every webhook
+the relay fanned out, newest first. Filter by kind, to errors only, or by path
+or service. Select a row to see it beside the list:
+
+- **Request** - the headers and body that came in (JSON is indented, keys in
+  the order they were sent; **Copy** puts the body on the clipboard).
+- **Fan-out** (webhooks) - each workspace it was handed to, with the status it
+  answered and how long it took, or why it could not be reached.
+- **Response** - the headers and body sent back.
+
+Bodies are kept in memory for the session only: the first 256 KB of each, and
+64 MB for the whole log (the oldest are dropped first). Authorization, cookie
+and token headers stay hidden until you click **Show Hidden**.
 
 <figure class="diagram">
 <svg viewBox="0 0 760 350" role="img" aria-label="Same-origin dev-proxy: the browser loads one origin; the dev-proxy routes / to the frontend and /_pom_dev/api/server to the backend." xmlns="http://www.w3.org/2000/svg">
@@ -255,7 +274,9 @@ It **ACKs `200` immediately** (`{"ok":true,"service":"api/server","fanout":N}`),
 then forwards the event in the background to **every** workspace whose service
 is currently listening. Each has its own database, so they process
 independently, and one slow or stopped branch never makes the provider retry.
-Stopped workspaces are skipped; a body over 32 MB is forwarded empty.
+Stopped workspaces are skipped; a body over 32 MB is forwarded empty. The
+Dev Requests tab shows each delivery, so a branch that answered with an error
+or refused the connection stands out.
 
 To use it, expose **one** public URL that forwards to `http://127.0.0.1:8766`,
 then let the provider call `/<repo>/<service>/<their-path>`:

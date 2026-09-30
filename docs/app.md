@@ -233,14 +233,14 @@ Layout**. While an update downloads, the title bar shows its progress; see
 | Page | What's there |
 | --- | --- |
 | **General** | Start at Login; the version, with **Check Now**, **Restart to Update** or **Try Again**. |
-| **Appearance** | Theme (built-in or [your own](./themes), static or following macOS light and dark; `cmd-k cmd-t` cycles) and the UI font. |
-| **Window & Layout** | Status bar and title bar items, window size, dock sides, agent and terminal buttons. |
+| **Appearance** | Theme (built-in or [your own](./themes), static or following macOS light and dark; `cmd-k cmd-t` cycles) the UI font, and **Hide Mouse** (the pointer hides while you type or use the keyboard, until the mouse moves). |
+| **Window & Layout** | Status bar and title bar items, dock sides, agent and terminal buttons. Each window reopens where you left it (position, size, maximized or full screen). |
 | **Editor** | The buffer font (family, size, weight, line height, [features and fallbacks](./themes#fonts)), soft wrap, diff view, external editor. |
 | **Terminal** | The terminal font (family, size, weight, line height, features, fallbacks), shell, scrollback. |
 | **Keymap** | Every window action and its binding; opens `keymap.json`. |
 | **Agent** | Agent command; Claude Code MCP server and activity hooks, with **Reinstall**. |
 | **Notifications** | Banners and a sound per agent event. |
-| **Network** | Dev-proxy and webhook relay status and ports, recent proxied requests. |
+| **Dev Services** | Turn the [dev-proxy and webhook relay](./network) on or off, set their ports, see their status and **Restart** them. **Open Requests** opens the Dev Requests tab. The [shared node_modules store](./workspace#shared-node-modules): on or off, the fallback where cloning is impossible, size limit, and **Open Store**. |
 | **Integrations** | Jira (site, email, API token, test connection) and **Keep Main Fresh**. |
 | **Project** | Repositories, config files and config bundles. See [Project config](./project-config). |
 
