@@ -16,8 +16,10 @@ With Claude Code it resumes the workspace's own conversation, gets the MCP
 tools and Pomelo's system prompt, so mid-task it can check ports, databases
 and services and act on the real stack. The agent runs in its own holder:
 closing its tab or quitting the app leaves it running, and the tab
-reattaches. Pomelo never stores AI credentials; you log in to the CLI
-yourself.
+reattaches. To end it, right-click its tab and choose **Stop Agent**; or set
+**Settings > Agent > Closing an Agent Tab** to **Stop the Agent** so closing
+the tab ends it too. Pomelo never stores AI credentials; you log in to the
+CLI yourself.
 
 ## Side agents
 
