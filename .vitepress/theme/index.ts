@@ -8,6 +8,8 @@ import ServicesPanel from './app/ServicesPanel.vue'
 import ServiceTab from './app/ServiceTab.vue'
 import DatabasePanel from './app/DatabasePanel.vue'
 import TableView from './app/TableView.vue'
+import KeyspaceView from './app/KeyspaceView.vue'
+import BucketView from './app/BucketView.vue'
 import AgentPopover from './app/AgentPopover.vue'
 import SideAgentBar from './app/SideAgentBar.vue'
 import UsageCard from './app/UsageCard.vue'
@@ -34,6 +36,6 @@ export default {
     app.component('PomHome', PomHome)
     app.component('Shot', Shot)
     app.component('Keys', Keys)
-    for (const [name, component] of Object.entries({ AppShot, HeroWindow, ServicesPanel, ServiceTab, DatabasePanel, TableView, AgentPopover, SideAgentBar, UsageCard, UsageChart, WorkspacesList, WorkspaceCreate, Onboarding, GitPanel, DiffView, ContextMenu, TerminalView, TabBar, CodeView, DevRequests, ModuleStore, CreateWorkspaceForm })) app.component(name, component)
+    for (const [name, component] of Object.entries({ AppShot, HeroWindow, ServicesPanel, ServiceTab, DatabasePanel, TableView, KeyspaceView, BucketView, AgentPopover, SideAgentBar, UsageCard, UsageChart, WorkspacesList, WorkspaceCreate, Onboarding, GitPanel, DiffView, ContextMenu, TerminalView, TabBar, CodeView, DevRequests, ModuleStore, CreateWorkspaceForm })) app.component(name, component)
   },
 }

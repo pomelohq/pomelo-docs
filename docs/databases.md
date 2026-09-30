@@ -186,20 +186,62 @@ table's tab.
 
 Double-click a cell (or press `enter`) to change it; a long or JSON value is
 edited in the Details side instead, where **Set NULL** and **Revert** are
-too. Changes are not saved right away: they turn yellow and a bar counts
+too. JSON opens there indented and colored, with line numbers, and goes back
+on one line when you keep it (`cmd-enter`), so only what you changed shows. Changes are not saved right away: they turn yellow and a bar counts
 them, naming the database they go into.
 
-- **Review SQL** lists the `UPDATE` statements.
+- **Review SQL** opens the `UPDATE` statements in an editor tab, one per
+  paragraph, to read before they run.
 - **Discard** drops them.
 - **Apply** (`cmd-s`) runs them all in one transaction, each row found by its
   primary key: if one fails, none is saved.
 
-<AppShot :width="1080" :height="440" text="Two staged changes, with Review SQL open. Try Discard or Apply, or double-click another cell."><TableView :edited="true" :review="true" :cell="[3, 4]" /></AppShot>
+<AppShot :width="1080" :height="440" text="Two staged changes. Try Discard or Apply, or double-click another cell."><TableView :edited="true" :cell="[3, 4]" /></AppShot>
 
 Primary key columns, views and tables without a primary key are read-only,
 and the side says why. **Open in tab** opens a value in the editor (JSON
 indented, keys in their order); saving that tab stages the change here, and
 text that is no longer valid JSON is refused.
+
+### Redis keys
+
+Click a keyspace (`session:*`) to open its keys in a tab. **MATCH** is the
+pattern they are scanned with; change it and press `enter`. The keys are
+grouped by their next part (`bull:mail:`, `bull:sms:`), each with its type
+and how long it has left.
+
+The selected key's value shows the way its type holds it:
+
+- **string** - the text, or a JSON tree when it is JSON.
+- **hash** - its fields and values.
+- **list** - each item with its index.
+- **zset** - each member with its score.
+- **set** - its members.
+
+A long value shows its first 1000 items. **TTL** changes when the key
+expires (a number of seconds, or empty for never); **Delete key** and
+**Delete all matching...** ask first.
+
+<AppShot :width="1080" :height="420" text="A keyspace tab. Click a key, fold a group, or change the pattern."><KeyspaceView /></AppShot>
+
+<AppShot :width="1080" :height="300" text="A hash, as fields and values."><KeyspaceView selected="bull:mail:meta" /></AppShot>
+
+### Object storage
+
+Click a bucket or a folder to open it as a folder tab; the chevron beside it
+only folds the tree. Clicking an object opens its folder with it chosen.
+
+The tab lists the folders (how many files each holds and their size) and the
+objects (size, when they changed). Click a folder to go in and the path
+above to come back up (or `cmd-backspace`); **find** narrows the folder by
+name, and **Upload here** puts the files you pick into it. The side previews
+the chosen object (an image, or the first 64 KB of text) with **Download**,
+**Copy URL (1 hour)**, **Copy Path** and **Delete...**; double-click an
+object to open it in its own tab.
+
+<AppShot :width="1080" :height="400" text="A folder of a bucket. Click a folder, the path above, or a file."><BucketView /></AppShot>
+
+<AppShot :width="1080" :height="320" text="An image, previewed at the side."><BucketView folder="avatars/" selected="avatars/user-104.png" /></AppShot>
 
 ### Consoles
 

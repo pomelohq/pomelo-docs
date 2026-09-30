@@ -7,7 +7,6 @@ const props = defineProps({
   side: { type: String, default: 'value' },
   cell: { type: Array, default: () => [1, 5] },
   edited: { type: Boolean, default: false },
-  review: { type: Boolean, default: false },
 })
 
 const columns = [
@@ -38,7 +37,6 @@ const selected = ref(props.cell)
 const filters = ref({})
 const edits = ref(props.edited ? { '3.4': 'admin', '6.2': 'Ken T.' } : {})
 const editing = ref(null)
-const review = ref(props.review)
 const open = ref(new Set(['$']))
 const more = ref(new Set())
 const flash = ref('')
@@ -97,9 +95,28 @@ function say(text) {
 function apply() {
   const count = statements.value.length
   edits.value = {}
-  review.value = false
   say(`Saved ${count} ${count === 1 ? 'change' : 'changes'} in one transaction`)
 }
+const DDL = `CREATE TABLE "public"."users" (
+    "id" bigint DEFAULT nextval('users_id_seq'::regclass) NOT NULL,
+    "email" character varying(255) NOT NULL,
+    "org_id" bigint,
+    "settings" jsonb,
+    CONSTRAINT "users_pkey" PRIMARY KEY (id),
+    CONSTRAINT "users_org_id_fkey" FOREIGN KEY (org_id) REFERENCES orgs(id)
+);`
+const SQL_KEYWORDS = new Set('create table view index unique on using not null default constraint primary key foreign references check as select from where and or in is cascade restrict set delete update no action with without time zone varying if exists alter add column generated always identity'.split(' '))
+// The same coloring the tab gives it: keywords, strings, numbers, quoted names.
+const ddl = DDL.split('\n').map(line => {
+  const parts = []
+  const re = /'[^']*'?|"[^"]*"?|\d[\d.]*|[A-Za-z_]\w*|[^A-Za-z0-9_'"]+/g
+  for (const [token] of line.matchAll(re)) {
+    const kind = token[0] === "'" ? 'string' : token[0] === '"' ? 'property' : /^\d/.test(token) ? 'number'
+      : SQL_KEYWORDS.has(token.toLowerCase()) ? 'keyword' : ''
+    parts.push([kind, token])
+  }
+  return parts
+})
 function follow(r, c) { say(`Opens orgs where "id" = '${value(r, c)}' in a new tab`) }
 
 function lines(v, path, depth, key, out) {
@@ -161,7 +178,7 @@ function expandAll() {
           <span v-for="[id, text] in [['data', 'Data'], ['structure', 'Structure'], ['ddl', 'DDL']]" :key="id"
             :class="{ on: view === id }" @click="view = id">{{ text }}</span>
         </div>
-        <span v-if="view === 'data'" class="pa-rows pa-click pa-tv-keyed" :class="{ on: details }" @click="details = !details">Details <span class="pa-tv-kbd">shift-enter</span></span>
+        <span v-if="view === 'data'" class="pa-rows pa-click pa-tv-keyed" :class="{ on: details }" @click="details = !details">Details <span class="pa-tv-kbd"><Icon name="shift" :size="11" /><Icon name="return" :size="11" /></span></span>
         <Icon name="rotate_cw" :size="13" class="icon-muted" />
       </div>
       <div v-if="view === 'data'" class="row pa-tv-query">
@@ -200,16 +217,12 @@ function expandAll() {
             </span>
           </div>
         </div>
-        <div v-if="review && statements.length" class="pa-tv-review mono">
-          <div class="row"><span class="muted pa-sans">Runs in one transaction; any error saves nothing</span></div>
-          <div v-for="s in statements" :key="s" class="trunc">{{ s }}</div>
-        </div>
         <div v-if="statements.length" class="row pa-tv-pending">
           <span class="warn pa-strong">{{ statements.length }} {{ statements.length === 1 ? 'change' : 'changes' }}</span>
           <span class="muted">not saved - into myproject_feat-login</span><span class="grow" />
-          <span class="pa-rows pa-click" :class="{ on: review }" @click="review = !review">Review SQL</span>
-          <span class="pa-rows pa-click" @click="edits = {}; review = false">Discard</span>
-          <span class="pa-rows pa-click pa-tv-keyed" @click="apply">Apply <span class="pa-tv-kbd">cmd-s</span></span>
+          <span class="pa-rows pa-click" @click="say('Opens the UPDATE statements in an editor tab')">Review SQL</span>
+          <span class="pa-rows pa-click" @click="edits = {}">Discard</span>
+          <span class="pa-rows pa-click pa-tv-keyed" @click="apply">Apply <span class="pa-tv-kbd"><Icon name="command" :size="11" /><span>S</span></span></span>
         </div>
         <div v-else class="row pa-tv-page">
           <Icon name="chevron_left" :size="12" class="icon-muted" /><Icon name="arrow_left" :size="12" class="icon-muted" />
@@ -231,14 +244,9 @@ function expandAll() {
         <div v-for="[name] in references" :key="name" class="pa-tv-srow"><span class="grow accent">{{ name }}</span><span class="muted" style="width:110px">cascade</span></div>
       </div>
 
-      <div v-else class="pa-tv-struct mono"><pre class="pa-tv-ddl">CREATE TABLE "public"."users" (
-    "id" bigint DEFAULT nextval('users_id_seq'::regclass) NOT NULL,
-    "email" character varying(255) NOT NULL,
-    "org_id" bigint,
-    "settings" jsonb,
-    CONSTRAINT "users_pkey" PRIMARY KEY (id),
-    CONSTRAINT "users_org_id_fkey" FOREIGN KEY (org_id) REFERENCES orgs(id)
-);</pre></div>
+      <div v-else class="pa-tv-struct mono"><pre class="pa-tv-ddl"><template v-for="(line, i) in ddl" :key="i"><span
+        v-for="(part, j) in line" :key="j" :style="part[0] ? { color: `var(--pa-syntax-${part[0]})` } : undefined">{{ part[1] }}</span>
+</template></pre></div>
     </div>
 
     <div v-if="view === 'data' && details" class="pa-tv-side">
@@ -325,7 +333,7 @@ function expandAll() {
   border: 1px solid var(--pa-border-variant); background: var(--pa-editor-background); }
 .pa-tv .pa-rows { height: 22px; padding: 0 6px; border-radius: 4px; border: 1px solid var(--pa-border-variant); font-size: 12px;
   display: inline-flex; align-items: center; white-space: nowrap; }
-.pa-tv-kbd { font-size: 10px; color: var(--pa-text-placeholder); border: 1px solid var(--pa-border-variant); border-radius: 3px; padding: 0 4px; }
+.pa-tv-kbd { display: inline-flex; align-items: center; gap: 1px; font-size: 11px; color: var(--pa-text-muted); }
 .pa-tv-name { margin-left: 6px; }
 .pa-tv-pill { border: 1px solid var(--pa-border-variant); border-radius: 9px; padding: 0 7px; }
 .pa-tv-jbox { border: 1px solid var(--pa-border-variant); border-radius: 6px; background: var(--pa-editor-background); }
@@ -364,7 +372,6 @@ function expandAll() {
 .pa-tv-row:hover .pa-tv-go, .pa-tv-c.on .pa-tv-go { opacity: 1; }
 .pa-tv-edit { width: 100%; font: inherit; color: var(--pa-text); background: var(--pa-editor-background); border: 1px solid var(--pa-border-focused);
   border-radius: 3px; outline: none; padding: 0 3px; height: 20px; }
-.pa-tv-review { padding: 6px 10px; background: var(--pa-panel-background); border-top: 1px solid var(--pa-border-variant); line-height: 18px; font-size: 11.5px; }
 .pa .pa-sans { font-family: 'IBM Plex Sans', system-ui, sans-serif; }
 .pa-tv-pending { height: 34px; padding: 0 10px; gap: 8px; border-top: 1px solid var(--pa-border-variant); flex: none;
   background: color-mix(in srgb, var(--pa-warning) 7%, transparent); }
