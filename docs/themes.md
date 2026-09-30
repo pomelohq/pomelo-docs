@@ -93,9 +93,11 @@ yours, by name, in the same shape as a theme's `style`:
 
 ## Fonts
 
-**Settings > Appearance > UI Font**, **Editor > Buffer Font** and
-**Terminal > Font** each set a font. The interface font has a family, size
-and weight; the editor and terminal fonts add a line height.
+Every font is set under **Settings > Appearance**: **Buffer Font** (the
+editor), **UI Font**, **Agent Panel Font** (the agent tabs' text size) and
+**Terminal Font**. The interface font has a family, size and weight; the
+editor and terminal fonts add a line height. The editor's text follows the
+buffer font size alone, whatever the UI font size is.
 
 | Setting | UI | Editor | Terminal |
 | --- | --- | --- | --- |

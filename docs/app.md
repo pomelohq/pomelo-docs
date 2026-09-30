@@ -105,6 +105,26 @@ stays editable from main; every save of it is
 **Open in External Editor** (command palette) opens the active file in the
 app chosen in **Settings > Editor > External Editor**.
 
+### The editor's toolbar
+
+A bar under each file's tabs shows where you are: the file's path, then the
+symbols around the caret (a class, then its method), colored like the code.
+Click it to open the outline. On its right:
+
+- **Search** opens the find bar.
+- **Selection Controls** (the text cursor): Select All, Select Next
+  Occurrence, Expand and Shrink Selection, Add Cursor Above and Below, Go to
+  Symbol, Go to Line/Column, Next and Previous Problem, Next and Previous
+  Hunk, Move Line Up and Down, Duplicate Selection, each with its key.
+- **Editor Controls** (the sliders) turns things on or off in this editor:
+  - **Minimap**: the whole file in miniature beside the scrollbar. It scrolls
+    with the editor, and its thumb frames what you see. Click it to jump
+    there, or drag the thumb.
+  - **Diagnostics**: the squiggles under problems.
+  - **Inline Diagnostics** (off at first): each line's most severe problem
+    at the end of that line.
+  - **Line Numbers**, **Inline Git Blame**, **Soft Wrap**.
+
 ## Panels
 
 - **Files** (`cmd-shift-e`) - the workspace's file tree across all its
@@ -233,10 +253,10 @@ Layout**. While an update downloads, the title bar shows its progress; see
 | Page | What's there |
 | --- | --- |
 | **General** | Start at Login; the version, with **Check Now**, **Restart to Update** or **Try Again**. |
-| **Appearance** | Theme (built-in or [your own](./themes), static or following macOS light and dark; `cmd-k cmd-t` cycles) the UI font, and **Hide Mouse** (the pointer hides while you type or use the keyboard, until the mouse moves). |
+| **Appearance** | Theme (built-in or [your own](./themes), static or following macOS light and dark; `cmd-k cmd-t` cycles); every font: the **Buffer Font** (the editor's family, size, weight, line height, [features and fallbacks](./themes#fonts)), the **UI Font**, the **Agent Panel Font** (the agent tabs' text size) and the **Terminal Font**; and the cursor: **Multi Cursor Modifier** (Alt-click adds a caret or drops the one there, Cmd-click goes to definition; Cmd Or Ctrl swaps them), **Cursor Blink**, **Cursor Animation** (the caret glides to where it moves, trailing on long jumps), **Cursor Shape** (bar, block, underline or hollow), **Hide Mouse** (the pointer hides while you type or use the keyboard, until the mouse moves) and **Reduce Motion** (holds loading shimmers, pulsing placeholders and the caret's glide still). |
 | **Window & Layout** | Status bar and title bar items, dock sides, agent and terminal buttons. Each window reopens where you left it (position, size, maximized or full screen). |
-| **Editor** | The buffer font (family, size, weight, line height, [features and fallbacks](./themes#fonts)), soft wrap, diff view, external editor. |
-| **Terminal** | The terminal font (family, size, weight, line height, features, fallbacks), shell, scrollback. |
+| **Editor** | Soft wrap, diff view, external editor. |
+| **Terminal** | Shell, scrollback. |
 | **Keymap** | Every window action and its binding; opens `keymap.json`. |
 | **Agent** | Agent command; Claude Code MCP server and activity hooks, with **Reinstall**. |
 | **Notifications** | Banners and a sound per agent event. |
