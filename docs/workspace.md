@@ -103,6 +103,12 @@ shows each repo of the open project by lockfile version:
 - **Old versions** - copies no workspace's lockfile matches any more, with
   **Free**. **Free ... Unused** at the top removes all of them.
 
+**Optimize** does all of it in one go: it keeps an install for each lockfile
+with no copy yet, moves every workspace that has its own copy onto the shared
+one (its services are stopped and started again around the swap), then frees
+the unused copies. It shows the plan and how much it frees at most before it
+starts.
+
 Removing a copy never breaks a workspace: each keeps its own. From a terminal:
 
 ```sh
