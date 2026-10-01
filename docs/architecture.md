@@ -74,7 +74,7 @@ on your machine.
   - `pom_core` - projects, new-project scaffolding, adding and removing
     repos.
   - `pom_services` - the service runner, env files, ports and the shared
-    Docker services.
+    services: Docker containers, and commands run once for every workspace.
   - `pom_workspace` - the staged [workspace](./workspace) create and delete
     pipelines.
   - `pom_ptyhost` - Pomelo's own PTY holders.
@@ -116,3 +116,15 @@ proxy + 2.
 | `~/.local/state/pom/` | Runtime state: ports, the session list, secrets, agent states. `XDG_STATE_HOME` moves it. |
 | `~/.config/pomelo/settings.json` | App settings. |
 | `~/.config/pomelo/keymap.json` | Your [key bindings](./shortcuts#your-own-bindings). |
+| `~/.config/pomelo/themes/` | Your own [themes](./themes#your-own-themes). |
+| `~/.config/pomelo/running-Pomelo.json` | Marks a running app so the next launch can tell a crash at startup; removed on a clean quit. The dev build keeps `running-PomeloDev.json`. |
+| `~/.config/pomelo/quiet-language-servers.json` | Missing language servers you chose **Don't show again** for. |
+| `~/.config/pomelo/dismissed-grammar-suggestions.json` | Language packages you chose **Don't show again** for. |
+| `~/.config/pomelo/recent-languages.json` | Languages you opened lately, so their packages install again after an update. |
+| `~/.config/pomelo/auto-installed-grammars.json` | Language packages already installed that way. |
+| `~/Library/Application Support/Pomelo/languages/` | Language servers Pomelo downloaded or built. |
+| `~/Library/Application Support/Pomelo/grammars/` | Installed [language packages](./app#language-packages), one folder per version. |
+| `~/Library/Application Support/Pomelo/update/` | A downloaded app update waiting to install. |
+| `~/Library/Logs/pomelo-panic.log` | What the app was doing when it crashed, to attach to a bug report. |
+
+`POMELO_CONFIG_DIR` moves everything under `~/.config/pomelo/`.

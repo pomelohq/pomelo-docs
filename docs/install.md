@@ -84,7 +84,8 @@ their existing updater, with no manual download.
 ## Build from source
 
 Requires Rust through `rustup` (the repo pins its toolchain and installs it
-on first build), Xcode command line tools, Docker and `zsh`.
+on first build), Xcode command line tools, `cmake` (`brew install cmake`; the
+runtime for language packages builds with it), Docker and `zsh`.
 
 ```bash
 git clone https://github.com/pomelohq/pomelo

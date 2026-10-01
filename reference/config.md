@@ -225,11 +225,14 @@ shared_services:
     ports: ["5672", "15672"]
 ```
 
-One set of containers (a docker compose project named `<session>-shared`)
-serves every workspace. Each port gets a host port that sticks: the port in
-`ports` (e.g. `5432`) when it is free, else the next free one within 100,
-else a random one - so you can set up an external client (`psql`, a GUI)
-once. You never hard-code it: use `{{shared.<name>.port}}`.
+A shared service runs once for every workspace of the project. It is either
+a Docker image (`image`) or a command (`cmd`), never both.
+
+Image services run in one docker compose project named `<session>-shared`.
+Each port gets a host port that sticks: the port in `ports` (e.g. `5432`)
+when it is free, else the next free one within 100, else a random one - so
+you can set up an external client (`psql`, a GUI) once. You never hard-code
+it: use `{{shared.<name>.port}}`.
 
 | Field | Description |
 | --- | --- |
