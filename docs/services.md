@@ -179,8 +179,11 @@ workspace's databases if they are missing. The command palette has
 
 ::: tip Ports never collide
 Each service with a port gets a **random free port** (10000-65535) reserved
-atomically, so any number of workspaces coexist. Ports are sticky: a
-stopped service keeps its port for a restart. Starting a service checks its
+atomically, so any number of workspaces coexist. The app, the `pom` CLI and
+every agent see the same port for a service. Ports are sticky: a
+stopped service keeps its port for a restart, a service that is rebuilding
+keeps it while its process lives, and a port leased for a service that is
+never started is given back after 7 days. Starting a service checks its
 port first; if something else took it, Pomelo moves that service to a new
 free port. If that still fails, the row shows who holds the port and a
 **Use a new port** button. You rarely need the port anyway - the

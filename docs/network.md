@@ -71,6 +71,13 @@ branch lowercased with anything outside `a-z`, `0-9` and `-` turned into `-`
 (`feat/login` becomes `feat-login`), or just its leading ticket key (such as
 `proj-101`) when no other workspace shares it.
 
+Each request goes to the port the service was given. When nothing answers
+there, the proxy goes to whatever port the service's processes listen on, over
+IPv4 or IPv6, so a dev server that ignores `$PORT` (Vite's 5173, say) still
+works. A service that isn't up answers with why instead:
+`... is still starting (building, not listening yet)` while it builds, and
+`... is not running in <branch>` once stopped.
+
 **Settings > Dev Services** turns the proxy and the relay on or off and sets
 their ports (8767 and 8766 by default). Service URLs in env files use the
 proxy port too, so restart running services after changing it. `POM_WEB_PORT`
@@ -78,8 +85,10 @@ overrides both, so a second copy of the app can run beside the first: the relay
 listens on that port + 1 and the proxy on + 2.
 
 The **Dev Requests** tab (**Open Requests** in Settings, or `Dev Requests` in
-the command palette) lists every request the proxy handled and every webhook
-the relay fanned out, newest first. Filter by kind, to errors only, or by path
+the command palette) lists every `/_pom_dev/` request the proxy handled, page
+loads and failed requests on a service hostname (a page's module and asset
+requests are left out, so they don't push everything else out), and every
+webhook the relay fanned out, newest first. Filter by kind, to errors only, or by path
 or service. Select a row to see it beside the list:
 
 - **Request** - the headers and body that came in (JSON is indented, keys in

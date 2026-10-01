@@ -179,7 +179,7 @@ The tools:
 | `commands` | List the project's `setup` steps and tasks plus its package manager - so the agent runs *your* canonical install/migrate/lint/test commands |
 | `run_shortcut` | Run one of those tasks in the repo's resolved env |
 | `run_in_env` | Run a command in a worktree with the resolved env - migrations, tests, seeds - and read the result (refused on main) |
-| `resolve_port_conflict` | Give the workspace's services fresh ports when something else grabbed one |
+| `resolve_port_conflict` | Give the workspace's services fresh ports when something else grabbed one, and restart the running ones on them |
 | `secrets_list` | List secret names (never values) |
 | `config_get` / `config_validate` / `config_set` | Read and safely edit `pom.yml` - every write is validated before it lands, and new services get ports automatically |
 | `config_doctor` / `config_normalize` | Check what keeps the project from running; clean up the config |

@@ -105,6 +105,11 @@ Large files open without a wait: files of millions of lines (a big CSV or
 log) load in the background on every core, then scroll and take typing as
 smoothly as a small one.
 
+Images open in a tab of their own. A high-resolution one decodes in the
+background (the tab says **Loading...** until then) and is shown scaled to
+4096 px on its long side; the tab names its original size, such as
+`12000 x 9000`. A file that can't be decoded says why.
+
 The **main** workspace is the prepared source new workspaces copy from, so
 its files are **read-only**: their tabs show a lock in place of the file
 icon, and saving there says "main is read-only: make changes in a branch

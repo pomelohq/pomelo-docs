@@ -101,6 +101,14 @@ usual port when it is free, for stable connection strings. If a start
 reports a port in use, something outside Pomelo is holding it: free it, or
 click **Use a new port** on the service's row.
 
+## A service URL says "backend not reachable"
+
+The proxy reached the service's port and got no answer, while the service has
+no process of its own listening anywhere: it crashed, or it was started outside
+Pomelo on another port. Open its tab to see its output and restart it. When the
+service is only building or is stopped, the page says so instead
+(`still starting`, `not running`).
+
 ## I deleted a workspace folder by hand and now create fails
 
 Deleting a `workspace--...` folder with `rm -rf` instead of the **Delete

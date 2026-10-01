@@ -108,12 +108,33 @@ Only the dev-proxy (`127.0.0.1:8767`) and the webhook relay
 them off; `POM_WEB_PORT` overrides both: the relay takes that port + 1 and the
 proxy + 2.
 
+## How ports are handed out
+
+The app, every `pom` command and every agent's `mcp` server run as separate
+processes, so a service's port lives on disk where all of them read it, never
+only in one process's memory:
+
+- `ports.d/<port>` reserves a number for the whole machine. It is created
+  exclusively, so two services never get the same port.
+- `keys.d/<hash>` names the one port a service owns and the process running it.
+  It is put in place atomically: when two processes ask for the same service at
+  once, one wins and the other reads its port.
+
+The dev-proxy sends a request to that port when something answers there,
+otherwise to the port the service's processes really listen on (a server that
+ignores `$PORT`, or one on `::1` only), and caches the answer for a few seconds.
+The app checks every lease of the project every 5 seconds: a port stays while
+its service's process lives, even through a long rebuild; it goes back once the
+service has stayed down for 20 seconds, failed to come up within 45, or was
+never started for 7 days. Leftover duplicates from older versions are merged
+when the app opens.
+
 ## Where things live
 
 | Path | What |
 | --- | --- |
 | `~/pom/<name>/` | A project created in the app (`pom.yml`, `workspace--<branch>/` folders). `POM_SESSIONS_ROOT` moves it. |
-| `~/.local/state/pom/` | Runtime state: ports, the session list, secrets, agent states. `XDG_STATE_HOME` moves it. |
+| `~/.local/state/pom/` | Runtime state: [ports](#how-ports-are-handed-out) (`ports.d/`, `keys.d/`), the session list, secrets, agent states. `XDG_STATE_HOME` moves it. |
 | `~/.config/pomelo/settings.json` | App settings. |
 | `~/.config/pomelo/keymap.json` | Your [key bindings](./shortcuts#your-own-bindings). |
 | `~/.config/pomelo/themes/` | Your own [themes](./themes#your-own-themes). |
