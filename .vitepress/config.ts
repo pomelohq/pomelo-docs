@@ -35,27 +35,29 @@ const PRODUCT = [
   },
 ]
 
-// One unified sidebar for both /docs/ and /reference/ — flat, practical-first.
+// One sidebar for /docs/ and /reference/: start, do a task, look a value up, understand, get help.
 const GROUPS = [
   {
     text: 'Getting Started',
     items: [
       { text: 'Install', link: '/docs/install' },
       { text: 'Quick Start', link: '/docs/quickstart' },
-      { text: 'Concepts', link: '/docs/concepts' },
     ],
   },
   {
-    text: 'Using Pomelo',
+    text: 'Guides',
     items: [
-      { text: 'The app', link: '/docs/app' },
-      { text: 'Themes and fonts', link: '/docs/themes' },
       { text: 'Workspaces', link: '/docs/workspace' },
       { text: 'Project config', link: '/docs/project-config' },
-      { text: 'Agents', link: '/docs/agents' },
-      { text: 'Agent status', link: '/docs/agent-status' },
       { text: 'Services', link: '/docs/services' },
       { text: 'Databases', link: '/docs/databases' },
+      { text: 'Network', link: '/docs/network' },
+      { text: 'Agents', link: '/docs/agents' },
+      { text: 'Agent status', link: '/docs/agent-status' },
+      { text: 'The app', link: '/docs/app' },
+      { text: 'Git and pull requests', link: '/docs/git' },
+      { text: 'Keyboard shortcuts', link: '/docs/shortcuts' },
+      { text: 'Themes and fonts', link: '/docs/themes' },
     ],
   },
   {
@@ -74,11 +76,15 @@ const GROUPS = [
     ],
   },
   {
-    text: 'More',
+    text: 'Understand',
     items: [
+      { text: 'Concepts', link: '/docs/concepts' },
       { text: 'Architecture', link: '/docs/architecture' },
-      { text: 'Network', link: '/docs/network' },
-      { text: 'Keyboard shortcuts', link: '/docs/shortcuts' },
+    ],
+  },
+  {
+    text: 'Help',
+    items: [
       { text: 'FAQ & troubleshooting', link: '/docs/faq' },
       { text: 'Changelog', link: '/docs/changelog' },
     ],

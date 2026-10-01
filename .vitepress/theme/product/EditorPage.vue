@@ -162,7 +162,7 @@ const rows = [
                 Jira needs a site, an email and an API token in Settings.</p>
             </div>
             <div class="pp-card-text"><h3>Nothing else to install</h3>
-              <p><a href="/docs/app#pull-requests">Pull requests</a> and <a href="/docs/workspace#create">tickets</a> in the docs.</p></div>
+              <p><a href="/docs/git#pull-requests">Pull requests</a> and <a href="/docs/workspace#create">tickets</a> in the docs.</p></div>
           </div>
         </div>
       </div>

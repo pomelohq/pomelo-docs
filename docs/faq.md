@@ -60,7 +60,7 @@ before the command.
   (an app opened from Finder doesn't see your shell's exports), otherwise
   from the project's secret named `github`: add it in the Services panel's
   **Secrets** tab. A read-only token is enough. See
-  [Pull requests](/docs/app#pull-requests).
+  [Pull requests](/docs/git#pull-requests).
 - On an **organization**, a fine-grained token must be approved by an org
   admin before it works.
 - The repo needs a GitHub `origin` remote. **SSH host aliases work**
