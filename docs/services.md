@@ -121,8 +121,9 @@ Right-click (or `...`):
   submenu with the repo's commands, **Environment...** and
   **Collapse**/**Expand**.
 - **A shared service** - **Open in Tab**, **Start** or **Restart**,
-  **Stop...** and **View Logs**. One container serves every workspace, so
-  stopping it while other workspaces use it asks first.
+  **Stop...** and **View Logs**. One container (or, for a `cmd` shared service,
+  one process) serves every workspace, so stopping it while other workspaces use
+  it asks first.
 
 ### The service tab
 

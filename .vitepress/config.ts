@@ -107,9 +107,9 @@ export default defineConfig({
     ['link', { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap' }],
   ],
 
-  // Pomelo docs are full of `{{var:NAME}}` / `{{db:name}}` templates. Inside
-  // code, Vue's template tokenizer still scans `{{ }}` (even under v-pre)
-  // and errors on the `:` (reads it as a TS annotation). Rather than change
+  // Pomelo docs are full of `{{shared.postgres.url}}` / `{{db.main}}` templates.
+  // Inside code, Vue's template tokenizer still scans `{{ }}` (even under
+  // v-pre) and can error on what it reads as an expression. Rather than change
   // Vue's delimiters globally — which breaks the default theme's own
   // `{{ }}` — we entity-encode the braces in rendered code so the tokenizer
   // never sees them; the browser decodes them back to literal `{{ }}`.
