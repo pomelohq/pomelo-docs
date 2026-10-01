@@ -170,10 +170,11 @@ The tools:
 
 | Tool | What the agent can do |
 | --- | --- |
-| `workspace_info` / `services` / `ports` / `service_url` | See the branch, its repos, each service's running state, port and URL |
+| `workspace_info` / `services` / `ports` / `service_url` | See the branch, its repos, each service's running state, port and URL, and the shared services with theirs |
 | `databases` | Get ready-to-use per-branch connection strings |
 | `db_list` / `db_tables` / `db_columns` / `db_query` | Browse and query the branch's Postgres and Redis |
 | `service_start` / `service_stop` / `service_restart` | Bring services up/down (ports are pre-flighted) |
+| `shared_start` / `shared_stop` / `shared_restart` | Bring a shared service (a container or a shared command) up/down for every workspace; stopping one other workspaces may use needs `force: true` |
 | `service_logs` | Read a service's recent output (e.g. to spot a crash) |
 | `commands` | List the project's `setup` steps and tasks plus its package manager - so the agent runs *your* canonical install/migrate/lint/test commands |
 | `run_shortcut` | Run one of those tasks in the repo's resolved env |
