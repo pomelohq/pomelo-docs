@@ -49,6 +49,7 @@ platforms will use.
 | Agent Usage | `pomelo::OpenAgentUsage` | <Keys k="cmd-shift-u"/> | <Keys pc k="ctrl-shift-u"/> |
 | Dev Requests | `pomelo::OpenDevRequests` | - | - |
 | node_modules Store | `pomelo::OpenModuleStore` | - | - |
+| Select Language | `language_selector::Toggle` | <Keys k="cmd-k m"/> | <Keys pc k="ctrl-k m"/> |
 | Go to Tab 1 | `["pane::ActivateItem", 0]` | <Keys k="cmd-1"/> | <Keys pc k="ctrl-1"/> |
 | Go to Tab 2 | `["pane::ActivateItem", 1]` | <Keys k="cmd-2"/> | <Keys pc k="ctrl-2"/> |
 | Go to Tab 3 | `["pane::ActivateItem", 2]` | <Keys k="cmd-3"/> | <Keys pc k="ctrl-3"/> |
