@@ -82,8 +82,24 @@ All of them take `--json`.
 | 4 | The session died |
 | 5 | The prompt was typed but never started a turn |
 | 6 | Refused by a guard rail (see below) |
+| 7 | `start`: the agent waits at its "trust this folder" prompt (see below) |
 
 With `--json`, an error is `{"schema": "pom.agent/v1", "error": "<code>", "message": "..."}` on stderr.
+
+## A folder the agent has not trusted yet
+
+The first time Claude Code opens a folder it asks whether you trust it, and nothing runs until someone answers.
+A new workspace is a new folder, so a session you start without a tab can stop there:
+
+- `pom agent start` notices within seconds, exits with code 7 and says how to go on;
+- `pom agent ls` and `watch` show the session as `needs_trust`, with its session id.
+
+Answer it in one of two ways:
+
+- open the session in Pomelo (or `pom agent takeover`) and pick **Yes, I trust this folder**;
+- start it with `--trust`, which answers yes for you. Only a person or an orchestrator can pass it, never an agent.
+
+Pomelo never edits Claude's own config to skip the question.
 
 ## Turns, state and death
 

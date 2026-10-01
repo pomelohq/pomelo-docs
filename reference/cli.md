@@ -74,5 +74,22 @@ A service is `name` or `repo/name`.
 | `pom disk` | Disk used by the registered projects |
 | `pom modules [list\|prune\|clear]` | The shared node_modules store: its copies, drop unused ones, or empty it |
 | `pom mcp [--branch b]` | MCP server on stdio for a coding agent working in this workspace |
+
+## Agents (one workspace at a time; --json for stable output)
+
+| Command | What it does |
+| --- | --- |
+| `pom agent ls [workspace] [--all-workspaces]` | The workspace's agent sessions: role, state, turn, holder |
+| `pom agent start [workspace] [--role r] [--fresh] [--trust] [--prompt text \| --prompt-file f]` | [--system-prompt-file f] [--tools t] [--allowed-tools t] [--disallowed-tools t] [--permission-mode m] [--model m] [--extra-mcp-config f] start (or reuse) a session; --fresh starts role r on a new conversation; --trust says yes to the agent's prompt to trust the folder (else exit 7) |
+| `pom agent read <workspace/role> [--turn n \| --since n] [--full]` | What the agent did in a turn (the last by default), from its transcript |
+| `pom agent watch [workspace] [--from-start] [--timeout d]` | Stream the workspace's agent events as NDJSON |
+| `pom agent stop <workspace/role>` | End a session |
+| `pom agent send <workspace/role> <text \| --file f> [--queue] [--take]` | Submit one turn (refused unless idle; --queue waits, --take takes the session over) |
+| `pom agent wait <workspace/role> [--until idle\|awaiting_input\|turn-end] [--turn n] [--timeout d]` | Exit 0 reached, 2 timeout, 3 awaiting input, 4 died |
+| `pom agent ask <workspace/role> <text \| --file f> [--take] [--timeout d]` | Send, wait for the turn to end, and read it |
+| `pom agent interrupt <workspace/role>` | Stop the current turn |
+| `pom agent approve\|deny <workspace/role> <request> [--always]` | Answer a pending approval of the workspace policy |
+| `pom agent takeover [workspace] --session-id <id> [--settings f] [--mcp-config f]` | - |
+| `pom agent release <workspace/role>` | A person takes a session over, and hands it back |
 | `pom completion bash\|zsh\|fish` | - |
 | `pom version` | - |
