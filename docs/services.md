@@ -62,7 +62,7 @@ repos:
 `profiles:` (repo or service level) lists the profiles a service offers -
 e.g. `[local, staging]`; `local` is always included. Each non-local profile
 can point a service reference at a deployed URL under the top-level
-[`environments`](../reference/config#environments-profiles), so `staging`
+[`environments`](../reference/config#top-level), so `staging`
 reaches a deployed backend while `local` uses the workspace's own services.
 Switch it from the **Env** submenu of the service's right-click menu; a running
 service restarts, and the choice is kept per workspace.

@@ -28,7 +28,7 @@ lives where it already was.
 | `workspace--main/` | The main workspace: one checkout per repo. |
 | `workspace--feat-login/` | The workspace for `feat-login`: one git worktree per repo. |
 | `workspace--feat-login/.pom-workspace.json` | That workspace's choices: its display name, the environment profile each repo or service runs with, and repos on a branch other than the workspace's. |
-| `workspace--feat-login/<repo>/.env.local` | The repo's env, written from its `env` (or one file per name under `env`, see [`env`](./config#env-one-key-three-forms)). |
+| `workspace--feat-login/<repo>/.env.local` | The repo's env, written from its `env` (or one file per name under `env`, see [`env`](../docs/project-config#write-the-env)). |
 
 ## App config
 
