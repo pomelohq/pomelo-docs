@@ -352,6 +352,14 @@ Inside the window, notices appear for things that need a look:
   [Language servers](#language-servers).
 - **A language server is missing** - the command that installs it, and
   **Don't show again**; see [Language servers](#language-servers).
+- **Pomelo quit unexpectedly last time** - the last launch crashed before it
+  settled (within its first minute). This launch opened your workspaces
+  without their tabs, which are what crashed; **Reopen Tabs** brings them
+  back. Until then their saved state is left as it was. After two such
+  crashes in a row, language servers and language packages also stay off for
+  that run. Pomelo checks for a newer release before opening anything.
+- **A fixed version is ready** - after such a crash, a newer release is
+  downloaded; **Restart to Update** installs it.
 
 Language server notices wait their turn: the next one shows when you close
 the current notice.
@@ -403,7 +411,7 @@ Layout**. While an update downloads, the title bar shows its progress; see
 
 | Page | What's there |
 | --- | --- |
-| **General** | Start at Login; the version, with **Check Now**, **Restart to Update** or **Try Again**. |
+| **General** | Start at Login; **Restore on Startup** (`restore_on_startup`: `last_session`, the default, reopens each workspace's tabs; `none` starts without them); the version, with **Check Now**, **Restart to Update** or **Try Again**. |
 | **Appearance** | Theme (built-in or [your own](./themes), static or following macOS light and dark; `cmd-k cmd-t` cycles); every font: the **Buffer Font** (the editor's family, size, weight, line height, [features and fallbacks](./themes#fonts)), the **UI Font**, the **Agent Panel Font** (the agent tabs' text size) and the **Terminal Font**; and the cursor: **Multi Cursor Modifier** (Alt-click adds a caret or drops the one there, Cmd-click goes to definition; Cmd Or Ctrl swaps them), **Cursor Blink**, **Cursor Animation** (the caret glides to where it moves, trailing on long jumps), **Cursor Shape** (bar, block, underline or hollow), **Hide Mouse** (the pointer hides while you type or use the keyboard, until the mouse moves) and **Reduce Motion** (holds loading shimmers, pulsing placeholders and the caret's glide still). |
 | **Window & Layout** | Status bar and title bar items, including a toggle per status bar button (Files, Services, Git, Database, Terminal, Agent), plus dock sides and agent/terminal buttons. A button's right-click menu moves its panel to another side. Each window reopens where you left it (position, size, maximized or full screen). |
 | **Editor** | Soft wrap, diff view, external editor. |
