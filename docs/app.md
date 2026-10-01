@@ -101,6 +101,13 @@ it, pin it, drag it, double-click its tab, or open the file another way
 another file also opens that file as the preview, and keeps the preview
 you came from. Tab titles longer than 24 characters end in `...`.
 
+The language in the status bar (next to the cursor position) shows how the
+active file is read. Click it, or press `cmd-k m`, to pick another: the list
+holds every language Pomelo knows, filters as you type, and marks the file's
+own as **(current)**. The choice applies to that file in every pane while it
+is open, with highlighting and language servers to match; a language whose
+package is not installed yet is installed first.
+
 Large files open without a wait: files of millions of lines (a big CSV or
 log) load in the background on every core, then scroll and take typing as
 smoothly as a small one.
