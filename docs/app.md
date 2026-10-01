@@ -56,7 +56,8 @@ Each row is a workspace:
 
 <AppShot :width="280" :height="210" text="Workspace rows"><WorkspacesList /></AppShot>
 
-Click a row to switch to it. Each workspace keeps its own tabs,
+Click a row to switch to it; click the ticket status under the name to open
+the ticket the same way as **Open Ticket** below. Each workspace keeps its own tabs,
 terminals and agent; switching never restarts anything. Drag rows to
 reorder them; **main** always stays first. The **+** in the header opens
 **New Workspace** (`cmd-n`), and workspaces being created or deleted show
@@ -70,7 +71,7 @@ Right-click a row for:
 | Item | Shown | Does |
 | --- | --- | --- |
 | **Rename...** | always | Sets the display name (the branch stays). |
-| **Open Ticket** | the branch names a Jira ticket | Opens the ticket in a tab. |
+| **Open Ticket** | the branch names a Jira ticket | Switches to that workspace if it is not the one on screen, then opens the ticket in a tab (or focuses it). |
 | **Stop All Services** | services run | Stops every service of that workspace. |
 | **Clone Missing Repos...** | main lacks repos | Clones them into main. |
 | **Add Repos...** | branch workspaces | Checks out more of the config's repos there. |
@@ -182,6 +183,7 @@ language:
 | C, C++ | clangd |
 | Ruby | solargraph (ruby-lsp when you name it, see below) |
 | TypeScript, TSX, JavaScript, CSS, HTML, Svelte, PHP | also tailwindcss-language-server |
+| TypeScript, TSX, JavaScript, Svelte | also ESLint |
 
 A file can have several servers at once, such as vtsls and the Tailwind
 server for a `.tsx` file. Their problems show together, their completions
@@ -201,14 +203,24 @@ Pomelo looks for the server on your login shell's `PATH` first. vtsls,
 basedpyright, pyright and the Tailwind server are downloaded when they are
 missing (with your `node` and `npm`) into
 `~/Library/Application Support/Pomelo/languages`, and kept up to date there.
-The others you install yourself (for example `gem install solargraph`). When
+ESLint is built once from its source release there (also with `node` and
+`npm`), and runs in the project's outermost `package.json` folder with the
+project's own `eslint`. The others you install yourself (for example
+`gem install solargraph`). When one is missing and can't be downloaded, a
+notice names the command that installs it (`gem install solargraph`,
+`gem install ruby-lsp`, `rustup component add rust-analyzer`,
+`go install golang.org/x/tools/gopls@latest`, `uv tool install ty`), once
+per launch; **Don't show again** stops it for that server. When
 a project's `Gemfile` lists a server (such as `ruby-lsp`), the version locked
 in its `Gemfile.lock` is the one that runs.
 
 The **bolt** button in the status bar lists the servers of the open folder,
 grouped under the folder each one runs in, each with a dot: green running, amber starting (or downloading), grey
 stopped, red failed. A server's menu has **View Message** (when it has one),
-**Restart Server**, **Stop Server**, and a line with its version and memory;
+**View Logs** (once it has started: a read-only tab with the server, its
+folder and program, then its last 2000 lines of output and log messages,
+growing as they come), **Restart Server**, **Stop Server**, and a line with
+its version and memory;
 hover that line for the program that runs it. **Restart All Servers** and
 **Stop All Servers** are at the bottom. Next to the diagnostics counts, one
 line says what the servers are doing: indexing progress, a download, an
@@ -220,6 +232,11 @@ question, each answer is a button, and closing the notification answers
 none. When solargraph says the workspace is too large to index, the
 notification offers **Use ruby-lsp**, which makes ruby-lsp the Ruby server
 (it writes the `languages` setting below) and restarts it.
+
+When none of a file's servers can go to a definition (or a declaration, a
+type definition or an implementation), a short message says which server
+and version can't, such as `ruby-lsp 0.4.1 does not support go to
+definition`.
 
 **Settings > Languages & Tools** turns servers on or off, for all languages
 or one (**Languages**, then **Configure**). **Language Servers** is a list in
@@ -333,6 +350,8 @@ Inside the window, notices appear for things that need a look:
   [Language packages](#language-packages).
 - **A language server's message** - see
   [Language servers](#language-servers).
+- **A language server is missing** - the command that installs it, and
+  **Don't show again**; see [Language servers](#language-servers).
 
 Language server notices wait their turn: the next one shows when you close
 the current notice.
