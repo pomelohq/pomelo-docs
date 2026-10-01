@@ -55,8 +55,9 @@ Start and stop services from the **Services** panel in the app. See
 
 ## Shared services
 
-Containers shared across all workspaces — Postgres, Redis, MinIO,
-OpenSearch — declared under `shared_services:`. **Docker is reserved for
+Services every workspace shares, declared under `shared_services:`: usually
+containers such as Postgres, Redis, MinIO and OpenSearch, or a command (see
+below). **Docker is reserved for
 these data/infra services** (the things you don't want to install and
 version-manage by hand); your own repo services stay native. One set of
 containers backs every workspace; isolation happens at the *data* layer
@@ -101,6 +102,8 @@ it like the containers. Its tab shows its output, how long it has run, the
 command, folder, port and URL. A shared service is either `image:` or
 `cmd:`, never both; the config doctor checks that the command's program is
 installed, and Docker is only needed when there is an `image:` service.
+
+Every field and rule is in the [pom.yml reference](../reference/config#shared-services).
 
 ## Database
 

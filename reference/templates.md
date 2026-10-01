@@ -19,10 +19,10 @@ Grouped by source.
 
 | Field | Resolves to | Example |
 | --- | --- | --- |
-| `.url` | Conn `user:pass@host:port` | `postgres:postgres@127.0.0.1:5432` |
+| `.url` | Conn `user:pass@host:port`; `host:port` for a service with no login (Redis); `http://127.0.0.1:<port>` for a `cmd` service | `postgres:postgres@127.0.0.1:5432` |
 | `.host` | Host (always `127.0.0.1`) | `127.0.0.1` |
 | `.port` | Port | `5432` |
-| `.user` / `.pass` | Credentials (default `postgres`) | `postgres` |
+| `.user` / `.pass` | Credentials (`postgres` for a Postgres that sets none; empty otherwise) | `postgres` |
 | `.slot` | Capacity slot index (e.g. Redis DB number) | `3` |
 
 Bare `{{shared.<name>}}` is the same as `.url`.
