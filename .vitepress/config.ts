@@ -67,6 +67,10 @@ const GROUPS = [
       { text: 'Key bindings', link: '/reference/shortcuts' },
       { text: 'pom CLI', link: '/reference/cli' },
       { text: 'MCP tools', link: '/reference/mcp' },
+      { text: 'Languages', link: '/reference/languages' },
+      { text: 'Language servers', link: '/reference/language-servers' },
+      { text: 'Files and folders', link: '/reference/files' },
+      { text: 'Notifications', link: '/reference/notifications' },
     ],
   },
   {

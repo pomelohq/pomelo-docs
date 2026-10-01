@@ -197,7 +197,9 @@ nearest `Gemfile` (Ruby), `pyproject.toml`, `setup.py`, `setup.cfg`,
 `compile_commands.json`, `CMakeLists.txt` or `.clangd` (C, C++); the
 outermost `package.json`, `tsconfig.json` or `jsconfig.json` (TypeScript,
 JavaScript, Tailwind), `Cargo.toml` (Rust), or `go.work` or `go.mod` (Go).
-A file outside any of these uses the workspace folder.
+A file outside any of these uses the workspace folder. The
+[language servers reference](/reference/language-servers) lists every server
+and its programs.
 
 Pomelo looks for the server on your login shell's `PATH` first. vtsls,
 basedpyright, pyright and the Tailwind server are downloaded when they are
@@ -362,7 +364,8 @@ Inside the window, notices appear for things that need a look:
   downloaded; **Restart to Update** installs it.
 
 Language server notices wait their turn: the next one shows when you close
-the current notice.
+the current notice. Every notification, notice and toast is listed in the
+[notifications reference](/reference/notifications).
 
 ## Command palette
 
