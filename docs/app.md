@@ -155,6 +155,11 @@ Languages you opened lately are installed in the background the first time
 you start a version of Pomelo that no longer carries them, so they stay
 highlighted.
 
+Installed packages stay up to date on their own: when a newer one is
+published, Pomelo downloads and checks it in the background, switches open
+files to it, then removes the old one. If the update fails, the package you
+have keeps working.
+
 Packages live in `~/Library/Application Support/Pomelo/grammars/`, one
 folder per language and version. Delete a language's folder to remove it.
 
