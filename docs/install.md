@@ -42,7 +42,8 @@ projects use.
 
 The `pom` CLI ships inside the app at
 `/Applications/Pomelo.app/Contents/MacOS/pom`; add that folder to your
-`PATH` if you want it in a terminal.
+`PATH` if you want it in a terminal. Its commands are listed in the
+[pom CLI reference](/reference/cli).
 
 ## Existing config carries over
 
