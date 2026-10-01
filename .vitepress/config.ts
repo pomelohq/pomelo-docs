@@ -65,6 +65,8 @@ const GROUPS = [
       { text: 'Templates', link: '/reference/templates' },
       { text: 'Settings', link: '/reference/settings' },
       { text: 'Key bindings', link: '/reference/shortcuts' },
+      { text: 'pom CLI', link: '/reference/cli' },
+      { text: 'MCP tools', link: '/reference/mcp' },
     ],
   },
   {

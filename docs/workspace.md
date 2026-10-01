@@ -189,7 +189,8 @@ it"* or *"add a worker service and start it"*, and the agent uses these
 tools instead of guessing. Everything stays on your machine.
 
 `pom mcp` is the underlying command; it's wired up automatically, so you
-rarely run it yourself.
+rarely run it yourself. Every tool, with its arguments, is listed in the
+[MCP tools reference](/reference/mcp).
 
 ## Recovery
 
