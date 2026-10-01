@@ -22,6 +22,7 @@ The keys at the top of `pom.yml`.
 | `seed` | list of commands | - | Runs once in the workspace folder when a workspace is created, before each repo's seed. |
 | `prepare_main` | list | reset, migrate, seed | The phases Prepare Main runs, in order: `reset`, `migrate` and `seed`. Other names are skipped; a list with none of them runs only `reset`. |
 | `sync` | map | - | Keep Main Fresh; see Sync. |
+| `agents` | map | - | A policy for the workspace's coding agents; see Agents. |
 | `workspaces` | map | - | Ignored. Workspace groups; nothing reads them now. |
 | `combinations` | map | - | Ignored. Repo combinations; `config_normalize` deletes them. |
 | `code_agents` | map | - | Ignored. Agent switches; the app's Settings hold these now. |
@@ -313,6 +314,24 @@ Examples, each written under `sync`:
 refresh_main: true
 
 refresh_interval_sec: 1800
+```
+
+## Agents
+
+What the workspace's coding agents may do: a policy command Pomelo asks before every tool call an agent makes.
+
+| Key | Type | Default | What it does |
+|---|---|---|---|
+| `agents.policy` | command | - | Run before every tool call a coding agent in a workspace makes, in the workspace folder. It reads `{tool_name, tool_input, session_id, role, workspace, origin, driven_by}` as JSON on stdin and prints `{"decision": "allow" \| "deny" \| "ask", "reason": "..."}`. `ask` shows the agent's permission prompt; in a session an orchestrator drives it denies with `pending approval <id>` until `pom agent approve` records an approval for that call. A failure, a non-zero exit, a timeout or an unreadable config denies the call. Without a policy, the agent's own permission prompts apply. |
+| `agents.policy_timeout_sec` | int | `5` | How long the policy command may take before the tool call is denied. |
+
+Examples, each written under `agents`:
+
+```yaml
+agents:
+  policy: ./scripts/agent-policy.sh
+
+policy_timeout_sec: 10
 ```
 
 ## code_agents (ignored)

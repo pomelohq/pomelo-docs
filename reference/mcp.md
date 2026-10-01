@@ -248,3 +248,86 @@ Read-only.
 Deterministically clean the config: strip REMOVED schema keys (schema_version/plugins/combinations/proxy/webhook/exposes), and migrate legacy colon tokens to dot form. Run this as the FINAL step of Adapt/onboarding - it does the mechanical cleanup so you don't have to.
 
 Not read-only.
+
+## agent_list
+
+The coding-agent sessions of THIS workspace: role, state (idle, thinking, tool_use, awaiting_input, died), turn, and whether you may drive it. Only this workspace's sessions exist for you.
+
+Read-only.
+
+## agent_start
+
+Start another agent session in THIS workspace on a fresh conversation of its own (for example a reviewer that must not share your context). You hold its lease: you may send it turns.
+
+Not read-only.
+
+| Argument | Type | Required | Description |
+| --- | --- | --- | --- |
+| `allowed_tools` | array | no | - |
+| `disallowed_tools` | array | no | - |
+| `model` | string | no | - |
+| `prompt` | string | no | Its first turn. |
+| `role` | string | yes | A new role for the session, like reviewer (lowercase letters, digits, dashes). |
+| `system_prompt` | string | no | - |
+| `tools` | string | no | The tool set it has, like Read,Grep,Glob. |
+
+## agent_send
+
+Send one turn to another agent session of THIS workspace and return its turn number. Refused if it is busy, if a person drives it, if you are sending too fast (once per 5 s, 20 per hour), or if agents are already two deep. Use agent_wait and agent_read for the result, or agent_ask for all three.
+
+Not read-only.
+
+| Argument | Type | Required | Description |
+| --- | --- | --- | --- |
+| `role` | string | yes | The session's role in this workspace, from agent_list (claude, reviewer, fixer...). |
+| `text` | string | yes | - |
+
+## agent_wait
+
+Wait for another agent session of THIS workspace: until its turn ends (default), it is idle, or it asks for a permission. Returns reached (turn-end, idle, awaiting_input, timeout, died) and the stop reason.
+
+Read-only.
+
+| Argument | Type | Required | Description |
+| --- | --- | --- | --- |
+| `role` | string | yes | The session's role in this workspace, from agent_list (claude, reviewer, fixer...). |
+| `timeout_s` | integer | no | At most 600; wait again to keep waiting. |
+| `turn` | integer | no | - |
+| `until` | string | no | - |
+
+## agent_read
+
+What another agent session of THIS workspace did in a turn: its prompt, text, tool calls with results, stop reason and token usage, read from its transcript.
+
+Read-only.
+
+| Argument | Type | Required | Description |
+| --- | --- | --- | --- |
+| `full` | boolean | no | Tool results in full instead of cut at 2 KB. |
+| `role` | string | yes | The session's role in this workspace, from agent_list (claude, reviewer, fixer...). |
+| `since` | integer | no | - |
+| `turn` | integer | no | One turn; the last by default. |
+
+## agent_ask
+
+Ask another agent session of THIS workspace one question and get its answer: sends a turn, waits for it to end, and returns what it did. The same limits as agent_send apply.
+
+Not read-only.
+
+| Argument | Type | Required | Description |
+| --- | --- | --- | --- |
+| `role` | string | yes | The session's role in this workspace, from agent_list (claude, reviewer, fixer...). |
+| `text` | string | yes | - |
+| `timeout_s` | integer | no | At most 600. |
+
+## agent_approve
+
+Answer a pending approval of another agent session of THIS workspace, once (approve or deny). Use it only for a call you would make yourself.
+
+Not read-only.
+
+| Argument | Type | Required | Description |
+| --- | --- | --- | --- |
+| `deny` | boolean | no | - |
+| `request` | string | yes | The id from its permission_request (pending approval &lt;id&gt;). |
+| `role` | string | yes | The session's role in this workspace, from agent_list (claude, reviewer, fixer...). |

@@ -21,6 +21,10 @@ reattaches. To end it, right-click its tab and choose **Stop Agent**; or set
 the tab ends it too. Pomelo never stores AI credentials; you log in to the
 CLI yourself.
 
+
+Scripts, orchestrators and other agents can drive these sessions too: see
+[Driving agents from scripts](./driving-agents).
+
 ## Side agents
 
 A side agent works next to the main one on something narrow. It never
