@@ -127,4 +127,5 @@ proxy + 2.
 | `~/Library/Application Support/Pomelo/update/` | A downloaded app update waiting to install. |
 | `~/Library/Logs/pomelo-panic.log` | What the app was doing when it crashed, to attach to a bug report. |
 
-`POMELO_CONFIG_DIR` moves everything under `~/.config/pomelo/`.
+`POMELO_CONFIG_DIR` moves everything under `~/.config/pomelo/`. Every file Pomelo keeps is listed in the
+[files reference](/reference/files).
