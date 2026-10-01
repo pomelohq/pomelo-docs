@@ -63,6 +63,8 @@ const GROUPS = [
     items: [
       { text: 'pom.yml', link: '/reference/config' },
       { text: 'Templates', link: '/reference/templates' },
+      { text: 'Settings', link: '/reference/settings' },
+      { text: 'Key bindings', link: '/reference/shortcuts' },
     ],
   },
   {

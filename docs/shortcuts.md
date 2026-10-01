@@ -141,7 +141,7 @@ file works on every platform. Going to a tab takes its position from 0:
 
 Each action's name (such as `git_panel::ToggleFocus`) is listed under its
 label in **Settings > Keymap**, which also shows any mistakes found in the
-file. Only the `Workspace` context is read; editor and terminal keys, and
+file, and in the [key bindings reference](/reference/shortcuts). Only the `Workspace` context is read; editor and terminal keys, and
 the split and pane keys in the tables above, are fixed. The
 [menu bar](./app#the-menu-bar) shows the keys currently bound, including
 yours.
