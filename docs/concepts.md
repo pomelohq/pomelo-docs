@@ -70,6 +70,38 @@ shared_services:
   redis:
 ```
 
+A shared service can also be a **command** instead of a container: one
+process for every workspace, for a small server you don't want running once
+per branch (a mock auth server, a local stub of an outside API). It runs in
+the repo's checkout in the main workspace (or the project folder when no
+`repo` is given), gets its port as `$PORT`, and keeps running when you close
+and reopen Pomelo. Services reach it with `{{shared.<name>.url}}`, which is
+`http://127.0.0.1:<port>`.
+
+```yaml
+shared_services:
+  mock-as:
+    cmd: node scripts/mock-as.js
+    repo: api                # optional: run in api's main checkout
+    port: 4010               # optional: a fixed port; otherwise one is picked
+    environment:
+      ISSUER: "http://127.0.0.1:$PORT"
+    healthcheck:
+      test: "curl -sf http://127.0.0.1:$PORT/health"
+repos:
+  api:
+    shared_services: [mock-as]
+    env:
+      AUTH_ISSUER: "{{shared.mock-as.url}}"
+```
+
+It starts with the other shared services when a workspace starts its
+services, and the Services panel's shared section starts, stops and restarts
+it like the containers. Its tab shows its output, how long it has run, the
+command, folder, port and URL. A shared service is either `image:` or
+`cmd:`, never both; the config doctor checks that the command's program is
+installed, and Docker is only needed when there is an `image:` service.
+
 ## Database
 
 Each workspace gets its **own databases**, named from templates and
@@ -82,7 +114,8 @@ instead of migrating from scratch. See [Databases](./databases).
 
 The **config doctor** is a deterministic health check (no LLM): it checks
 that the config loads and is valid, that git and Docker are installed and
-Docker is running, that main has every repo, and it flags removed config
+Docker is running (when a shared service is a container), that each shared
+command's program is installed, that main has every repo, and it flags removed config
 keys, unset `{{secret.*}}` values and shared services nothing is wired to.
 When it finds problems the window shows **Project setup needs attention**,
 with **Fix with Claude** (or **Open pom.yml** when Claude Code is not
