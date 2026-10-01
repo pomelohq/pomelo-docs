@@ -134,6 +134,34 @@ Click it to open the outline. On its right:
     at the end of that line.
   - **Line Numbers**, **Inline Git Blame**, **Soft Wrap**.
 
+### Language packages
+
+Most languages are highlighted out of the box. These are a small download
+instead, so the app stays smaller: C#, Dart, Elixir, Elm, Erlang, Gleam,
+GraphQL, Haskell, HCL, Kotlin, Lua, Nix, OCaml, Prisma, Proto, R, Scala,
+Svelte, Swift, XML and Zig.
+
+A file in one of them is still recognized (the status bar names its
+language) and opens as plain text, with a notice such as **Kotlin is
+available for this file**.
+
+- **Install Kotlin** (the language's name) downloads its package (highlighting, outline,
+  indentation, comments and brackets for that language), checks it against
+  its checksum and Pomelo's signature, and highlights every open file of
+  that language in place.
+- **Don't show again** stops the notice for that language for good.
+
+Languages you opened lately are installed in the background the first time
+you start a version of Pomelo that no longer carries them, so they stay
+highlighted.
+
+Packages live in `~/Library/Application Support/Pomelo/grammars/`, one
+folder per language and version. Delete a language's folder to remove it.
+
+Offline, a file whose package is not installed stays plain text, and an
+install that cannot download says so in a notice. Pomelo checks the list of
+packages at most once a day; until it can, it uses the list it shipped with.
+
 ### Language servers
 
 Go to definition (`cmd`-click, or `F12`), hover, completions and the
@@ -296,6 +324,8 @@ Inside the window, notices appear for things that need a look:
 - **Invalid settings.json** - a hand edit of `settings.json` does not parse;
   the settings stay as they were, and **Open settings.json** jumps to the
   line. It goes away once the file parses again.
+- **Kotlin is available for this file** (or another language) - see
+  [Language packages](#language-packages).
 - **A language server's message** - see
   [Language servers](#language-servers).
 
