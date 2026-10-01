@@ -428,3 +428,4 @@ Settings are saved to `~/.config/pomelo/settings.json`. **Edit in
 settings.json** opens it in a tab in the window. Edits you make to the file
 yourself apply while the app runs, within a second of saving. Keys the app
 does not know, such as ones a newer version added, are kept when it saves.
+Every key, with its default, is in the [settings reference](/reference/settings).

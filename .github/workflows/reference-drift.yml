@@ -1,0 +1,47 @@
+name: Reference drift
+
+# The generated reference pages must match what the latest release's docs_gen writes.
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'reference/**'
+      - '.github/workflows/reference-drift.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: macos-15
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Latest release tag
+        id: release
+        run: |
+          tag="$(git ls-remote --tags --refs --sort=-v:refname https://github.com/pomelohq/pomelo 'v*' | head -1 | sed 's|.*refs/tags/||')"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: pomelohq/pomelo
+          ref: ${{ steps.release.outputs.tag }}
+          path: pomelo
+      - name: Generate and compare
+        run: |
+          if [ ! -d pomelo/rust/crates/docs_gen ]; then
+            echo "${{ steps.release.outputs.tag }} predates docs_gen; nothing to compare"
+            exit 0
+          fi
+          (cd pomelo/rust && rustup show >/dev/null && cargo run -q -p docs_gen -- --out "$RUNNER_TEMP/reference")
+          status=0
+          for page in "$RUNNER_TEMP"/reference/*.md; do
+            name="$(basename "$page")"
+            if ! diff -u "reference/$name" "$page"; then
+              echo "::error file=reference/$name::differs from docs_gen at ${{ steps.release.outputs.tag }}; regenerate it"
+              status=1
+            fi
+          done
+          exit $status
