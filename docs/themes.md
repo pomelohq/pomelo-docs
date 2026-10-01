@@ -117,7 +117,10 @@ buffer font size alone, whatever the UI font size is.
   `false` off, a number picks an alternate. Turning off `calt` shows `->`
   and `!=` as plain characters instead of the font's ligatures.
 - **Fallbacks** - families tried in order for characters the family lacks,
-  before the system's own fallback.
+  before the system's own fallback. Symbols meant as text (such as the
+  record dot some terminal apps print, check marks and arrows) then try the
+  plain symbol fonts macOS ships, so they show as text rather than as color
+  emoji; emoji themselves still show in color.
 
 ```json
 {

@@ -154,7 +154,11 @@ one you click; **View logs** keeps it open). The tab has:
   yellow. With the filter not focused, `cmd-c` copies the last line.
 
 A crashed service's tab shows the output it left. A shared service's tab
-follows its Docker logs. Closing a service's tab never stops the service.
+has the same header (its name, tagged **shared**, with **Start**, **Stop**,
+**Restart** and `...`), facts (**Status**, **Image**, **Port**, the
+**Connection** URL with copy, and **Used by**) and log list, following its
+Docker logs; stopping it there asks first when other workspaces use it.
+Closing a service's tab never stops the service.
 
 ### URLs
 
