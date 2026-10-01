@@ -197,7 +197,7 @@ environments:
     api.server: "https://api.acme.dev"      # dev-proxy forwards there when staging is active
 ```
 
-See [Environments & profiles](../reference/config#environments-profiles).
+See [Environments & profiles](../reference/config#top-level).
 
 ## Webhook fan-out
 
