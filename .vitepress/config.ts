@@ -54,6 +54,7 @@ const GROUPS = [
       { text: 'Network', link: '/docs/network' },
       { text: 'Agents', link: '/docs/agents' },
       { text: 'Agent status', link: '/docs/agent-status' },
+      { text: 'Driving agents from scripts', link: '/docs/driving-agents' },
       { text: 'The app', link: '/docs/app' },
       { text: 'Git and pull requests', link: '/docs/git' },
       { text: 'Keyboard shortcuts', link: '/docs/shortcuts' },
