@@ -25,7 +25,25 @@ shared_services: { ... }        # see "Shared services" below
 repos: { ... }                  # see "Repos" below
 seed: [ ... ]                   # optional: run once in the workspace root before repo seeds
 prepare_main: [reset, migrate, seed]   # phases of Prepare Main (default: all three)
+sync:                           # optional: auto-push and Keep Main Fresh defaults
+  auto_push: true               # push committed work on a timer
+  interval_sec: 180             # how often (default 180, at least 30)
+  refresh_main: true            # Keep Main Fresh, until it is set in the app
+  refresh_interval_sec: 1800    # how often main is refreshed (default 1800)
 ```
+
+| Key | Type | Default | Description |
+| --- | --- | --- | --- |
+| `session` | string | `pomelo` | Project name. Prefixes databases, holders, hostnames and the shared compose project. |
+| `default_branch` | string | `main` | Default branch of every repo; a repo's `default_branch` overrides it. |
+| `preset` | string or list | - | Presets whose `services` run once per workspace, in the workspace root. |
+| `environments` | map | - | Profiles that point services at deployed URLs (see below). |
+| `presets` | map | - | Reusable repo fragments (see [Presets](#presets)). |
+| `shared_services` | map | - | Services every workspace shares (see [Shared services](#shared-services)). |
+| `repos` | map | - | The project's repos (see [Repos](#repos)). |
+| `seed` | list of commands | - | Run once in a new workspace's root, before the repos' seeds. |
+| `prepare_main` | list | `[reset, migrate, seed]` | Phases **Prepare Main** runs, in order. |
+| `sync` | map | - | `auto_push` and `interval_sec` push committed work on a timer; `refresh_main` and `refresh_interval_sec` are the Keep Main Fresh schedule until you change it in the app, which then wins. |
 
 A top-level `preset:` does not apply to repos: the named presets' `services`
 run once per workspace, in the workspace root.
@@ -114,8 +132,42 @@ repos:
 | `env` | Env vars to generate. Flat map -> `.env.local`, or file-keyed (see below). Uses [templates](./templates). |
 | `databases` | **Named** map (`name: template`); auto-created per workspace as `<session>_<template>`. Referenced as `{{db.name}}`. Only `{{branch...}}` tokens expand here. |
 | `seed_from_main` | Clone this repo's DBs from the **main** workspace's copies instead of creating them empty; skips the repo's `seed`. See below. |
-| `services` | Named services. See [Services](../docs/services). |
+| `shared_services` | The shared services this repo uses: a list of names (`[postgres, mock-as]`), or `{postgres: {db_name: "..."}}` to also create a database on it. Starting the repo's services starts these, and the shared tab lists the repo under **Used by**. |
+| `services` | Named services (see the table below and [Services](../docs/services)). |
 | `lifecycle` | The ops side - set up / run / tear down. See below. |
+| `proxy_port` | Port a repo-level reference falls back to when none of the repo's services has one. |
+
+A service is either a command string or a map:
+
+```yaml
+services:
+  worker: bundle exec sidekiq          # just the command
+  server:
+    type: backend                      # backend | frontend | worker
+    cmd: bin/rails s -p $PORT
+    dir: apps/api                      # run in a sub-folder (monorepos)
+    port: true                         # lease a port as $PORT
+    depends_on: [worker]               # start after these
+    env: { RAILS_LOG_LEVEL: debug }
+    profiles: [local, staging]
+    mode: dev
+    modes:
+      dev: bin/rails s -p $PORT
+      prod: bin/rails s -e production -p $PORT
+```
+
+| Service field | Description |
+| --- | --- |
+| `cmd` | The command, run by the login shell with the resolved env. |
+| `type` | `backend`, `frontend` or `worker`. Backends and frontends get a port unless `port: false`. |
+| `dir` | Folder inside the repo to run in. |
+| `port` | `true` leases a port (given as `$PORT`); `false` never does. |
+| `depends_on` | Services of the same repo to start first. |
+| `env` | Env vars for this service only, over the repo's. |
+| `profiles` | Environments this service can switch to; replaces the repo's list. |
+| `modes` / `mode` | Named alternate commands and the default one; switched live from the service's menu. |
+| `pre_start` / `shell_env` | Replace the repo's for this service. |
+| `tasks` | Quick commands shown for this service (`shortcuts` is read as the same key). |
 
 The **`lifecycle:`** block keeps ops out of the repo's identity. The same
 keys are also read at the repo's top level; `lifecycle:` wins.
@@ -225,6 +277,24 @@ shared_services:
     ports: ["5672", "15672"]
 ```
 
+Or run a **command** instead of a container - one process for every
+workspace (a mock auth server, a stub of an outside API):
+
+```yaml
+shared_services:
+  mock-as:
+    cmd: node scripts/mock-as.js     # instead of image
+    repo: api                        # run in api's checkout in the main workspace
+    port: 4010                       # optional: fixed; otherwise one is leased
+    environment:
+      ISSUER: "http://127.0.0.1:$PORT"
+    healthcheck:
+      test: "curl -sf http://127.0.0.1:$PORT/health"
+repos:
+  api:
+    shared_services: [mock-as]       # starting api's services starts it
+```
+
 A shared service runs once for every workspace of the project. It is either
 a Docker image (`image`) or a command (`cmd`), never both.
 
@@ -234,18 +304,46 @@ when it is free, else the next free one within 100, else a random one - so
 you can set up an external client (`psql`, a GUI) once. You never hard-code
 it: use `{{shared.<name>.port}}`.
 
-| Field | Description |
+A command service runs in one process for every workspace, under a holder
+that keeps running when you quit Pomelo. It is told its port as `$PORT`
+(and `$BIND_IP`), and `{{shared.<name>.url}}` is `http://127.0.0.1:<port>`.
+A `healthcheck` test is waited for, up to 30 seconds, before the services
+that use it start.
+
+| Field | Applies to | Description |
+| --- | --- | --- |
+| `image` | image | Docker image. |
+| `cmd` | cmd | Shell command to run instead of a container. |
+| `type` | image | Well-known template to base this service on (defaults to the service's name). Never applied to a `cmd`. |
+| `ports` | image | Container ports (`"5432"` or `"host:container"`); the first number is the preferred host port. |
+| `port` | cmd | The port it is told. Without it, one is leased and kept. |
+| `repo` | cmd | A repo key: run in that repo's checkout in the main workspace. Without it, the project folder. |
+| `environment` | both | Env vars, written as-is. In a `cmd` service, `$PORT` and `${PORT}` in a value become the port. |
+| `volumes` | image | Volume mounts. |
+| `command` | image | Override the container command. |
+| `healthcheck` | both | Image: `test` / `interval` / `timeout` / `retries` for the compose file. Cmd: a `test` command waited for at start. |
+| `db_user` / `db_password` | image | Credentials for auto database creation. |
+| `host` | image | Host to reach an external database instead of a container. |
+| `capacity` | image | Max slots per instance (a new instance is added when full). |
+
+## Validation
+
+Pomelo checks the file when it loads it. An invalid file is not used, and
+each problem is listed with where it is:
+
+| Problem | Example message |
 | --- | --- |
-| `image` | Docker image. |
-| `ports` | Container ports (`"5432"` or `"host:container"`); the first number is the preferred host port. |
-| `environment` | Container env vars (written as-is). |
-| `volumes` | Volume mounts. |
-| `command` | Override container command. |
-| `healthcheck` | `test` / `interval` / `timeout` / `retries` for the generated compose file. |
-| `db_user` / `db_password` | Credentials for auto database creation. |
-| `host` | Host to reach an external database instead of a container. |
-| `capacity` | Max slots per instance (a new instance is added when full). |
-| `type` | Well-known template to base this service on (defaults to the service's name). |
+| A colon-form template | `repo "api" env.DATABASE_URL: {{conn:postgres}} is removed - use {{shared.NAME.url}}` |
+| A profile with no environment | `repo "api": environment "staging" not defined` |
+| A shared service with both or neither of `image` and `cmd` | `shared service "mock-as": set either image (a Docker container) or cmd (a command), not both` |
+| An image-only field on a `cmd` service | `shared service "mock-as": ports is only for an image; a cmd service uses port` |
+| A cmd-only field on an image service | `shared service "postgres": port is only for a cmd; an image service uses ports` |
+| A `repo` that is not in `repos` | `shared service "mock-as": repo "auth" is not in repos` |
+| A `cmd` service on a port another shared service wants | `shared services "mock-as", "stub" all want port 4010` |
+
+The [config doctor](../docs/concepts#config-doctor) looks further: missing
+tools (Docker, a `cmd` service's program), repos that are not cloned,
+secrets with no value, and shared services nothing references.
 
 ## Presets
 
