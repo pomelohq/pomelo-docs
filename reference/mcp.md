@@ -195,13 +195,19 @@ Not read-only; results over 8000 characters are cut.
 
 ## resolve_port_conflict
 
-Move this workspace to a fresh, fully-free port region and regenerate its env - the self-heal when a service can't bind because something grabbed pom's port. Restart affected services afterward.
+Move this workspace to a fresh, fully-free port region and regenerate its env - the self-heal when a service can't bind because something grabbed pom's port. Running services restart on their new ports.
 
 Not read-only.
 
 ## config_get
 
-Read this project's pom.yml (services, repos, shared services - Docker image or cmd -, env profiles, databases).
+Read this project's pom.yml (services, repos, shared services - Docker image or cmd -, env profiles, databases). What each key means: config_reference.
+
+Read-only.
+
+## config_reference
+
+The pom.yml reference: every key the config reads (type, default, what it does, examples), every &#123;&#123;...&#125;&#125; template token, and the removed keys and colon forms with their replacements. Read it before writing a config with config_set.
 
 Read-only.
 
@@ -213,7 +219,7 @@ Read-only.
 
 ## config_validate
 
-Dry-run validate a proposed pom.yml (schema + reference checks) WITHOUT writing. Always validate before config_set. A shared service is either a Docker `image:` or a `cmd:` run once for every workspace, e.g. `shared_services: {mock-as: {cmd: node scripts/mock-as.js, repo: api, port: 4010}}` (repo: run in that repo's main checkout; port: else one is leased and given as $PORT); reach it with &#123;&#123;shared.mock-as.url&#125;&#125;.
+Dry-run validate a proposed pom.yml (schema + reference checks) WITHOUT writing. Always validate before config_set. Every key and token: config_reference. A shared service is either a Docker `image:` or a `cmd:` run once for every workspace, e.g. `shared_services: {mock-as: {cmd: node scripts/mock-as.js, repo: api, port: 4010}}` (repo: run in that repo's main checkout; port: else one is leased and given as $PORT); reach it with &#123;&#123;shared.mock-as.url&#125;&#125;.
 
 Read-only.
 
@@ -223,7 +229,7 @@ Read-only.
 
 ## config_set
 
-Validate and write a new pom.yml, then reload - adds/edits services, repos, shared services, databases, env. Rejected if invalid (nothing is written). Newly added services get ports allocated automatically. A shared service is a Docker `image:` or a `cmd:` (one process for every workspace, optional repo/port/environment/healthcheck); start it with shared_start.
+Validate and write a new pom.yml, then reload - adds/edits services, repos, shared services, databases, env. Rejected if invalid (nothing is written). Newly added services get ports allocated automatically. A shared service is a Docker `image:` or a `cmd:` (one process for every workspace, optional repo/port/environment/healthcheck); start it with shared_start. Every key and token: config_reference.
 
 Not read-only.
 
