@@ -19,14 +19,20 @@ A service is `name` or `repo/name`.
 
 | Command | What it does |
 | --- | --- |
-| `pom start <target>` | Start a service, a repo's services, or a `workspaces:` group |
+| `pom start <target> [--wait [--timeout 120s]]` | Start a service, a repo's services, or a `workspaces:` group; --wait blocks until each is ready (its healthcheck, else its port): exit 0 ready, 2 timeout, 3 stopped |
 | `pom stop [target]` | Stop them; with no target, every service of the workspace |
 | `pom restart <target>` | Stop, then start |
-| `pom status` | Services of the workspace and whether they run |
-| `pom logs <service>` | Recent output of a service |
+| `pom status [-o json]` | Services of the workspace and whether they run (json: up, ready, healthy) |
+| `pom logs <service> [--since <mark>] [--raw] [-o json]` | Recent output of a service, or only what it printed since a mark |
+| `pom logs --mark <name> record where every service's output has got to` | - |
+| `pom mark <name> [-w b] one mark for a test step: log offsets and query counters` | - |
+| `pom queue wait-idle <service> [--timeout 60s] [-o json]` | Wait until the service's Sidekiq/BullMQ queue (pom.yml `queue:`) has no work: exit 0 idle, 2 still busy |
+| `pom queue counts <service> [-o json]` | The queue's waiting, active, due and delayed jobs |
 | `pom attach <service>` | Attach this terminal to a running service (detach: close the terminal) |
 | `pom ports` | Every leased port |
 | `pom url <service>` | Where a service with a port listens, directly and through the dev proxy |
+| `pom proxy fault add <service> [--path /x] [--status 503] [--delay 2s] [--rate 0.3] [--ttl 10m]` | Make the dev proxy fail or slow down this workspace's requests to a service |
+| `pom proxy fault ls [--all] [-o json] \| rm <id> \| clear` | The fault rules in force; remove one, or every one of the workspace |
 | `pom proxy` | Serve the dev proxy and webhook relay for every project (`pom start` runs one in the background when neither the app nor another proxy does) |
 | `pom run <name\|"cmd"> [repo]` | A command from the config (or any shell command) in the repo's worktree, with the workspace's env |
 | `pom commands` | The commands the config defines, per repo |
@@ -46,7 +52,15 @@ A service is `name` or `repo/name`.
 | `pom apply [branch] [--yes]` | Check out repos the config added but a workspace lacks |
 | `pom prepare-main [--no-seed]` | Reset main's databases, migrate and seed (new workspaces copy them) |
 | `pom db create\|drop\|reset [branch]` | The workspace's databases in the shared Postgres |
-| `pom db clean [--dry-run] [--yes]` | Drop this project's databases no workspace uses |
+| `pom db clean [--dry-run] [--yes]` | Drop this project's databases (and snapshots) no workspace uses |
+| `pom db snapshot <name> [-w b] [--replace] [-o json]` | Copy every database of the workspace into snapshot &lt;name&gt; |
+| `pom db restore <name> [-w b] [--no-restart] [--main] [-o json]` | Put the snapshot back: stops the workspace's services, restarts them after |
+| `pom db snapshots [-w b] [-o json]` | The workspace's snapshots and their sizes |
+| `pom db snapshot drop <name> [-w b]` | Drop a snapshot |
+| `pom db baseline [-w b] [-o json]` | Run the branch's migrations, then save ws__baseline again |
+| `pom db mark <name> [-w b]` | Save the workspace's query counters (pom mark saves logs too) |
+| `pom db stats --since <mark> [--repeated n] [-w b] [-o json]` | The queries the workspace ran since the mark: totals, slowest, repeated (N+1) |
+| `pom db reseed [-w b] [--from main__baseline \| --snapshot <name>] [--main] [-o json]` | Replace the workspace's data, migrate, save ws__baseline; services restart |
 
 ## Config
 

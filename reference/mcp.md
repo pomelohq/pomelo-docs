@@ -86,6 +86,49 @@ Not read-only; results over 12000 characters are cut.
 | `limit` | integer | no | max rows (default 200) |
 | `sql` | string | yes | SQL (postgres) or a Redis command (e.g. `GET key`) |
 
+## db_snapshots
+
+List THIS workspace's database snapshots: each name with its databases, sizes and when it was taken, plus the total size. ws__baseline is the state right after the workspace was created; take others with db_snapshot.
+
+Read-only.
+
+## db_snapshot
+
+Save every database of THIS workspace as snapshot `name` (letters, digits, - and _), so db_restore can put exactly this data back later - e.g. before a test that writes. Briefly disconnects the workspace's own services from their databases. Refused if the name exists unless `replace` is true. Never touches main or other workspaces.
+
+Not read-only.
+
+| Argument | Type | Required | Description |
+| --- | --- | --- | --- |
+| `name` | string | yes | snapshot name, e.g. before-checkout |
+| `replace` | boolean | no | take it again if it exists (default false) |
+
+## db_restore
+
+Put snapshot `name` back into every database of THIS workspace (see db_snapshots). STOPS the workspace's running services, replaces each database with its snapshot copy, then STARTS them again. Every change since the snapshot is lost. Refused on main.
+
+Not read-only; destructive.
+
+| Argument | Type | Required | Description |
+| --- | --- | --- | --- |
+| `name` | string | yes | a snapshot from db_snapshots |
+
+## db_baseline
+
+Run THIS workspace's migrations, then save its databases again as ws__baseline - after a migration changes the schema, so later resets start from the migrated data. Refused on main.
+
+Not read-only.
+
+## db_reseed
+
+Replace THIS workspace's data: from main's main__baseline (default, without disconnecting main) or from one of its own snapshots (`snapshot`). Then runs its migrations and saves ws__baseline again. STOPS and restarts the workspace's running services. Refused on main.
+
+Not read-only; destructive.
+
+| Argument | Type | Required | Description |
+| --- | --- | --- | --- |
+| `snapshot` | string | no | one of this workspace's snapshots instead of main__baseline |
+
 ## service_start
 
 start a service in this workspace and report status. Ports are pre-flighted, so a started service is guaranteed to bind the port pom reports.
