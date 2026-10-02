@@ -20,7 +20,7 @@ The keys at the top of `pom.yml`.
 | `environments` | map of maps | - | Profiles that point services at deployed URLs: `<profile>: { <repo>.<service>: <url> }`. Under that profile `{{<repo>.<service>.url}}` (and `.host`, `.port`, `.ws`) resolves to the URL and the dev proxy forwards there; other services stay local. The URL is used as written, without templates. |
 | `preset` | string or list | - | Presets whose services run once per workspace, outside any repo. |
 | `seed` | list of commands | - | Runs once in the workspace folder when a workspace is created, before each repo's seed. |
-| `prepare_main` | list | reset, migrate, seed | The phases Prepare Main runs, in order: `reset`, `migrate` and `seed`. Other names are skipped; a list with none of them runs only `reset`. |
+| `prepare_main` | list | reset, migrate, seed, snapshot | The phases Prepare Main runs, in order: `reset`, `migrate`, `seed` and `snapshot`, which saves main's databases as the `main__baseline` snapshot new workspaces copy from without disconnecting main. Other names are skipped; a list with none of them runs only `reset`. |
 | `sync` | map | - | Keep Main Fresh; see Sync. |
 | `agents` | map | - | A policy for the workspace's coding agents; see Agents. |
 | `workspaces` | map | - | Ignored. Workspace groups; nothing reads them now. |
@@ -44,7 +44,7 @@ preset: [gateway]
 
 seed: [./scripts/seed-all.sh]
 
-prepare_main: [migrate, seed]
+prepare_main: [migrate, seed, snapshot]
 ```
 
 ## Repos
@@ -160,6 +160,8 @@ Each entry of a repo's (or preset's) `services:` is one long-running process. `n
 | `repos.<repo>.services.<service>.mode` | string | - | The mode used when none is picked in the app; `cmd` runs when there is none. |
 | `repos.<repo>.services.<service>.tasks` | list | - | Quick commands for this service; see Tasks. |
 | `repos.<repo>.services.<service>.shortcuts` | list | - | Older name of `tasks`. |
+| `repos.<repo>.services.<service>.healthcheck` | map | - | When the service counts as ready; see Service healthcheck. |
+| `repos.<repo>.services.<service>.queue` | map | - | The job queue this worker drains; see Service queue. |
 
 Examples, each written under `repos.<repo>.services.<service>`:
 
@@ -179,6 +181,56 @@ modes:
   prod: npm run start -- -p $PORT
 
 mode: dev
+
+healthcheck: { http: /health }
+
+queue: { kind: sidekiq }
+```
+
+## Service healthcheck
+
+When a service counts as ready, for `pom start --wait` and `pom status`: give `http` or `cmd`. Without a healthcheck a service with a port is ready once the port listens.
+
+| Key | Type | Default | What it does |
+|---|---|---|---|
+| `repos.<repo>.services.<service>.healthcheck.http` | path | - | A path on the service's own port; ready once a GET answers 2xx or 3xx. |
+| `repos.<repo>.services.<service>.healthcheck.cmd` | command | - | A shell command run in the service's folder with its env; ready once it exits 0. |
+| `repos.<repo>.services.<service>.healthcheck.interval` | duration | `1s` | Time between checks. |
+| `repos.<repo>.services.<service>.healthcheck.timeout` | duration | `3s` | How long one check may take before it counts as failed. |
+
+Examples, each written under `repos.<repo>.services.<service>.healthcheck`:
+
+```yaml
+http: /health
+
+cmd: bin/rails runner 'ActiveRecord::Base.connection'
+
+interval: 500ms
+
+timeout: 5s
+```
+
+## Service queue
+
+The background-job queue a worker service drains, in the workspace's Redis slot. `pom queue wait-idle <service>` waits until it is empty, e.g. before a test checks what a job did.
+
+| Key | Type | Default | What it does |
+|---|---|---|---|
+| `repos.<repo>.services.<service>.queue.kind` | string | - | `sidekiq` or `bullmq`. |
+| `repos.<repo>.services.<service>.queue.prefix` | string | `bull` | BullMQ's key prefix. |
+| `repos.<repo>.services.<service>.queue.queues` | list | every queue found | The queues to watch. |
+| `repos.<repo>.services.<service>.queue.redis` | string | the repo's first Redis | The shared Redis service the queue lives in. |
+
+Examples, each written under `repos.<repo>.services.<service>.queue`:
+
+```yaml
+kind: bullmq
+
+prefix: bull
+
+queues: [default, mailers]
+
+redis: redis
 ```
 
 ## Tasks
@@ -234,6 +286,7 @@ Each entry of `shared_services:` runs once for every workspace: a Docker `image`
 | `shared_services.<name>.db_user` | string | postgres for a Postgres | For an `image`: the login `{{shared.<name>.url}}` and `.user` carry. |
 | `shared_services.<name>.db_password` | string | postgres for a Postgres | For an `image`: the password `{{shared.<name>.url}}` and `.pass` carry. |
 | `shared_services.<name>.capacity` | number | - | For an `image`: how many workspaces share one instance. Each gets a slot, `{{shared.<name>.slot}}` (a Redis database number, for example); when an instance is full another starts at base port + instance. |
+| `shared_services.<name>.slot_reset` | string | - | For an `image` with `capacity`: a command run inside the instance's container to empty one slot, with `{{slot}}` replaced by its number. It runs when a workspace gives its slot back (deleted, or its folder is gone) and before a slot is handed to a new workspace, so no workspace sees another's data; a slot whose reset fails is not handed out. The redis preset empties the Redis database. |
 | `shared_services.<name>.host` | string | `localhost` | The host the app's database and storage browsers connect to. Templates always use `127.0.0.1`. |
 
 Examples, each written under `shared_services.<name>`:
@@ -251,7 +304,9 @@ port: 4010
 
 ports: ["5432"]
 
-capacity: 16
+capacity: 64
+
+slot_reset: redis-cli -n {{slot}} FLUSHDB | grep -qx OK
 ```
 
 ## Shared service healthcheck

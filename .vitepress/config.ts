@@ -51,6 +51,7 @@ const GROUPS = [
       { text: 'Project config', link: '/docs/project-config' },
       { text: 'Services', link: '/docs/services' },
       { text: 'Databases', link: '/docs/databases' },
+      { text: 'Testing against a workspace', link: '/docs/testing' },
       { text: 'Network', link: '/docs/network' },
       { text: 'Agents', link: '/docs/agents' },
       { text: 'Agent status', link: '/docs/agent-status' },
