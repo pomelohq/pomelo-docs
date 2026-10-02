@@ -12,6 +12,10 @@ The agent button (`cmd-?`) opens the command set in **Settings > Agent >
 Agent Command** (`claude` by default) in the agent dock. Its tab is pinned
 first and titled **Main**.
 
+To keep agents next to your code instead, set **Settings > Agents > Open Agents In** to **Editor Tab**: every
+agent then opens as a tab in the focused pane of the editor area. An agent already open, in either place, is
+focused rather than opened twice.
+
 With Claude Code it resumes the workspace's own conversation, gets the MCP
 tools and Pomelo's system prompt, so mid-task it can check ports, databases
 and services and act on the real stack. The agent runs in its own holder:

@@ -107,6 +107,7 @@ window; they change as you use it and rarely need editing by hand.
 | Key | Default | Description |
 | --- | --- | --- |
 | `agent_command` | `"claude"` | The AI CLI the Agent button opens in a workspace; `claude` also gets pom's MCP server and prompt. |
+| `agent_open_in` | `"dock"` | Where agents open: `"dock"` in the agent dock, `"center"` as a tab next to the code. |
 | `agent_tab_close` | `"hide"` | Closing an agent's tab: `"hide"` leaves the agent running, `"stop"` ends it. |
 
 ## Notifications
