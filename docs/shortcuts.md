@@ -63,6 +63,135 @@ Project with AI**, **Add Repository**, **Clone Missing Repos into Main**,
 
 In a terminal, `cmd-d` or `ctrl-alt`-arrow splits the terminal pane.
 
+| Action | macOS | Windows / Linux (coming soon) |
+| --- | --- | --- |
+| Switch to a recent tab (hold `ctrl`, press again to go further back) | <Keys k="ctrl-tab"/> / <Keys k="ctrl-shift-tab"/> | <Keys pc k="ctrl-tab"/> / <Keys pc k="ctrl-shift-tab"/> |
+| Close the tab picked in the switcher | <Keys k="ctrl-backspace"/> | <Keys pc k="ctrl-backspace"/> |
+| Close the other tabs | <Keys k="cmd-alt-t"/> | <Keys pc k="ctrl-alt-t"/> |
+| Close the tabs to the left / right | <Keys k="cmd-k e"/> / <Keys k="cmd-k t"/> | <Keys pc k="ctrl-k e"/> / <Keys pc k="ctrl-k t"/> |
+| Close the saved tabs | <Keys k="cmd-k u"/> | <Keys pc k="ctrl-k u"/> |
+
+Pinned tabs stay when a set of tabs closes.
+
+## Moving around
+
+| Action | macOS | Windows / Linux (coming soon) |
+| --- | --- | --- |
+| Previous / next workspace in the sidebar | <Keys k="cmd-alt-up"/> / <Keys k="cmd-alt-down"/> | <Keys pc k="ctrl-alt-up"/> / <Keys pc k="ctrl-alt-down"/> |
+| Next workspace waiting for you | <Keys k="cmd-alt-a"/> | <Keys pc k="ctrl-alt-a"/> |
+| Back to the editor (from a panel, terminal or agent) | <Keys k="cmd-escape"/> | <Keys pc k="ctrl-escape"/> |
+| Next / previous region (editor, panels, terminal, agent) | <Keys k="cmd-k tab"/> / <Keys k="cmd-k shift-tab"/> | <Keys pc k="ctrl-k tab"/> / <Keys pc k="ctrl-k shift-tab"/> |
+
+A panel's own key (Files, Git, Services, Database in the Window table) moves
+the keyboard into its list; pressed again, or with <Keys k="escape"/>, it goes
+back to the editor. Clicking a list does the same. In any list or context
+menu, <Keys k="up"/> / <Keys k="down"/>, <Keys k="home"/> / <Keys k="end"/>
+move, <Keys k="enter"/> picks and <Keys k="escape"/> closes. Tooltips of
+buttons that have a key show it.
+
+## Panel lists
+
+These work only while the list has the keyboard, never in a terminal or an
+agent, so single letters are safe there.
+
+**Files**
+
+| Keys | Action |
+| --- | --- |
+| <Keys k="space"/> | Open |
+| <Keys k="enter"/> or <Keys k="f2"/> | Rename |
+| <Keys k="cmd-n"/> / <Keys k="cmd-alt-n"/> | New file / folder |
+| <Keys k="cmd-x"/> / <Keys k="cmd-c"/> / <Keys k="cmd-v"/> | Cut / copy / paste |
+| <Keys k="cmd-d"/> | Duplicate |
+| <Keys k="cmd-alt-c"/> / <Keys k="cmd-alt-shift-c"/> | Copy path / relative path |
+| <Keys k="backspace"/> or <Keys k="cmd-backspace"/> | Move to Trash |
+| <Keys k="cmd-alt-backspace"/> | Delete |
+| <Keys k="cmd-alt-r"/> | Reveal in Finder |
+| <Keys k="left"/> / <Keys k="right"/> | Collapse / expand |
+| <Keys k="cmd-left"/> / <Keys k="cmd-right"/> | Collapse / expand all |
+
+**Git**
+
+| Keys | Action |
+| --- | --- |
+| <Keys k="enter"/> | Open the diff, commit or pull request |
+| <Keys k="space"/> | Stage or unstage |
+| <Keys k="cmd-y"/> / <Keys k="cmd-shift-y"/> | Stage / unstage the file |
+| <Keys k="cmd-ctrl-y"/> / <Keys k="cmd-ctrl-shift-y"/> | Stage / unstage everything |
+| <Keys k="backspace"/> | Discard the file's changes (asks first) |
+| <Keys k="cmd-alt-c"/> / <Keys k="cmd-alt-shift-c"/> | Copy path / relative path |
+| <Keys k="tab"/> | To the commit message and back |
+| <Keys k="left"/> / <Keys k="right"/> | Fold / unfold |
+| <Keys k="ctrl-g ctrl-g"/> | Fetch |
+| <Keys k="ctrl-g up"/> / <Keys k="ctrl-g down"/> | Push / pull |
+| <Keys k="cmd-1"/> / <Keys k="cmd-2"/> / <Keys k="cmd-3"/> | Changes / Remote / History |
+
+**Services**
+
+| Keys | Action |
+| --- | --- |
+| <Keys k="enter"/> | Open the service's tab |
+| <Keys k="s"/> | Start or stop (the whole repo on a repo row) |
+| <Keys k="r"/> | Restart |
+| <Keys k="o"/> | Open in the browser |
+| <Keys k="l"/> | Logs |
+| <Keys k="left"/> / <Keys k="right"/> | Fold / unfold |
+
+**Database**
+
+| Keys | Action |
+| --- | --- |
+| <Keys k="enter"/> | Open the table, console or bucket |
+| <Keys k="left"/> / <Keys k="right"/> | Fold / unfold |
+| <Keys k="cmd-alt-c"/> | Copy the connection URL |
+| <Keys k="cmd-n"/> | New console |
+
+## Agents and notices
+
+| Action | macOS | Windows / Linux (coming soon) |
+| --- | --- | --- |
+| Start a side agent (pick Ask, Review, Second opinion or Fix) | <Keys k="cmd-k a"/> | <Keys pc k="ctrl-k a"/> |
+| Take the agent's session over | <Keys k="cmd-k o"/> | <Keys pc k="ctrl-k o"/> |
+| Allow / deny the tool call waiting on you | <Keys k="cmd-k y"/> / <Keys k="cmd-k n"/> | <Keys pc k="ctrl-k y"/> / <Keys pc k="ctrl-k n"/> |
+| Stop the agent | <Keys k="cmd-k ."/> | <Keys pc k="ctrl-k ."/> |
+| Run the notice's action (for example Restart to Update) | <Keys k="cmd-k enter"/> | <Keys pc k="ctrl-k enter"/> |
+| Close the notice | <Keys k="cmd-k escape"/> | <Keys pc k="ctrl-k escape"/> |
+
+The agent keys act on the front tab of the focused group, then the agent
+dock's.
+
+## Settings window
+
+<Keys k="up"/> / <Keys k="down"/> open the previous / next page,
+<Keys k="home"/> / <Keys k="end"/> the first / last. <Keys k="tab"/> (or
+<Keys k="right"/>) steps into the page's controls, <Keys k="shift-tab"/> goes
+back, <Keys k="enter"/> or <Keys k="space"/> presses the control, and
+<Keys k="left"/> or <Keys k="escape"/> returns to the pages. In an open
+dropdown, <Keys k="up"/> / <Keys k="down"/> and <Keys k="enter"/> pick an item.
+
+## Vim mode
+
+Turn it on in **Settings > Keymap > Vim Mode** or with **Toggle Vim Mode** in
+the command palette. The editor then starts in Normal mode and the status bar
+shows the mode.
+
+| Keys | Action |
+| --- | --- |
+| `h` `j` `k` `l`, `w` `b` `e` (`W` `B` `E`), `0` `^` `$`, `gg` `G`, `f` `t` `F` `T` `;` `,` | Motions, with counts |
+| `i` `a` `I` `A` `o` `O` | Insert mode; <Keys k="escape"/> back to Normal |
+| `d` `c` `y` `>` `<` + a motion, or doubled for lines | Delete, change, yank, indent, outdent |
+| `x` `X` `s` `S` `D` `C` `Y` `r` `J` | Small edits |
+| `p` `P` | Paste the last delete or yank |
+| `u` / <Keys k="ctrl-r"/> | Undo / redo |
+| `.` | Repeat the last change |
+| `v` / `V` | Visual mode by character / line |
+| `/` `?` `n` `N` `*` `#` | Search with the find bar |
+| <Keys k="ctrl-d"/> / <Keys k="ctrl-u"/> | Scroll a page |
+
+In the panel lists, vim mode adds `j` / `k`, `gg` / `G` and `h` / `l` (the
+Services list keeps `l` for logs); the Git list also takes `x` to stage or
+unstage, `X` / `U` for everything and `i` for the commit message.
+
 ## Editor
 
 | Keys | Action |
@@ -106,7 +235,7 @@ and `cmd-"` expands them all.
 | Keys | Action |
 | --- | --- |
 | <Keys k="cmd-c"/> / <Keys k="cmd-v"/> | Copy / paste |
-| <Keys k="cmd-k"/> | Clear |
+| <Keys k="cmd-k"/> | Clear (when no `cmd-k` chord follows) |
 | <Keys k="cmd-a"/> | Select all |
 | <Keys k="cmd-f"/> / <Keys k="cmd-g"/> | Find / next match |
 | <Keys k="cmd-left"/> / <Keys k="cmd-right"/> | Start / end of the line |
@@ -141,7 +270,10 @@ file works on every platform. Going to a tab takes its position from 0:
 
 Each action's name (such as `git_panel::ToggleFocus`) is listed under its
 label in **Settings > Keymap**, which also shows any mistakes found in the
-file, and in the [key bindings reference](/reference/shortcuts). Only the `Workspace` context is read; editor and terminal keys, and
+file, and in the [key bindings reference](/reference/shortcuts). The contexts
+read are `Workspace` and the lists' own `ProjectPanel`, `GitPanel`,
+`ServicesPanel`, `DatabasePanel` and `TabSwitcher`, which apply only while
+that list has the keyboard; editor and terminal keys, and
 the split and pane keys in the tables above, are fixed. The
 [menu bar](./app#the-menu-bar) shows the keys currently bound, including
 yours.
