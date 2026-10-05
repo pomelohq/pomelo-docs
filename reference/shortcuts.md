@@ -10,55 +10,132 @@ and pane keys listed there are fixed and cannot be rebound.
 Pomelo runs on macOS today; the Windows / Linux column shows the keys those
 platforms will use.
 
-| Action | Name | macOS | Windows / Linux |
-| --- | --- | --- | --- |
-| Command Palette | `command_palette::Toggle` | <Keys k="cmd-shift-p"/> | <Keys pc k="ctrl-shift-p"/> |
-| Go to File | `file_finder::Toggle` | <Keys k="cmd-p"/> | <Keys pc k="ctrl-p"/> |
-| Find in Project | `project_search::Deploy` | <Keys k="cmd-shift-f"/> | <Keys pc k="ctrl-shift-f"/> |
-| Project Diagnostics | `diagnostics::Deploy` | <Keys k="cmd-shift-m"/> | <Keys pc k="ctrl-shift-m"/> |
-| Open Settings | `pomelo::OpenSettings` | <Keys k="cmd-,"/> | <Keys pc k="ctrl-,"/> |
-| Open Keymap | `pomelo::OpenKeymap` | <Keys k="cmd-k cmd-s"/> | <Keys pc k="ctrl-k ctrl-s"/> |
-| Open Project | `workspace::Open` | <Keys k="cmd-o"/> | <Keys pc k="ctrl-o"/> |
-| New Workspace | `workspace::NewWorkspace` | <Keys k="cmd-n"/> | <Keys pc k="ctrl-n"/> |
-| New Project | `workspace::NewProject` | <Keys k="cmd-shift-n"/> | <Keys pc k="ctrl-shift-n"/> |
-| Switch Workspace | `workspace::SwitchWorkspace` | <Keys k="cmd-alt-o"/> | <Keys pc k="ctrl-alt-o"/> |
-| Next Theme | `theme::Cycle` | <Keys k="cmd-k cmd-t"/> | <Keys pc k="ctrl-k ctrl-t"/> |
-| Toggle Left Dock | `workspace::ToggleLeftDock` | <Keys k="cmd-b"/> | <Keys pc k="ctrl-b"/> |
-| Toggle Right Dock | `workspace::ToggleRightDock` | <Keys k="cmd-r"/> | <Keys pc k="ctrl-r"/> |
-| Toggle Bottom Dock | `workspace::ToggleBottomDock` | <Keys k="cmd-j"/> | <Keys pc k="ctrl-j"/> |
-| Files | `project_panel::ToggleFocus` | <Keys k="cmd-shift-e"/> | <Keys pc k="ctrl-shift-e"/> |
-| Git | `git_panel::ToggleFocus` | <Keys k="cmd-shift-c"/> | <Keys pc k="ctrl-shift-c"/> |
-| Services | `services_panel::ToggleFocus` | <Keys k="cmd-shift-s"/> | <Keys pc k="ctrl-shift-s"/> |
-| Database | `database_panel::ToggleFocus` | <Keys k="cmd-shift-d"/> | <Keys pc k="ctrl-shift-d"/> |
-| Pull Requests | `git_panel::PullRequests` | <Keys k="cmd-shift-r"/> | <Keys pc k="ctrl-shift-r"/> |
-| Agent | `agent::ToggleFocus` | <Keys k="cmd-?"/> | <Keys pc k="ctrl-?"/> |
-| Terminal | `terminal_panel::ToggleFocus` | <Keys k="ctrl-&#96;"/> | <Keys pc k="ctrl-&#96;"/> |
-| New Terminal | `workspace::NewTerminal` | <Keys k="cmd-t"/> | <Keys pc k="ctrl-t"/> |
-| Close Tab | `pane::CloseActiveItem` | <Keys k="cmd-w"/> | <Keys pc k="ctrl-w"/> |
-| Close All Tabs | `pane::CloseAllItems` | <Keys k="cmd-alt-w"/> | <Keys pc k="ctrl-alt-w"/> |
-| Open in External Editor | `workspace::OpenInExternalEditor` | - | - |
-| Export Config | `workspace::ExportConfig` | - | - |
-| Import Config | `workspace::ImportConfig` | - | - |
-| Markdown Preview | `markdown::OpenPreview` | <Keys k="cmd-shift-v"/> | <Keys pc k="ctrl-shift-v"/> |
-| Markdown Preview to the Side | `markdown::OpenPreviewToTheSide` | <Keys k="cmd-k v"/> | <Keys pc k="ctrl-k v"/> |
-| Open Jira Ticket | `workspace::OpenTicket` | - | - |
-| Open Project Config | `pomelo::OpenProjectConfig` | - | - |
-| Set Up Project with AI | `pomelo::SetUpProjectWithAi` | - | - |
-| Add Repository | `pomelo::AddRepository` | - | - |
-| Clone Missing Repos into Main | `pomelo::CloneMissingRepos` | - | - |
-| Agent Usage | `pomelo::OpenAgentUsage` | <Keys k="cmd-shift-u"/> | <Keys pc k="ctrl-shift-u"/> |
-| Dev Requests | `pomelo::OpenDevRequests` | - | - |
-| node_modules Store | `pomelo::OpenModuleStore` | - | - |
-| Select Language | `language_selector::Toggle` | <Keys k="cmd-k m"/> | <Keys pc k="ctrl-k m"/> |
-| Go to Tab 1 | `["pane::ActivateItem", 0]` | <Keys k="cmd-1"/> | <Keys pc k="ctrl-1"/> |
-| Go to Tab 2 | `["pane::ActivateItem", 1]` | <Keys k="cmd-2"/> | <Keys pc k="ctrl-2"/> |
-| Go to Tab 3 | `["pane::ActivateItem", 2]` | <Keys k="cmd-3"/> | <Keys pc k="ctrl-3"/> |
-| Go to Tab 4 | `["pane::ActivateItem", 3]` | <Keys k="cmd-4"/> | <Keys pc k="ctrl-4"/> |
-| Go to Tab 5 | `["pane::ActivateItem", 4]` | <Keys k="cmd-5"/> | <Keys pc k="ctrl-5"/> |
-| Go to Tab 6 | `["pane::ActivateItem", 5]` | <Keys k="cmd-6"/> | <Keys pc k="ctrl-6"/> |
-| Go to Tab 7 | `["pane::ActivateItem", 6]` | <Keys k="cmd-7"/> | <Keys pc k="ctrl-7"/> |
-| Go to Tab 8 | `["pane::ActivateItem", 7]` | <Keys k="cmd-8"/> | <Keys pc k="ctrl-8"/> |
-| Go to Tab 9 | `["pane::ActivateItem", 8]` | <Keys k="cmd-9"/> | <Keys pc k="ctrl-9"/> |
-| Go to Last Tab | `pane::ActivateLastItem` | <Keys k="cmd-0"/> | <Keys pc k="ctrl-0"/> |
-| Previous Tab | `pane::ActivatePreviousItem` | <Keys k="cmd-alt-left"/> or <Keys k="cmd-shift-["/> | <Keys pc k="ctrl-pageup"/> or <Keys pc k="ctrl-shift-["/> |
-| Next Tab | `pane::ActivateNextItem` | <Keys k="cmd-alt-right"/> or <Keys k="cmd-shift-]"/> | <Keys pc k="ctrl-pagedown"/> or <Keys pc k="ctrl-shift-]"/> |
+The context says where a binding works: `Workspace` everywhere in the window,
+`ProjectPanel` only while the file tree has the keyboard, `TabSwitcher` only
+while the tab switcher is open. A keymap file
+section binds a context with `"context": "ProjectPanel"`.
+
+| Action | Name | Context | macOS | Windows / Linux |
+| --- | --- | --- | --- | --- |
+| Command Palette | `command_palette::Toggle` | `Workspace` | <Keys k="cmd-shift-p"/> | <Keys pc k="ctrl-shift-p"/> |
+| Go to File | `file_finder::Toggle` | `Workspace` | <Keys k="cmd-p"/> | <Keys pc k="ctrl-p"/> |
+| Find in Project | `project_search::Deploy` | `Workspace` | <Keys k="cmd-shift-f"/> | <Keys pc k="ctrl-shift-f"/> |
+| Project Diagnostics | `diagnostics::Deploy` | `Workspace` | <Keys k="cmd-shift-m"/> | <Keys pc k="ctrl-shift-m"/> |
+| Open Settings | `pomelo::OpenSettings` | `Workspace` | <Keys k="cmd-,"/> | <Keys pc k="ctrl-,"/> |
+| Open Keymap | `pomelo::OpenKeymap` | `Workspace` | <Keys k="cmd-k cmd-s"/> | <Keys pc k="ctrl-k ctrl-s"/> |
+| Open Project | `workspace::Open` | `Workspace` | <Keys k="cmd-o"/> | <Keys pc k="ctrl-o"/> |
+| New Workspace | `workspace::NewWorkspace` | `Workspace` | <Keys k="cmd-n"/> | <Keys pc k="ctrl-n"/> |
+| New Project | `workspace::NewProject` | `Workspace` | <Keys k="cmd-shift-n"/> | <Keys pc k="ctrl-shift-n"/> |
+| Switch Workspace | `workspace::SwitchWorkspace` | `Workspace` | <Keys k="cmd-alt-o"/> | <Keys pc k="ctrl-alt-o"/> |
+| Next Theme | `theme::Cycle` | `Workspace` | <Keys k="cmd-k cmd-t"/> | <Keys pc k="ctrl-k ctrl-t"/> |
+| Toggle Left Dock | `workspace::ToggleLeftDock` | `Workspace` | <Keys k="cmd-b"/> | <Keys pc k="ctrl-b"/> |
+| Toggle Right Dock | `workspace::ToggleRightDock` | `Workspace` | <Keys k="cmd-r"/> | <Keys pc k="ctrl-r"/> |
+| Toggle Bottom Dock | `workspace::ToggleBottomDock` | `Workspace` | <Keys k="cmd-j"/> | <Keys pc k="ctrl-j"/> |
+| Files | `project_panel::ToggleFocus` | `Workspace` | <Keys k="cmd-shift-e"/> | <Keys pc k="ctrl-shift-e"/> |
+| Git | `git_panel::ToggleFocus` | `Workspace` | <Keys k="cmd-shift-c"/> | <Keys pc k="ctrl-shift-c"/> |
+| Services | `services_panel::ToggleFocus` | `Workspace` | <Keys k="cmd-shift-s"/> | <Keys pc k="ctrl-shift-s"/> |
+| Database | `database_panel::ToggleFocus` | `Workspace` | <Keys k="cmd-shift-d"/> | <Keys pc k="ctrl-shift-d"/> |
+| Pull Requests | `git_panel::PullRequests` | `Workspace` | <Keys k="cmd-shift-r"/> | <Keys pc k="ctrl-shift-r"/> |
+| Agent | `agent::ToggleFocus` | `Workspace` | <Keys k="cmd-?"/> | <Keys pc k="ctrl-?"/> |
+| Terminal | `terminal_panel::ToggleFocus` | `Workspace` | <Keys k="ctrl-&#96;"/> | <Keys pc k="ctrl-&#96;"/> |
+| New Terminal | `workspace::NewTerminal` | `Workspace` | <Keys k="cmd-t"/> | <Keys pc k="ctrl-t"/> |
+| Close Tab | `pane::CloseActiveItem` | `Workspace` | <Keys k="cmd-w"/> | <Keys pc k="ctrl-w"/> |
+| Close All Tabs | `pane::CloseAllItems` | `Workspace` | <Keys k="cmd-alt-w"/> | <Keys pc k="ctrl-alt-w"/> |
+| Open in External Editor | `workspace::OpenInExternalEditor` | `Workspace` | - | - |
+| Export Config | `workspace::ExportConfig` | `Workspace` | - | - |
+| Import Config | `workspace::ImportConfig` | `Workspace` | - | - |
+| Markdown Preview | `markdown::OpenPreview` | `Workspace` | <Keys k="cmd-shift-v"/> | <Keys pc k="ctrl-shift-v"/> |
+| Markdown Preview to the Side | `markdown::OpenPreviewToTheSide` | `Workspace` | <Keys k="cmd-k v"/> | <Keys pc k="ctrl-k v"/> |
+| Open Jira Ticket | `workspace::OpenTicket` | `Workspace` | - | - |
+| Open Project Config | `pomelo::OpenProjectConfig` | `Workspace` | - | - |
+| Set Up Project with AI | `pomelo::SetUpProjectWithAi` | `Workspace` | - | - |
+| Add Repository | `pomelo::AddRepository` | `Workspace` | - | - |
+| Clone Missing Repos into Main | `pomelo::CloneMissingRepos` | `Workspace` | - | - |
+| Agent Usage | `pomelo::OpenAgentUsage` | `Workspace` | <Keys k="cmd-shift-u"/> | <Keys pc k="ctrl-shift-u"/> |
+| Dev Requests | `pomelo::OpenDevRequests` | `Workspace` | - | - |
+| node_modules Store | `pomelo::OpenModuleStore` | `Workspace` | - | - |
+| Select Language | `language_selector::Toggle` | `Workspace` | <Keys k="cmd-k m"/> | <Keys pc k="ctrl-k m"/> |
+| Go to Tab 1 | `["pane::ActivateItem", 0]` | `Workspace` | <Keys k="cmd-1"/> | <Keys pc k="ctrl-1"/> |
+| Go to Tab 2 | `["pane::ActivateItem", 1]` | `Workspace` | <Keys k="cmd-2"/> | <Keys pc k="ctrl-2"/> |
+| Go to Tab 3 | `["pane::ActivateItem", 2]` | `Workspace` | <Keys k="cmd-3"/> | <Keys pc k="ctrl-3"/> |
+| Go to Tab 4 | `["pane::ActivateItem", 3]` | `Workspace` | <Keys k="cmd-4"/> | <Keys pc k="ctrl-4"/> |
+| Go to Tab 5 | `["pane::ActivateItem", 4]` | `Workspace` | <Keys k="cmd-5"/> | <Keys pc k="ctrl-5"/> |
+| Go to Tab 6 | `["pane::ActivateItem", 5]` | `Workspace` | <Keys k="cmd-6"/> | <Keys pc k="ctrl-6"/> |
+| Go to Tab 7 | `["pane::ActivateItem", 6]` | `Workspace` | <Keys k="cmd-7"/> | <Keys pc k="ctrl-7"/> |
+| Go to Tab 8 | `["pane::ActivateItem", 7]` | `Workspace` | <Keys k="cmd-8"/> | <Keys pc k="ctrl-8"/> |
+| Go to Tab 9 | `["pane::ActivateItem", 8]` | `Workspace` | <Keys k="cmd-9"/> | <Keys pc k="ctrl-9"/> |
+| Go to Last Tab | `pane::ActivateLastItem` | `Workspace` | <Keys k="cmd-0"/> | <Keys pc k="ctrl-0"/> |
+| Previous Tab | `pane::ActivatePreviousItem` | `Workspace` | <Keys k="cmd-alt-left"/> or <Keys k="cmd-shift-["/> | <Keys pc k="ctrl-pageup"/> or <Keys pc k="ctrl-shift-["/> |
+| Next Tab | `pane::ActivateNextItem` | `Workspace` | <Keys k="cmd-alt-right"/> or <Keys k="cmd-shift-]"/> | <Keys pc k="ctrl-pagedown"/> or <Keys pc k="ctrl-shift-]"/> |
+| Files: Open | `project_panel::Open` | `ProjectPanel` | <Keys k="space"/> | <Keys pc k="space"/> |
+| Files: Rename | `project_panel::Rename` | `ProjectPanel` | <Keys k="enter"/> or <Keys k="f2"/> | <Keys pc k="enter"/> or <Keys pc k="f2"/> |
+| Files: New File | `project_panel::NewFile` | `ProjectPanel` | <Keys k="cmd-n"/> | <Keys pc k="ctrl-n"/> |
+| Files: New Folder | `project_panel::NewDirectory` | `ProjectPanel` | <Keys k="cmd-alt-n"/> | <Keys pc k="ctrl-alt-n"/> |
+| Files: Cut | `project_panel::Cut` | `ProjectPanel` | <Keys k="cmd-x"/> | <Keys pc k="ctrl-x"/> |
+| Files: Copy | `project_panel::Copy` | `ProjectPanel` | <Keys k="cmd-c"/> | <Keys pc k="ctrl-c"/> |
+| Files: Paste | `project_panel::Paste` | `ProjectPanel` | <Keys k="cmd-v"/> | <Keys pc k="ctrl-v"/> |
+| Files: Duplicate | `project_panel::Duplicate` | `ProjectPanel` | <Keys k="cmd-d"/> | <Keys pc k="ctrl-d"/> |
+| Files: Copy Path | `project_panel::CopyPath` | `ProjectPanel` | <Keys k="cmd-alt-c"/> | <Keys pc k="ctrl-alt-c"/> |
+| Files: Copy Relative Path | `project_panel::CopyRelativePath` | `ProjectPanel` | <Keys k="cmd-alt-shift-c"/> | <Keys pc k="ctrl-alt-shift-c"/> |
+| Files: Move to Trash | `project_panel::Trash` | `ProjectPanel` | <Keys k="backspace"/> or <Keys k="delete"/> or <Keys k="cmd-backspace"/> | <Keys pc k="backspace"/> or <Keys pc k="delete"/> or <Keys pc k="ctrl-backspace"/> |
+| Files: Delete | `project_panel::Delete` | `ProjectPanel` | <Keys k="cmd-alt-backspace"/> or <Keys k="cmd-delete"/> | <Keys pc k="ctrl-alt-backspace"/> or <Keys pc k="ctrl-delete"/> |
+| Files: Reveal in Finder | `project_panel::RevealInFileManager` | `ProjectPanel` | <Keys k="cmd-alt-r"/> | <Keys pc k="ctrl-alt-r"/> |
+| Files: Collapse | `project_panel::CollapseSelectedEntry` | `ProjectPanel` | <Keys k="left"/> | <Keys pc k="left"/> |
+| Files: Expand | `project_panel::ExpandSelectedEntry` | `ProjectPanel` | <Keys k="right"/> | <Keys pc k="right"/> |
+| Files: Collapse All | `project_panel::CollapseAllEntries` | `ProjectPanel` | <Keys k="cmd-left"/> | <Keys pc k="ctrl-left"/> |
+| Files: Expand All | `project_panel::ExpandAllEntries` | `ProjectPanel` | <Keys k="cmd-right"/> | <Keys pc k="ctrl-right"/> |
+| Switch Tab | `tab_switcher::Toggle` | `Workspace` | <Keys k="ctrl-tab"/> | <Keys pc k="ctrl-tab"/> |
+| Switch Tab (Oldest First) | `tab_switcher::ToggleSelectLast` | `Workspace` | <Keys k="ctrl-shift-tab"/> | <Keys pc k="ctrl-shift-tab"/> |
+| Tab Switcher: Close Selected Tab | `tab_switcher::CloseSelectedItem` | `TabSwitcher` | <Keys k="ctrl-backspace"/> | <Keys pc k="ctrl-backspace"/> |
+| Previous Workspace | `workspace::ActivatePreviousWorkspace` | `Workspace` | <Keys k="cmd-alt-up"/> | <Keys pc k="ctrl-alt-up"/> |
+| Next Workspace | `workspace::ActivateNextWorkspace` | `Workspace` | <Keys k="cmd-alt-down"/> | <Keys pc k="ctrl-alt-down"/> |
+| Next Workspace Waiting for You | `workspace::ActivateNextWorkspaceNeedingAttention` | `Workspace` | <Keys k="cmd-alt-a"/> | <Keys pc k="ctrl-alt-a"/> |
+| Git: Open | `git_panel::OpenSelectedEntry` | `GitPanel` | <Keys k="enter"/> | <Keys pc k="enter"/> |
+| Git: Toggle Staged | `git::ToggleStaged` | `GitPanel` | <Keys k="space"/> or <Keys k="cmd-alt-y"/> | <Keys pc k="space"/> or <Keys pc k="ctrl-alt-y"/> |
+| Git: Stage File | `git::StageFile` | `GitPanel` | <Keys k="cmd-y"/> | <Keys pc k="alt-y"/> |
+| Git: Unstage File | `git::UnstageFile` | `GitPanel` | <Keys k="cmd-shift-y"/> | <Keys pc k="alt-shift-y"/> |
+| Git: Stage All | `git::StageAll` | `GitPanel` | <Keys k="cmd-ctrl-y"/> | <Keys pc k="ctrl-space"/> |
+| Git: Unstage All | `git::UnstageAll` | `GitPanel` | <Keys k="cmd-ctrl-shift-y"/> | <Keys pc k="ctrl-shift-space"/> |
+| Git: Discard Changes | `git::RestoreFile` | `GitPanel` | <Keys k="backspace"/> or <Keys k="delete"/> or <Keys k="cmd-backspace"/> or <Keys k="cmd-delete"/> | <Keys pc k="backspace"/> or <Keys pc k="delete"/> or <Keys pc k="ctrl-backspace"/> or <Keys pc k="ctrl-delete"/> |
+| Git: Copy Path | `git_panel::CopyPath` | `GitPanel` | <Keys k="cmd-alt-c"/> | <Keys pc k="ctrl-alt-c"/> |
+| Git: Copy Relative Path | `git_panel::CopyRelativePath` | `GitPanel` | <Keys k="cmd-alt-shift-c"/> | <Keys pc k="ctrl-alt-shift-c"/> |
+| Git: Focus Commit Message | `git_panel::FocusEditor` | `GitPanel` | <Keys k="tab"/> or <Keys k="shift-tab"/> | <Keys pc k="tab"/> or <Keys pc k="shift-tab"/> |
+| Git: Collapse | `git_panel::CollapseSelectedEntry` | `GitPanel` | <Keys k="left"/> | <Keys pc k="left"/> |
+| Git: Expand | `git_panel::ExpandSelectedEntry` | `GitPanel` | <Keys k="right"/> | <Keys pc k="right"/> |
+| Git: Fetch | `git::Fetch` | `GitPanel` | <Keys k="ctrl-g ctrl-g"/> | <Keys pc k="ctrl-g ctrl-g"/> |
+| Git: Push | `git::Push` | `GitPanel` | <Keys k="ctrl-g up"/> | <Keys pc k="ctrl-g up"/> |
+| Git: Pull | `git::Pull` | `GitPanel` | <Keys k="ctrl-g down"/> | <Keys pc k="ctrl-g down"/> |
+| Git: Changes | `git_panel::ActivateChangesTab` | `GitPanel` | <Keys k="cmd-1"/> | <Keys pc k="ctrl-1"/> |
+| Git: Remote | `git_panel::ActivateRemoteTab` | `GitPanel` | <Keys k="cmd-2"/> | <Keys pc k="ctrl-2"/> |
+| Git: History | `git_panel::ActivateHistoryTab` | `GitPanel` | <Keys k="cmd-3"/> | <Keys pc k="ctrl-3"/> |
+| Services: Open | `services_panel::Open` | `ServicesPanel` | <Keys k="enter"/> | <Keys pc k="enter"/> |
+| Services: Start or Stop | `services_panel::ToggleRunning` | `ServicesPanel` | <Keys k="s"/> | <Keys pc k="s"/> |
+| Services: Restart | `services_panel::Restart` | `ServicesPanel` | <Keys k="r"/> | <Keys pc k="r"/> |
+| Services: Open in Browser | `services_panel::OpenInBrowser` | `ServicesPanel` | <Keys k="o"/> | <Keys pc k="o"/> |
+| Services: View Logs | `services_panel::ViewLogs` | `ServicesPanel` | <Keys k="l"/> | <Keys pc k="l"/> |
+| Services: Collapse | `services_panel::CollapseSelectedEntry` | `ServicesPanel` | <Keys k="left"/> | <Keys pc k="left"/> |
+| Services: Expand | `services_panel::ExpandSelectedEntry` | `ServicesPanel` | <Keys k="right"/> | <Keys pc k="right"/> |
+| Database: Open | `database_panel::Open` | `DatabasePanel` | <Keys k="enter"/> | <Keys pc k="enter"/> |
+| Database: Collapse | `database_panel::CollapseSelectedEntry` | `DatabasePanel` | <Keys k="left"/> | <Keys pc k="left"/> |
+| Database: Expand | `database_panel::ExpandSelectedEntry` | `DatabasePanel` | <Keys k="right"/> | <Keys pc k="right"/> |
+| Database: Copy Connection URL | `database_panel::CopyUrl` | `DatabasePanel` | <Keys k="cmd-alt-c"/> | <Keys pc k="ctrl-alt-c"/> |
+| Database: New Console | `database_panel::NewConsole` | `DatabasePanel` | <Keys k="cmd-n"/> | <Keys pc k="ctrl-n"/> |
+| Agent: New Side Agent | `agent::NewSideAgent` | `Workspace` | <Keys k="cmd-k a"/> | <Keys pc k="ctrl-k a"/> |
+| Agent: Take Over | `agent::TakeOver` | `Workspace` | <Keys k="cmd-k o"/> | <Keys pc k="ctrl-k o"/> |
+| Agent: Allow Pending Tool | `agent::Allow` | `Workspace` | <Keys k="cmd-k y"/> | <Keys pc k="ctrl-k y"/> |
+| Agent: Deny Pending Tool | `agent::Deny` | `Workspace` | <Keys k="cmd-k n"/> | <Keys pc k="ctrl-k n"/> |
+| Agent: Stop | `agent::StopAgent` | `Workspace` | <Keys k="cmd-k ."/> | <Keys pc k="ctrl-k ."/> |
+| Notification: Run Action | `notification::RunAction` | `Workspace` | <Keys k="cmd-k enter"/> | <Keys pc k="ctrl-k enter"/> |
+| Notification: Dismiss | `notification::Dismiss` | `Workspace` | <Keys k="cmd-k escape"/> | <Keys pc k="ctrl-k escape"/> |
+| Close Other Tabs | `pane::CloseOtherItems` | `Workspace` | <Keys k="cmd-alt-t"/> | <Keys pc k="ctrl-alt-t"/> |
+| Close Tabs to the Left | `pane::CloseItemsToTheLeft` | `Workspace` | <Keys k="cmd-k e"/> | <Keys pc k="ctrl-k e"/> |
+| Close Tabs to the Right | `pane::CloseItemsToTheRight` | `Workspace` | <Keys k="cmd-k t"/> | <Keys pc k="ctrl-k t"/> |
+| Close Saved Tabs | `pane::CloseCleanItems` | `Workspace` | <Keys k="cmd-k u"/> | <Keys pc k="ctrl-k u"/> |
+| Focus the Editor | `workspace::FocusCenter` | `Workspace` | <Keys k="cmd-escape"/> | <Keys pc k="ctrl-escape"/> |
+| Focus Next Region | `workspace::ActivateNextRegion` | `Workspace` | <Keys k="cmd-k tab"/> | <Keys pc k="ctrl-k tab"/> |
+| Focus Previous Region | `workspace::ActivatePreviousRegion` | `Workspace` | <Keys k="cmd-k shift-tab"/> | <Keys pc k="ctrl-k shift-tab"/> |
+| Toggle Vim Mode | `workspace::ToggleVimMode` | `Workspace` | - | - |
+| List: Next | `menu::SelectNext` | `Workspace` | - | - |
+| List: Previous | `menu::SelectPrevious` | `Workspace` | - | - |
+| List: First | `menu::SelectFirst` | `Workspace` | - | - |
+| List: Last | `menu::SelectLast` | `Workspace` | - | - |

@@ -102,6 +102,12 @@ window; they change as you use it and rarely need editing by hand.
 | `terminal_shell` | `""` | The shell new terminals run, with its arguments; empty runs your login shell. |
 | `terminal_scrollback` | `10000` | Lines of history each new terminal keeps. |
 
+## Keymap
+
+| Key | Default | Description |
+| --- | --- | --- |
+| `vim_mode` | `false` | Modal (vim) editing in the editor: Normal and Insert modes, motions and counts. |
+
 ## Agent
 
 | Key | Default | Description |
