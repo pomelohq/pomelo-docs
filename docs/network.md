@@ -78,6 +78,10 @@ works. A service that isn't up answers with why instead:
 `... is still starting (building, not listening yet)` while it builds, and
 `... is not running in <branch>` once stopped.
 
+In a browser that answer is a page: it says whether the service is starting, stopped, not answering or unknown,
+shows the `pom start` command for a stopped one, and checks again in the background, so it opens the app by itself
+as soon as the service is up. Scripts, `fetch` and curl still get the one-line text.
+
 **Settings > Dev Services** turns the proxy and the relay on or off and sets
 their ports (8767 and 8766 by default). Service URLs in env files use the
 proxy port too, so restart running services after changing it. `POM_WEB_PORT`
