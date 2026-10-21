@@ -19,16 +19,16 @@ window; they change as you use it and rarely need editing by hand.
 
 | Key | Default | Description |
 | --- | --- | --- |
-| `theme` | `"One Dark"` | The theme shown when `theme_selection` is `"static"`. |
+| `theme` | `"Pomelo Dark"` | The theme shown when `theme_selection` is `"static"`. |
 | `theme_selection` | `"static"` | `"static"` always shows `theme`; `"dynamic"` picks `theme_light` or `theme_dark` by `theme_mode`. |
 | `theme_mode` | `"system"` | With dynamic selection: `"light"`, `"dark"` or `"system"` (follow the macOS appearance). |
-| `theme_light` | `"One Light"` | The theme used when light mode is active. |
-| `theme_dark` | `"One Dark"` | The theme used when dark mode is active. |
+| `theme_light` | `"Pomelo Light"` | The theme used when light mode is active. |
+| `theme_dark` | `"Pomelo Dark"` | The theme used when dark mode is active. |
 | `theme_overrides` | `{}` | Per theme name, color tokens laid over that theme: `{"One Dark": {"editor.background": "#1e2127"}}`. |
 | `buffer_font_family` | `".PomeloMono"` | Font family used for the code editor. |
-| `buffer_font_size` | `15.0` | Text size of the code editor. |
+| `buffer_font_size` | `13.0` | Text size of the code editor. |
 | `buffer_font_weight` | `400.0` | Font weight for the code editor (100-900). |
-| `buffer_line_height` | `"comfortable"` | Line height for the code editor: `"comfortable"` (1.618), `"standard"` (1.3), a number or `{"custom": n}`. |
+| `buffer_line_height` | `1.54` | Line height for the code editor: `"comfortable"` (1.618), `"standard"` (1.3), a number or `{"custom": n}`. |
 | `buffer_font_features` | `{}` | OpenType features for the code editor, by tag. |
 | `buffer_font_fallbacks` | `[]` | Families tried, in order, for characters the editor font lacks. |
 | `ui_font` | `".PomeloSans"` | Font family used for interface text. |

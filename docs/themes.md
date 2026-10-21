@@ -1,15 +1,22 @@
 # Themes and fonts
 
-Pomelo ships One Dark, One Light, Ayu Mirage and Gruvbox Dark, reads your own
-theme files, and lets you set the family, weight, line height, OpenType
-features and fallbacks of the interface, editor and terminal fonts.
+Pomelo ships Pomelo Dark and Pomelo Light (the defaults), One Dark, One
+Light, Ayu Mirage, Gruvbox Dark, Catppuccin Mocha, Macchiato, Frappe and
+Latte, Tokyo Night, Nord and Rose Pine Dawn. Every built-in theme is laid
+out the same way: the window, panels, editor and menus each a step apart,
+one accent color, and yellow for the workspace that needs you. Pomelo also
+reads your own theme files, and lets you set the family, weight, line
+height, OpenType features and fallbacks of the interface, editor and
+terminal fonts.
 
 ## Choosing a theme
 
 **Settings > Appearance > Theme** has a **Theme Mode**:
 
-- **Static** - one theme, picked in **Theme Name**.
-- **Dynamic** - a **Light Theme** and a **Dark Theme**, and a **Mode**:
+- **Static** - one theme, picked in **Theme Name** (Pomelo Dark unless you
+  pick another).
+- **Dynamic** - a **Light Theme** and a **Dark Theme** (Pomelo Light and
+  Pomelo Dark unless you pick others), and a **Mode**:
   **Light**, **Dark**, or **System** to follow macOS as it switches between
   light and dark.
 
@@ -111,8 +118,9 @@ buffer font size alone, whatever the UI font size is.
 - **Family** - any installed family. `.PomeloSans` and `.PomeloMono` are the
   bundled IBM Plex Sans and Lilex.
 - **Weight** - 100 to 900; bold text stays bold.
-- **Line height** - `"comfortable"` (1.618, the editor's default),
-  `"standard"` (1.3, the terminal's default), or `{"custom": 1.5}`.
+- **Line height** - `"comfortable"` (1.618), `"standard"` (1.3, the
+  terminal's default), or `{"custom": 1.5}`. The editor defaults to 1.54
+  at 13px.
 - **OpenType features** - tags and values: `true` turns a feature on,
   `false` off, a number picks an alternate. Turning off `calt` shows `->`
   and `!=` as plain characters instead of the font's ligatures.

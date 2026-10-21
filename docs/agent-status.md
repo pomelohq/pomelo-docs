@@ -29,8 +29,8 @@ terminal.
 | <span class="pom-dot pom-red"></span> | Awaiting input | The agent is blocked on you: a permission prompt or a question. |
 
 The colors come from the active theme (success, warning, info, accent and
-error); the swatches above are the default One Dark theme, where Using
-tools and Compacting share the same blue.
+error); the swatches above are One Dark, where Using tools and Compacting
+share the same blue.
 
 ## How it updates
 
