@@ -1,0 +1,58 @@
+/* Parts the data and services tabs share: rounded cards on the tab's surface, segmented switches, inset fields. */
+.pa .accent { color: var(--pa-text-accent); }
+.pa .ok { color: var(--pa-success); }
+.pa .pa-click { cursor: pointer; }
+.pa-link { color: var(--pa-text-accent); cursor: pointer; padding: 0 3px; border-radius: 3px; }
+.pa-link:hover { background: var(--pa-ghost-element-hover); }
+
+.pa-dt { height: 100%; display: flex; flex-direction: column; background: var(--pa-editor-background); font-size: 13px; }
+.pa-dt-bar { flex: none; height: 40px; padding: 0 10px 0 14px; gap: 8px; display: flex; align-items: center; white-space: nowrap; }
+.pa-dt-crumb { font-size: 12.5px; display: inline-flex; align-items: center; gap: 6px; color: var(--pa-text-muted); }
+.pa-dt-crumb .pa-icon { color: var(--pa-icon-muted); margin-right: -2px; }
+.pa-dt-crumb .pa-engine svg { fill: currentColor; }
+.pa-dt-crumb i { font-style: normal; color: var(--pa-text-placeholder); }
+.pa-dt-crumb b { font-weight: 500; color: var(--pa-text); }
+.pa-dt-on { margin-left: 6px; display: inline-flex; align-items: center; gap: 5px; color: var(--pa-text-placeholder); }
+.pa-dt-on .pa-icon { color: var(--pa-text-accent); }
+.pa-dt-on .mono { color: var(--pa-text-accent); }
+
+.pa-dt-seg { flex: none; display: inline-flex; padding: 2px; gap: 0; border-radius: 6px; background: var(--pa-element-background); }
+.pa-dt-seg span { height: 22px; padding: 0 9px; display: inline-flex; align-items: center; border-radius: 4px; color: var(--pa-text-muted); cursor: pointer; }
+.pa-dt-seg span:hover { color: var(--pa-text); }
+.pa-dt-seg span.on { background: var(--pa-element-selected); color: var(--pa-text); }
+
+.pa-dt-btn { flex: none; height: 26px; padding: 0 8px; gap: 6px; border-radius: 6px; display: inline-flex; align-items: center; white-space: nowrap;
+  color: var(--pa-text); cursor: pointer; }
+.pa-dt-btn:hover { background: var(--pa-ghost-element-hover); }
+.pa-dt-btn.secondary { background: var(--pa-element-background); box-shadow: inset 0 0 0 1px var(--pa-border); }
+.pa-dt-btn.primary { background: var(--pa-accent-fill); color: var(--pa-on-accent); }
+.pa-dt-btn.danger { color: var(--pa-error); }
+.pa-dt-btn.icon { width: 26px; padding: 0; justify-content: center; color: var(--pa-icon-muted); }
+.pa-dt-btn.on { background: var(--pa-element-selected); }
+.pa-dt-kbd { height: 18px; padding: 0 4px; gap: 2px; border-radius: 4px; display: inline-flex; align-items: center; font-size: 11px;
+  background: color-mix(in srgb, var(--pa-text) 8%, transparent); color: var(--pa-text-muted); }
+.pa-dt-btn.primary .pa-dt-kbd { background: rgba(255, 255, 255, 0.18); color: var(--pa-on-accent); }
+
+.pa-dt-field { min-width: 0; height: 28px; padding: 0 10px; gap: 10px; border-radius: 6px; display: flex; align-items: center;
+  background: var(--pa-background); box-shadow: inset 0 0 0 1px var(--pa-border-variant); }
+.pa-dt-field > b { flex: none; font-size: 11px; font-weight: 600; letter-spacing: 0.02em; color: var(--pa-text-muted); text-transform: uppercase; }
+.pa-dt-field input { flex: 1; min-width: 0; border: 0; outline: 0; padding: 0; background: none; font: inherit; color: var(--pa-text); }
+.pa-dt-field input::placeholder { color: var(--pa-text-placeholder); }
+
+.pa-dt-split { flex: 1; min-height: 0; display: flex; gap: 6px; padding: 0 8px; }
+.pa-dt-card { min-width: 0; border-radius: 6px; background: var(--pa-panel-background); overflow: hidden; display: flex; flex-direction: column; }
+.pa-dt-status { flex: none; height: 40px; padding: 4px 8px 0; gap: 2px; font-size: 12px; display: flex; align-items: center; white-space: nowrap; }
+.pa-dt-label { font-size: 11px; font-weight: 600; letter-spacing: 0.02em; color: var(--pa-text-placeholder); text-transform: uppercase; }
+
+/* JSON as the tab's tree draws it. */
+.pa-dt-json { border-radius: 6px; box-shadow: inset 0 0 0 1px var(--pa-border-variant); }
+.pa-dt-json-bar { height: 28px; padding: 0 8px 0 8px; gap: 6px; display: flex; align-items: center; font-size: 12px; white-space: nowrap;
+  box-shadow: inset 0 -1px 0 var(--pa-border-variant); }
+.pa-dt-tree { padding: 6px 8px; font-size: 12px; }
+.pa-dt-line { height: 18px; display: flex; align-items: center; white-space: pre; }
+.pa-dt-fold { width: 12px; flex: none; display: flex; color: var(--pa-icon-muted); cursor: pointer; }
+.pa-j-key { color: var(--pa-syntax-property); }
+.pa-j-str { color: var(--pa-success); }
+.pa-j-num, .pa-j-bool, .pa-j-const { color: var(--pa-syntax-number); }
+.pa-j-muted { color: var(--pa-text-placeholder); }
+.pa-j-plain { color: var(--pa-text); }

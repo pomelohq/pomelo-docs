@@ -7,7 +7,7 @@ around the workspace's badge takes the same color, and hovering the badge
 names the state. You can tell which agent needs you without opening its
 terminal.
 
-<AppShot :width="280" :height="250" text="From the top: idle, thinking, awaiting input, using tools and compacting"><WorkspacesList :rows='[{"name":"main","agent":"idle"},{"name":"Login page","branch":"feat-login","current":true,"agent":"thinking","running":2},{"name":"Checkout flow","ticket":"PROJ-101","status":["In Review","accent"],"agent":"input","running":3},{"name":"Search filters","ticket":"PROJ-104","status":["In Progress","accent"],"agent":"tools","running":1},{"name":"Invoice export","ticket":"PROJ-97","status":["Done","done"],"agent":"compacting"}]' /></AppShot>
+<AppShot :width="280" :height="330" text="From the top: main with no agent running, an agent working, an agent waiting for you, and an idle workspace"><WorkspacesList :creating="[]" :rows='[{"id":"main","title":"main","branch":"main","running":2},{"id":"101","title":"Login page","branch":"feat-login","key":"PROJ-101","group":"In progress","agent":"thinking","running":2,"current":true},{"id":"104","title":"Checkout flow","key":"PROJ-104","group":"In progress","agent":"waiting","running":3},{"id":"97","title":"Invoice export","key":"PROJ-97","group":"In review","agent":"idle"}]' /></AppShot>
 
 ## What the states mean
 

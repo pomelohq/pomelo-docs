@@ -101,7 +101,7 @@ or service. Select a row to see it beside the list:
   answered and how long it took, or why it could not be reached.
 - **Response** - the headers and body sent back.
 
-<AppShot :width="1000" :height="560" text="Dev Requests: a webhook that one of two branches failed. Click a row, the tabs, the filters or Show Hidden."><DevRequests /></AppShot>
+<AppShot :width="1002" :height="602" text="Dev Requests. Click a row, the tabs, the filters or Show Hidden; the 15:39:02 webhook shows a fan-out that one of two branches failed."><DevRequests /></AppShot>
 
 Bodies are kept in memory for the session only: the first 256 KB of each, and
 64 MB for the whole log (the oldest are dropped first). Authorization, cookie

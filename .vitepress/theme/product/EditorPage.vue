@@ -44,10 +44,10 @@ const terminal = [
   [['web', 6], [' % ', 'fg']],
 ]
 const rows = [
-  { name: 'main', agent: 'idle' },
-  { name: 'Login page', branch: 'feat-login', current: true, agent: 'idle', running: 2, pr: { count: 1, tone: 'ok' } },
-  { name: 'Checkout flow', ticket: 'PROJ-101', status: ['In Review', 'accent'], agent: 'input', pr: { count: 1, tone: 'danger', trouble: 'failed' }, trouble: ['CI failed', 'error'] },
-  { name: 'Invoice export', ticket: 'PROJ-97', status: ['Done', 'done'], agent: 'idle', pr: { count: 1, tone: 'merged' } },
+  { id: 'main', title: 'main', branch: 'main', running: 2 },
+  { id: '101', title: 'Login page', branch: 'feat-login', key: 'PROJ-101', group: 'In progress', running: 2, pr: { count: 1, trouble: 'pending' }, current: true },
+  { id: '104', title: 'Checkout flow', key: 'PROJ-104', group: 'In review', pr: { count: 1, trouble: 'ci' } },
+  { id: '97', title: 'Invoice export', key: 'PROJ-97', group: 'In review', pr: { count: 1, trouble: 'conflict' } },
 ]
 </script>
 
@@ -60,13 +60,13 @@ const rows = [
         and a Git panel that commits across all of the branch's repos in one go.</p>
       <div class="pp-hero-window">
         <Frame :width="1440" :height="820" window>
-          <AppWindow active="git" :sidebar="248" :dock="340" :bottom="180" language="Ruby" cursor="11:23">
-            <template #sidebar><WorkspacesList :rows="rows" /></template>
+          <AppWindow active="git" :dock="340" :bottom="180" language="Ruby" cursor="11:23">
+            <template #sidebar><WorkspacesList :rows="rows" :creating="[]" /></template>
             <template #dock><GitPanel /></template>
             <TabBar nav :tabs="[
               { title: 'Login.tsx', icon: 'file-react' },
               { title: 'Branch diff', icon: 'diff_split', active: true },
-            ]" :buttons="['diff_unified', 'diff_split', 'panel_right', 'panel_bottom', 'maximize']" />
+            ]" :buttons="['panel_right', 'panel_bottom', 'maximize']" />
             <DiffView />
             <template #bottom>
               <TabBar :tabs="[{ title: 'web - zsh', icon: 'terminal', active: true }]" :buttons="['plus', 'panel_right', 'panel_bottom', 'maximize']" />
@@ -107,12 +107,12 @@ const rows = [
           per repo. Push, pull and the pull request's checks sit on the Remote tab.</p>
         <div class="pp-grid">
           <div class="pp-card">
-            <div class="pp-stage"><div style="width: 100%; max-width: 360px"><Frame :width="360" :height="470" window><GitPanel /></Frame></div></div>
+            <div class="pp-stage"><div style="width: 100%; max-width: 380px"><Frame :width="380" :height="640" window><GitPanel /></Frame></div></div>
             <div class="pp-card-text"><h3>Stage and commit together</h3>
               <p>Click a file to stage or unstage it; the footer says how many commits it will make.</p></div>
           </div>
           <div class="pp-card">
-            <div class="pp-stage"><div style="width: 100%"><Frame :width="720" :height="470" window><DiffView /></Frame></div></div>
+            <div class="pp-stage"><div style="width: 100%"><Frame :width="886" :height="450" window><DiffView /></Frame></div></div>
             <div class="pp-card-text"><h3>Unified or split</h3>
               <p>The whole branch diff with every hunk open. Switch between unified and side-by-side with the two
                 buttons; the choice is kept for every diff.</p></div>
@@ -151,7 +151,7 @@ const rows = [
           in a tab with its checks, reviewers and conversation; the ticket with its description and comments.</p>
         <div class="pp-grid">
           <div class="pp-card">
-            <div class="pp-stage"><div style="width: 100%; max-width: 280px"><Frame :width="280" :height="210" window><WorkspacesList :rows="rows" /></Frame></div></div>
+            <div class="pp-stage"><div style="width: 100%; max-width: 280px"><Frame :width="280" :height="330" window><WorkspacesList :rows="rows" :creating="[]" /></Frame></div></div>
             <div class="pp-card-text"><h3>On every workspace row</h3>
               <p>Checks pending, changes requested, CI failed or a conflict, and the ticket's status, without opening
                 anything.</p></div>

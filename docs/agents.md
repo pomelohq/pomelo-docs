@@ -57,7 +57,7 @@ begins with:
   commits, changes) for it to read. A second opinion always starts fresh:
   another CLI cannot read Claude's session.
 
-<AppShot :width="380" :height="700" :window="false" text="The + popover. Pick a type and what it starts with."><AgentPopover /></AppShot>
+<AppShot :width="380" :height="720" :window="false" text="The + popover. Pick a type and what it starts with."><AgentPopover /></AppShot>
 
 Double-click a type to start it right away. The popover also offers **New
 agent in a new workspace**, for parallel code changes that need their own

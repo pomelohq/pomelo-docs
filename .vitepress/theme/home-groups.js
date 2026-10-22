@@ -20,17 +20,16 @@ const shot = (width, height, render, { window = true, fade = false, max } = {}) 
     h(Frame, { width, height, window, fade, bare: !window }, { default: render })),
 })
 const statusRows = [
-  { name: 'main', agent: 'idle' },
-  { name: 'Login page', branch: 'feat-login', current: true, agent: 'thinking', running: 2 },
-  { name: 'Checkout flow', ticket: 'PROJ-101', status: ['In Review', 'accent'], agent: 'input', running: 3 },
-  { name: 'Search filters', ticket: 'PROJ-104', status: ['In Progress', 'accent'], agent: 'tools', running: 1 },
-  { name: 'Invoice export', ticket: 'PROJ-97', status: ['Done', 'done'], agent: 'compacting' },
+  { id: 'main', title: 'main', branch: 'main', running: 2 },
+  { id: '101', title: 'Login page', branch: 'feat-login', key: 'PROJ-101', group: 'In progress', agent: 'thinking', running: 2, current: true },
+  { id: '104', title: 'Checkout flow', key: 'PROJ-104', group: 'In progress', agent: 'waiting', running: 3 },
+  { id: '97', title: 'Invoice export', key: 'PROJ-97', group: 'In review', agent: 'compacting' },
 ]
 const prRows = [
-  { name: 'main', agent: 'idle' },
-  { name: 'Login page', branch: 'feat-login', current: true, agent: 'idle', running: 2, pr: { count: 1, tone: 'warn' }, trouble: ['Checks pending', 'warning'] },
-  { name: 'Checkout flow', ticket: 'PROJ-101', status: ['In Review', 'accent'], agent: 'input', pr: { count: 1, tone: 'danger', trouble: 'failed' }, trouble: ['CI failed', 'error'] },
-  { name: 'Invoice export', ticket: 'PROJ-97', status: ['Done', 'done'], agent: 'idle', pr: { count: 1, tone: 'merged' } },
+  { id: 'main', title: 'main', branch: 'main', running: 2 },
+  { id: '101', title: 'Login page', branch: 'feat-login', key: 'PROJ-101', group: 'In progress', running: 2, pr: { count: 1, trouble: 'pending' }, current: true },
+  { id: '104', title: 'Checkout flow', key: 'PROJ-104', group: 'In review', pr: { count: 1, trouble: 'ci' } },
+  { id: '97', title: 'Invoice export', key: 'PROJ-97', group: 'In review', pr: { count: 1, trouble: 'conflict' } },
 ]
 const testOutput = [
   [['web', 6], [' % ', 'fg'], ['pnpm test', 'fg']],
@@ -57,7 +56,7 @@ export const groups = [
         visual: shot(280, 250, () => h(WorkspaceCreate, { stage: 5 }), { window: false }) },
       { title: 'Services at a glance', link: '/product/environments#services',
         body: 'What runs, what crashed and why, with a new port, the logs or a fix one click away.',
-        visual: shot(330, 460, () => h(ServicesPanel)) },
+        visual: shot(320, 460, () => h(ServicesPanel)) },
       { title: 'Databases per branch', link: '/product/environments#databases',
         body: 'Tables, Redis keyspaces and buckets in one tree, data grids and SQL consoles, with nothing to wire up.',
         visual: shot(300, 420, () => h(DatabasePanel)) },
@@ -77,14 +76,14 @@ export const groups = [
         body: 'Ask, review, get a second opinion or fix, starting from a fork, a compacted fork or a fresh packet.',
         visual: shot(380, 440, () => h(AgentPopover), { window: false }) },
       { title: 'Status on every workspace', link: '/product/agents#status',
-        body: 'Thinking, using tools, compacting or waiting for you, with a notification when it changes.',
-        visual: shot(280, 250, () => h(WorkspacesList, { rows: statusRows })) },
+        body: 'Agent working or waiting for you, in one line per workspace, with a notification when it changes.',
+        visual: shot(280, 330, () => h(WorkspacesList, { rows: statusRows, creating: [] })) },
       { title: 'Usage and plan limits', link: '/product/agents#usage',
         body: 'The 5-hour and weekly limits in the title bar, and cost by day from the agents\' own transcripts.',
         visual: shot(300, 230, () => h(UsageCard), { window: false, fade: false }) },
       { title: 'Project setup', link: '/product/agents#setup',
         body: 'An agent CLI writes pom.yml from what Pomelo detected; Pomelo checks every service boots.',
-        visual: shot(720, 520, () => h(Onboarding)) },
+        visual: shot(1048, 460, () => h(Onboarding)) },
     ],
   },
   {
@@ -96,7 +95,7 @@ export const groups = [
     cards: [
       { title: 'Git across every repo', link: '/product/editor#git',
         body: 'Stage in any repo, then one message makes one commit per repo. Push, pull and checks on the Remote tab.',
-        visual: shot(360, 470, () => h(GitPanel)) },
+        visual: shot(380, 640, () => h(GitPanel)) },
       { title: 'Unified or split diffs', link: '/product/editor#git',
         body: 'The whole branch diff with every hunk open, side by side when there is room.',
         visual: shot(720, 360, () => h(DiffView)) },
@@ -107,8 +106,8 @@ export const groups = [
           h('div', { style: { position: 'absolute', right: '24px', top: '44px' } }, h(ContextMenu, { items: terminalMenu, width: 230 })),
         ])) },
       { title: 'Pull requests and Jira', link: '/product/editor#tickets',
-        body: 'Each workspace shows its pull request\'s checks and its ticket\'s status; both open in tabs.',
-        visual: shot(280, 250, () => h(WorkspacesList, { rows: prRows })) },
+        body: 'Each workspace carries its ticket key and says when its pull request\'s checks fail or run; both open in tabs.',
+        visual: shot(280, 330, () => h(WorkspacesList, { rows: prRows, creating: [] })) },
     ],
   },
 ]
