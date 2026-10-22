@@ -83,6 +83,9 @@ repos:
 - with a port and no healthcheck, the port listens;
 - with neither, the process runs.
 
+When the target includes a repo service, `--wait` also waits until every shared service answers on its host
+port (see [Services](./services#urls)); nothing is run inside the containers.
+
 | Exit code | Meaning |
 |---|---|
 | 0 | Every service is ready |
@@ -90,7 +93,8 @@ repos:
 | 3 | A service stopped while starting; its last lines are printed |
 
 `pom status -o json` reports `up`, `ready` and `healthy` for every service. `healthy` is null for a service with
-no healthcheck.
+no healthcheck. Its `shared` list reports `up` and `ready` for each shared service; `pom status` shows a shared
+service that runs but does not answer yet as `starting`.
 
 ## What one step did
 

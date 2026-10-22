@@ -87,7 +87,7 @@ shared_services:
     port: 4010               # optional: a fixed port; otherwise one is picked
     environment:
       ISSUER: "http://127.0.0.1:$PORT"
-    healthcheck:
+    healthcheck:           # runs on the host; never inside a container
       test: "curl -sf http://127.0.0.1:$PORT/health"
 repos:
   api:
