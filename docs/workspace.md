@@ -276,6 +276,72 @@ The app can do the same when its pull requests refresh, set by
 Either way a workspace with uncommitted or unpushed work is kept: its delete
 stops before changing anything and says why.
 
+## Move a workspace
+
+A workspace you started on one machine (the laptop, say) can open on another (a dev VM) exactly as you left
+it: the same commits, including the ones you never pushed, the same uncommitted and untracked files, and the
+test data in its databases.
+
+```sh
+pom ws export feat-login                 # writes myproject-feat-login.pomws here
+pom ws import myproject-feat-login.pomws # on the other machine
+pom ws export feat-login --to dev        # or stream it straight into a host of `pom host`
+```
+
+The other machine needs the project first, with its repos cloned on main. `pom project export` and
+`pom project import` bring it over (see below), or set it up by hand: the import checks that each repo's
+`origin` is the same repo as on the source (SSH and HTTPS URLs of one repo match).
+
+**What travels**
+
+| In the archive | How it comes back |
+| --- | --- |
+| Commits origin does not have (`git bundle` of the branch since it left origin's default branch) | The branch is created at the same commit; nothing is pushed |
+| Uncommitted changes (`git diff --binary HEAD`), and which of them were staged | Applied to the new worktree, the staged part staged again |
+| Untracked files git does not ignore | Unpacked into the worktree |
+| Each database the workspace owns (`pg_dump -Fc`, run inside the shared Postgres) | Restored with `pg_restore` under this machine's names: `myproject_api_feat-login` becomes `<this project>_api_feat-login` |
+| Docker volumes labelled `pom.workspace=<project>/<branch>` | Recreated with this machine's label |
+| The display name and env profiles of `.pom-workspace.json` | Set on the new workspace |
+| The secrets the config uses (`{{secret.NAME}}`), sealed with a passphrase | Stored in this machine's secrets store; one this machine already has keeps its value (a warning names it) |
+
+**What does not travel**
+
+- **Gitignored files** (`.env.local`, logs, build output, `node_modules`): they are machine-specific or can be
+  made again. Env files are written again from `pom.yml` with this machine's paths and freshly leased ports,
+  and setup runs as it does for a new workspace.
+- **`secret.key`**, the key this machine encrypts its secrets with. The secrets are decrypted on the source
+  and sealed again with your passphrase; the import stores them under the target's own key.
+- Secrets the config does not use, other workspaces' data, databases shared with main, and running services.
+
+**The passphrase.** When the config uses secrets, `pom ws export` asks for a passphrase on the terminal (twice)
+and `pom ws import` asks for it again; in a script, set `POM_BUNDLE_PASSPHRASE` instead. It is never a
+command-line argument. A wrong passphrase stops the import before anything is made. With `--to`, pom makes a
+one-time passphrase itself and sends it to the host ahead of the archive, over the same SSH connection.
+
+| Command | What it does |
+| --- | --- |
+| `pom ws export <branch> [-o file.pomws] [--no-db] [--json]` | Writes the archive (`-o -` writes it to stdout). `--no-db` leaves the databases and volumes out. |
+| `pom ws export <branch> --to <host> [--no-db] [--json]` | Streams it over SSH into `pom ws import -` on a host of [`pom host`](/docs/remote); no archive file is written on either side. |
+| `pom ws import <file.pomws \| -> [--project name] [--branch new] [--json]` | Opens it here. The project is found by name (or `--project`, or `-c`); `--branch` imports it under another branch name. |
+
+Each step of the import is a stage, as in [Create](#create). If one fails, the error says which; run the same
+import again to resume from that stage, or `pom ws delete <branch>` to remove what it made. An archive made by
+a newer pom (a newer major version of its format, `pom.wsbundle/v1` today) is refused before anything
+changes. Progress goes to stderr; with `--json` both commands print one `pom.ws-transfer/v1` object on stdout.
+
+### Move a project
+
+```sh
+pom project export                  # writes myproject.pomproj
+pom project import myproject.pomproj
+pom project export --to dev
+```
+
+`pom project export` carries `pom.yml`, every secret of the project (sealed with a passphrase, as above) and
+each repo's `origin` and default branch. `pom project import` writes `pom.yml` into `~/pom/<project>` (or
+`--dir`), stores the secrets under this machine's key, clones each repo on main and lists the project in
+`pom project ls`. It refuses a project this machine already has.
+
 ## Agent tools (MCP)
 
 An AI agent running in a workspace can't see its own environment by

@@ -86,6 +86,25 @@ pom -H dev -c pom/myproject/pom.yml agent ls feat-login --json
 
   An unknown host name exits 1 with `"code": "unknown_host"`.
 
+## Moving work to the host
+
+A workspace started on the laptop moves to the host with its unpushed commits, uncommitted files and database
+data; the project itself (its `pom.yml`, secrets and repos) moves the same way:
+
+```sh
+pom project export --to dev          # once: the project, its secrets, its repos cloned there
+pom ws export feat-login --to dev    # the workspace, as it is now
+```
+
+`--to` streams the archive through the same SSH connection `pom -H` uses into `pom ... import -` on the host,
+so no archive file is written on either side. The secrets travel sealed with a one-time passphrase sent ahead
+of the archive; `secret.key` and gitignored files stay on the laptop. The import on the host leases its own
+ports, writes env files from `pom.yml` and runs setup; with `--json` the report includes the host's own
+report under `remote`. If SSH cannot connect, the export exits with **69** like `pom -H`.
+
+What travels, what does not, and how to move one through a file instead are in
+[Move a workspace](/docs/workspace#move-a-workspace).
+
 ## In the app
 
 **Connect to a host** is on the welcome page and in the project menu (**Connect to host...**). It lists
