@@ -24,9 +24,11 @@ With no project open, the window shows the welcome page:
 - **Import a bundle** - a teammate's exported config; it imports into the
   project open in the window, so open or create one first.
 - **Recent** - the projects you created or opened.
-- **This Mac** - whether **Docker** runs, which **git** you have, and which
-  **Agent CLI**s are installed (Claude Code, Codex, Gemini CLI). **Start
-  Docker** opens Docker Desktop or OrbStack; **Check again** re-checks.
+
+When something this computer needs is missing - **Docker** not running,
+no **git**, or no **Agent CLI** (Claude Code, Codex, Gemini CLI) - a bar
+above the cards says so, with a button to fix it: **Start Docker** opens
+Docker Desktop or OrbStack; **Check again** re-checks.
 
 A **project** is one `pom.yml` - your repos and every
 `workspace--<branch>/` worktree live under it. **New session...** in the
