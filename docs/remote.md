@@ -130,20 +130,52 @@ When the host runs `pom server`, the window follows the shown workspace as it ch
 again and again. The server looks at the project every second, and at once when an agent reports, and sends
 the workspace list, the services, the agents and the last turn you are reading only when one of them
 changed. A change on the host shows within about a second; nothing crosses the connection while nothing
-changes. The app still reads everything in full every 30 seconds, in case an update went missing, and asks
-for a service's recent output every 2.5 seconds while you read it.
+changes. The app still reads everything in full every 30 seconds, in case an update went missing.
+
+A service's output that you read in the Services panel streams in as the service prints it (the last 400
+lines stay on screen). When the service restarts, the output goes on from the new run after a
+`--- api/web restarted ---` line; a stopped service shows what it printed last, and its output comes in again
+once it starts. Reading output never stops or slows the service: a reader that falls far behind skips ahead
+to the last 1 MiB, as a terminal does.
 
 All of it goes over one SSH session; the connection line ends in **via server**. Updates stop while the
 window is minimized, covered or on another Space, and start again with a full read when it shows.
 
-A host whose `pom` has an older server without live updates is asked again every 2.5 seconds instead. When
+A host whose `pom` has an older server without live updates is asked again every 2.5 seconds instead, and a
+server without live output is asked for the service's recent output every 2.5 seconds while you read it. When
 the host's `pom` has no server at all, every look is a short `pom ... --json` over the shared connection, the
 line says **via ssh**, and the page says why (for example "update pom on the VM to get terminals"). If the
 host's `pom` is on another minor version than the app, the page says so too.
 
 The editor, the file tree and Git need the project's files on the laptop, so a remote project does not
-offer them: open the worktree in an editor that works over SSH. Creating, renaming or deleting a workspace is
-done on the host for now: `pom -H dev -c ... ws create <branch>`.
+offer them: open the worktree in an editor that works over SSH.
+
+### Creating, sleeping and waking workspaces
+
+With `pom server` on the host, these run on the host from the app, each as a card in the WORKSPACES list
+that shows its steps as they go:
+
+- **New workspace.** The **+** of the WORKSPACES list opens the create form: a name, the branch and the repos
+  to check out (all of main's by default). The create runs the same steps as `pom ws create` on the host,
+  and the card lists them (worktrees, setup, seeding...) with the one running. Once it is ready the window
+  switches to it.
+- **Sleep Workspace** and **Wake Workspace** in a workspace's right-click menu stop or start its services and
+  agents on the host, as `pom ws sleep` and `pom ws wake` there. A workspace whose agent is working stays
+  awake, and its card says which agent.
+- **Pull from Origin** in the same menu pulls every repo of the workspace from origin, as the Pull of a push
+  notice does on the laptop.
+
+**Cancel** on a running card stops the job before its next step; the step under way finishes first. A
+cancelled or failed create stays as a card with **Retry**, which goes on from the step it stopped at, like a
+create on the laptop; the workspace also shows as stopped part-way in `pom ws ls` on the host.
+
+The jobs run on the host, not in the app: closing the app or losing the connection does not stop them. A card
+whose connection comes back within half a minute picks up at the step it last showed; after that it fails
+with the reason, and `pom ws ls` on the host tells how the job ended.
+
+Renaming or deleting a workspace, and the other items of a local workspace's menu, are done on the host for
+now: `pom -H dev -c ... ws rename <branch> <name>` or `ws delete <branch>`. With a `pom` on the host that
+predates jobs, the app says to update it, and `pom -H dev -c ... ws create <branch>` works as before.
 
 ## Terminals on a remote project
 
@@ -212,7 +244,7 @@ socket in a folder only your user can open (`$XDG_RUNTIME_DIR/pom-server/`, else
 refuses a connection from any other user, and is reached only through your SSH login.
 
 ```sh
-pom server status          # pid, version, uptime and connections; exit 3 when none runs
+pom server status          # pid, version, uptime, connections, open streams and running jobs; exit 3 when none runs
 pom server status --json   # the same as pom.server/v1
 pom server stop
 pom server run             # start one in the background yourself
@@ -227,7 +259,7 @@ pom server run             # start one in the background yourself
   exit, stops none of them.
 - **Log.** `$XDG_STATE_HOME/pom/server/<version>.log` (else `~/.local/state/pom/server/`), rotated at 5 MiB
   with one `.log.1` kept. It records connections and each request's method, size, duration and result,
-  never what a request or an answer carried.
+  never what a request or an answer carried: no service output and no job steps.
 - **Fallback.** A host whose `pom` predates `pom server`, or speaks another protocol version, is read with
   plain SSH as before, without terminals. A server from before terminals still serves the rest; updating
   `pom` on the host brings them.
