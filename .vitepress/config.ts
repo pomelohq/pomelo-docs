@@ -53,6 +53,7 @@ const GROUPS = [
       { text: 'Databases', link: '/docs/databases' },
       { text: 'Testing against a workspace', link: '/docs/testing' },
       { text: 'Network', link: '/docs/network' },
+      { text: 'Remote machine', link: '/docs/remote' },
       { text: 'Agents', link: '/docs/agents' },
       { text: 'Agent status', link: '/docs/agent-status' },
       { text: 'Driving agents from scripts', link: '/docs/driving-agents' },
