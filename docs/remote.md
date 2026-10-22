@@ -121,7 +121,8 @@ The window of a remote project shows:
 - A line with the connection: connected (and when it last answered), connecting, or disconnected with
   SSH's reason and a **Reconnect** button. What was read before stays on screen while the host is away.
 - The workspace's services by repo, with **Start**, **Stop**, **Restart** and their recent output, the
-  shared services, and the workspace's agents with their state; click an agent to read its last turn.
+  shared services, and the workspace's agents with their state; click an agent to read its last turn (or, with
+  terminals, to open it).
 
 The app asks the host again every 2.5 seconds while the window is visible, and stops asking while it is
 minimized, covered or on another Space. Each look is a request to `pom server` on the host, all over one SSH
@@ -130,10 +131,38 @@ short `pom ... --json` over the shared connection instead, the line says **via s
 (for example "update pom on the VM to get terminals"). If the host's `pom` is on another minor version than
 the app, the page says so too. There is no live stream yet.
 
-The editor, the file tree, Git, terminals and the agent dock need the project's files on the laptop, so a
-remote project does not offer them. They come with the Pomelo server, which will run on the host. Until
-then, open the worktree in an editor that works over SSH. Creating, renaming or deleting a workspace is done
-on the host for now: `pom -H dev -c ... ws create <branch>`.
+The editor, the file tree and Git need the project's files on the laptop, so a remote project does not
+offer them: open the worktree in an editor that works over SSH. Creating, renaming or deleting a workspace is
+done on the host for now: `pom -H dev -c ... ws create <branch>`.
+
+## Terminals on a remote project
+
+When the host runs `pom server` (the connection line says **via server**), the window of a remote project
+has terminals, and they run on the host:
+
+- **Terminal tabs.** A new tab starts your login shell on the host, in the shown workspace's worktree. Typing,
+  resizing, splitting and the find bar work as on the laptop; each keystroke goes out on its own, at once.
+- **Service output.** The terminal button of a running service opens its live output in a terminal tab, the
+  same holder the service runs in on the host.
+- **Agents.** Clicking an agent in the Services panel opens its session in the agent dock. The dock shows the
+  agents running on the host; it does not start new ones there.
+
+What survives what:
+
+- **Closing the app, a lost connection or a laptop asleep** leaves every shell, service and agent running on
+  the host. A lost connection ends the tab's stream with a note; reopening the tab, or the app, attaches
+  again and replays the shell's recent output (the last 1 MiB). Reconnecting a tab on its own comes later.
+- **Closing a terminal tab** ends its shell on the host. Closing a service's or an agent's tab only stops
+  watching it.
+- **The server stopping** (idle exit, `pom server stop`, an update) does not stop shells either: they run in
+  their own holders, like services.
+
+A program that prints faster than the laptop reads, such as a long build log, never makes the host wait: the
+server keeps the last 1 MiB of output, and a tab that falls further behind skips ahead to it, clearing the
+screen first.
+
+PTY output and what you type pass through the server without being logged: its log has the method, the size
+and the result of each request, never terminal bytes, input or environment.
 
 ## pom server
 
@@ -161,7 +190,8 @@ pom server run             # start one in the background yourself
   with one `.log.1` kept. It records connections and each request's method, size, duration and result,
   never what a request or an answer carried.
 - **Fallback.** A host whose `pom` predates `pom server`, or speaks another protocol version, is read with
-  plain SSH as before. Updating `pom` on the host brings the server, which terminals on the host will need.
+  plain SSH as before, without terminals. A server from before terminals still serves the rest; updating
+  `pom` on the host brings them.
 
 ## Open in Editor
 
