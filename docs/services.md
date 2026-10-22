@@ -177,7 +177,17 @@ and **Copy URL** all use this address, so it stays the same when the port
 changes.
 
 Starting a repo service first brings up its shared services and creates the
-workspace's databases if they are missing. The command palette has
+workspace's databases if they are missing.
+
+Pomelo checks whether a shared service is up from the host, on its published
+port: a Postgres startup handshake, a Redis `PING`, or, for any other image, a
+TCP connection that stays open. It never runs a check inside a container: the
+generated `docker-compose.shared.yml` turns every image's own healthcheck off
+(`healthcheck: { disable: true }`), because a `docker exec` on a timer can hang
+the whole machine when the container runtime stalls. A `healthcheck.test` you
+set on a shared service runs on the host too, with `$PORT` set to the
+service's host port; if its program is not installed on the host, the
+built-in check is used instead. The command palette has
 `services: start` / `stop` entries, and a workspace's right-click menu has
 **Stop All Services**.
 
