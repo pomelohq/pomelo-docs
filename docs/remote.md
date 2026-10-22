@@ -28,7 +28,7 @@ pom host rm lab
 
 | Command | What it does |
 | --- | --- |
-| `pom host add <name> ssh://user@host[:port] [--pom-path p]` | Adds the host, or replaces one of that name. Without a user, your SSH config picks it. `--pom-path` is where `pom` lives there (`~/` works). |
+| `pom host add <name> ssh://user@host[:port] [--pom-path p] [--transport server\|ssh]` | Adds the host, or replaces one of that name. Without a user, your SSH config picks it. `--pom-path` is where `pom` lives there (`~/` works). `--transport` picks how the app reads it (see [pom server](#pom-server)). |
 | `pom host ls` | The hosts. |
 | `pom host rm <name>` | Forgets one. Nothing changes on the machine. |
 | `pom host test <name>` | Connects, runs `pom --version` there and compares it with this one. A different major or minor version prints a warning. |
@@ -43,10 +43,13 @@ The hosts live in `~/.config/pomelo/hosts.json`:
   "schema": "pom.hosts/v1",
   "hosts": {
     "dev": { "url": "ssh://dev@dev.example.net" },
-    "lab": { "url": "ssh://me@100.64.0.10:2222", "pom_path": "/opt/pom/bin/pom" }
+    "lab": { "url": "ssh://me@100.64.0.10:2222", "pom_path": "/opt/pom/bin/pom", "transport": "ssh" }
   }
 }
 ```
+
+`transport` is optional: without it the app reads the host through `pom server` and falls back to plain SSH
+when the host cannot serve; `"ssh"` always uses plain SSH.
 
 ## Running a command there: `pom -H`
 
@@ -121,13 +124,44 @@ The window of a remote project shows:
   shared services, and the workspace's agents with their state; click an agent to read its last turn.
 
 The app asks the host again every 2.5 seconds while the window is visible, and stops asking while it is
-minimized, covered or on another Space. Each look is a short `pom ... --json` over the shared connection;
-there is no live stream yet.
+minimized, covered or on another Space. Each look is a request to `pom server` on the host, all over one SSH
+session; the connection line ends in **via server**. When the host's `pom` has no server, every look is a
+short `pom ... --json` over the shared connection instead, the line says **via ssh**, and the page says why
+(for example "update pom on the VM to get terminals"). If the host's `pom` is on another minor version than
+the app, the page says so too. There is no live stream yet.
 
 The editor, the file tree, Git, terminals and the agent dock need the project's files on the laptop, so a
 remote project does not offer them. They come with the Pomelo server, which will run on the host. Until
 then, open the worktree in an editor that works over SSH. Creating, renaming or deleting a workspace is done
 on the host for now: `pom -H dev -c ... ws create <branch>`.
+
+## pom server
+
+`pom server` is a long-lived `pom` process on the host that answers the app. The app starts it on demand:
+it runs `ssh <host> pom server proxy`, which connects to the server, or starts one first and waits up to 5
+seconds for it. There is nothing to install or enable, and no network port: the server listens only on a Unix
+socket in a folder only your user can open (`$XDG_RUNTIME_DIR/pom-server/`, else `/tmp/pom-server-<uid>/`),
+refuses a connection from any other user, and is reached only through your SSH login.
+
+```sh
+pom server status          # pid, version, uptime and connections; exit 3 when none runs
+pom server status --json   # the same as pom.server/v1
+pom server stop
+pom server run             # start one in the background yourself
+```
+
+- **One per version.** Each `pom` version runs its own server (`<version>.sock`), so after an update the old
+  one goes away on its own while the new one starts on the next connection.
+- **Idle exit.** With no client connected for 30 minutes the server exits; the next connection starts it
+  again. `server.idle_exit_minutes` in `~/.config/pomelo/settings.json` on the host changes the 30, and `0`
+  keeps it running. It also exits when its socket file is deleted.
+- **Services survive it.** Services and agents run in their own holders, so stopping the server, or its
+  exit, stops none of them.
+- **Log.** `$XDG_STATE_HOME/pom/server/<version>.log` (else `~/.local/state/pom/server/`), rotated at 5 MiB
+  with one `.log.1` kept. It records connections and each request's method, size, duration and result,
+  never what a request or an answer carried.
+- **Fallback.** A host whose `pom` predates `pom server`, or speaks another protocol version, is read with
+  plain SSH as before. Updating `pom` on the host brings the server, which terminals on the host will need.
 
 ## Open in Editor
 
@@ -156,3 +190,5 @@ port, add a `Host` entry with its `Port` to `~/.ssh/config` and use that alias i
   (`ssh-add`) or check `~/.ssh/config`.
 - `pom is not installed on dev`: install it in `~/.local/bin`, or set `--pom-path` with `pom host add`.
 - A version warning: update `pom` on the older side; both should be on the same minor version.
+- The page says it reads over SSH: update `pom` on the host (`pom host test dev` shows its version). On the
+  host, `pom server status` and the server log say whether a server runs and what it served.
