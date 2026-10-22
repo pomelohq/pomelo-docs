@@ -126,6 +126,27 @@ REDIS_URL=redis://127.0.0.1:6379/3
 Only `env` values are resolved. A `cmd` is run as written: use `$PORT`,
 `$BIND_IP` or any env var the service gets.
 
+### Test profile
+
+`pom run` exports this env too. For tests, a repo's `test:` block says what
+`pom run test` runs and what the test profile layers on top:
+
+```yaml
+repos:
+  api:
+    test:
+      command: bin/rspec
+      env_file: .env.test        # default; .env.test.local is read after it
+      env:
+        DATABASE_URL: "{{db.test.url}}"
+```
+
+Under the test profile, a variable the repo's `.env.test` sets replaces the
+dev value, except a connection value (a template with a `db`, `shared`,
+`slot`, `branch`, `bind_ip` or `<repo>.<service>` token, and `PORT`), which
+keeps the workspace's. `test.env` wins over both. See
+[Running a repo's tests](./testing#running-a-repo-s-tests).
+
 ## When the config is invalid
 
 Pomelo checks the file when it loads it. An invalid file is not used, and

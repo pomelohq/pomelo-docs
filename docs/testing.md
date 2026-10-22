@@ -23,6 +23,71 @@ for test in checkout refund; do
 done
 ```
 
+## Running a repo's tests
+
+`pom run` exports the workspace's dev env before it runs a command. dotenv never overwrites a variable that is
+already set, so a test framework that loads `.env.test` would keep the dev values. The test profile fixes that:
+
+```sh
+pom run --profile test "bin/rspec"        # the repo's .env.test values, the workspace's connections
+pom run test                              # same, when the repo has a test: block
+pom run --explain-env --profile test "bin/rspec"   # where each variable comes from; runs nothing
+```
+
+Under the test profile:
+
+- **The test env file wins.** `.env.test`, then `.env.test.local`, are read from the repo folder. A variable
+  they set replaces the dev value, a secret included (CI does not see dev secrets either).
+- **Connection values keep the workspace's.** A variable whose `env` template has a workspace token
+  (`{{db.*}}`, `{{shared.*}}`, `{{slot.*}}`, `{{branch*}}`, `{{bind_ip}}`, `{{<repo>.<service>.*}}`), and
+  `PORT`, keeps this workspace's value even when `.env.test` sets it: the tests still reach this workspace's
+  databases, Redis, URLs and buckets. Which variables these are is decided from the template, never from the name.
+- **`test.env` wins over everything.** Set a test database there.
+- **Generated files are skipped.** A `.env.test.local` Pomelo wrote is not read; the `.env.test.local:` entry of
+  the repo's `env` applies instead.
+
+```yaml
+repos:
+  api:
+    env:
+      DATABASE_URL: "{{db.main.url}}"
+      SOME_ALLOWED_DOMAINS: "*"
+    databases:
+      main: "{{branch.safe}}"
+      test: "{{branch.safe}}_test"
+    test:
+      command: bin/rspec               # what `pom run test` runs
+      env_file: .env.test              # the default; `<env_file>.local` is read after it
+      env:
+        DATABASE_URL: "{{db.test.url}}"
+```
+
+With a `test:` block, `pom run test` (or `pom run` of the exact `test.command`) applies the profile without
+`--profile test`; `--profile dev` turns it off. Without `--profile` and without a `test:` block, `pom run`
+exports the dev env as before.
+
+`pom run --explain-env [--profile test] [--json] <command>` prints each variable with its value (secrets masked)
+and its source: `workspace`, `connection`, the env file (`.env.test`), `pom.yml env <file>` or
+`pom.yml test.env`. A connection value that the env file also set says which file it was kept over. `--json`
+prints schema `pom.run/v1`:
+
+```json
+{
+  "schema": "pom.run/v1",
+  "workspace": "feat-login",
+  "repo": "api",
+  "command": "bin/rspec",
+  "profile": "test",
+  "env_files": [".env.test"],
+  "env": [
+    { "key": "DATABASE_URL", "value": "postgres://postgres:postgres@127.0.0.1:5432/myproject_feat_login",
+      "source": "connection", "connection": true, "secret": false, "kept_over": ".env.test" },
+    { "key": "SOME_ALLOWED_DOMAINS", "value": "example.test",
+      "source": ".env.test", "connection": false, "secret": false, "kept_over": null }
+  ]
+}
+```
+
 ## Database snapshots
 
 | Command | What it does |
