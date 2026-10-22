@@ -1,50 +1,48 @@
 <script setup>
 import { ref } from 'vue'
+import './kit.css'
+
 const days = ['Wed', 'Thu', 'Fri', 'Sat', 'Sun', 'Mon', 'today']
 const series = [
-  ['feat-login', 'var(--pa-ansi-4)', [9.8, 0, 6.2, 0, 0.4, 0, 0]],
-  ['PROJ-101', 'var(--pa-ansi-2)', [0, 1.3, 0, 0.9, 0, 3.0, 3.9]],
-  ['main', 'var(--pa-ansi-3)', [0, 0, 0, 0, 0, 0, 1.4]],
+  ['feat-login', 'var(--pa-text-accent)', [10, 0, 6.3, 0, 0.6, 0, 0]],
+  ['PROJ-101', 'var(--pa-success)', [0, 1.4, 0, 0.9, 0, 3.0, 3.9]],
+  ['main', 'var(--pa-warning)', [0, 0, 0, 0, 0, 0, 1.4]],
 ]
-const range = ref('7 days')
+const range = ref(1)
 const max = 10
 </script>
 
 <template>
-  <div class="pa-uc">
-    <div class="row pa-uc-head">
-      <div class="col grow"><span class="pa-uc-big">$67.09</span><span class="muted pa-uc-small">API-equivalent cost - 7 days</span></div>
-      <div class="pa-uc-seg">
-        <span v-for="r in ['Today', '7 days', '30 days']" :key="r" :class="{ on: range === r }" @click="range = r">{{ r }}</span>
+  <div class="pa-uch">
+    <div class="pa-uch-head">
+      <div class="pa-uch-stat"><span class="pa-uch-big">$67.09</span><span class="pk-small pk-2">API-equivalent cost</span></div>
+      <div class="pk-seg"><span v-for="(r, i) in ['Today', '7 days', '30 days']" :key="r" :class="{ on: range === i }" @click="range = i">{{ r }}</span></div>
+    </div>
+    <span class="pk-label">By day</span>
+    <div class="pa-uch-chart">
+      <div v-for="(day, i) in days" :key="day" class="pa-uch-col">
+        <div class="pa-uch-stack"><i v-for="[name, color, values] in series" :key="name" :style="{ height: (values[i] / max) * 100 + '%', background: color }" /></div>
+        <span class="pk-small pk-3">{{ day }}</span>
       </div>
     </div>
-    <div class="pa-uc-chart">
-      <div v-for="(day, i) in days" :key="day" class="pa-uc-col">
-        <div class="pa-uc-stack">
-          <i v-for="[name, color, values] in series" :key="name" :style="{ height: (values[i] / max) * 100 + '%', background: color }" />
-        </div>
-        <span class="placeholder">{{ day }}</span>
-      </div>
-    </div>
-    <div class="row pa-uc-legend">
+    <div class="pa-uch-legend pk-small">
       <span v-for="[name, color] in series" :key="name"><i :style="{ background: color }" />{{ name }}</span>
     </div>
   </div>
 </template>
 
 <style>
-.pa-uc { height: 100%; padding: 16px 18px; background: var(--pa-editor-background); display: flex; flex-direction: column; gap: 12px; }
-.pa-uc-head { align-items: flex-start; }
-.pa-uc-big { font-size: 22px; font-weight: 600; }
-.pa-uc-small { font-size: 12px; }
-.pa-uc-seg { display: flex; padding: 2px; border-radius: 6px; background: var(--pa-panel-background); font-size: 12px; }
-.pa-uc-seg span { padding: 3px 10px; border-radius: 4px; color: var(--pa-text-muted); cursor: pointer; }
-.pa-uc-seg span.on { background: var(--pa-element-selected); color: var(--pa-text); }
-.pa-uc-chart { flex: 1; display: flex; gap: 6px; align-items: stretch; border-bottom: 1px solid var(--pa-border-variant); padding-bottom: 0; }
-.pa-uc-col { flex: 1; display: flex; flex-direction: column; font-size: 11px; text-align: center; gap: 4px; }
-.pa-uc-stack { flex: 1; display: flex; flex-direction: column-reverse; }
-.pa-uc-stack i { display: block; width: 100%; }
-.pa-uc-legend { gap: 14px; font-size: 12px; color: var(--pa-text-muted); }
-.pa-uc-legend span { display: inline-flex; align-items: center; gap: 5px; }
-.pa-uc-legend i { width: 7px; height: 7px; border-radius: 50%; display: block; }
+.pa-uch { height: 100%; padding: 14px 18px; background: var(--pa-editor-background); display: flex; flex-direction: column; gap: 8px; }
+.pa-uch-head { display: flex; align-items: flex-start; justify-content: space-between; }
+.pa-uch-stat { display: flex; flex-direction: column; gap: 2px; }
+.pa-uch-big { font-size: 20px; line-height: 26px; font-weight: 600; }
+.pa-uch-chart { flex: 1; min-height: 0; display: flex; gap: 6px; }
+.pa-uch .pk-seg { background: var(--pa-element-background); }
+.pa-uch .pk-seg > span.on { background: var(--pa-element-selected); box-shadow: none; }
+.pa-uch-col { flex: 1; display: flex; flex-direction: column; gap: 4px; text-align: center; }
+.pa-uch-stack { flex: 1; display: flex; flex-direction: column-reverse; border-bottom: 1px solid var(--pa-border-variant); }
+.pa-uch-stack i { display: block; width: 100%; }
+.pa-uch-legend { display: flex; gap: 12px; color: var(--pa-text-muted); }
+.pa-uch-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.pa-uch-legend i { width: 7px; height: 7px; border-radius: 50%; display: block; }
 </style>

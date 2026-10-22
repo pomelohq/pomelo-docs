@@ -34,12 +34,12 @@ Workspace**:
 The footer sums up what **Create** will make, for example
 `3 repos - 1 installs once - databases copied from main - local`.
 
-<AppShot :width="760" :height="560" :window="false" text="Create Workspace. Pick a ticket (typing filters, arrows and Enter work), switch its source, toggle repos, pick an environment."><CreateWorkspaceForm /></AppShot>
+<AppShot :width="620" :height="554" :window="false" text="Create Workspace. Pick a ticket (typing filters, arrows and Enter work), switch its source, toggle repos, pick an environment and the data."><CreateWorkspaceForm /></AppShot>
 
 Pomelo builds the workspace through a staged pipeline and shows each stage
 on a card at the top of the sidebar:
 
-<AppShot :width="280" :height="236" :window="false" text="A workspace being created"><WorkspaceCreate /></AppShot>
+<AppShot :width="256" :height="290" :window="false" text="A workspace being created"><div class="pa-sheet"><WorkspaceCreate /></div></AppShot>
 
 1. Validating config and hosts
 2. Provisioning workspace
@@ -120,7 +120,7 @@ shows each repo of the open project by lockfile version:
 - **Old versions** - copies no workspace's lockfile matches any more, with
   **Free**. **Free ... Unused** at the top removes all of them.
 
-<AppShot :width="1000" :height="620" text="The node_modules Store tab. Try Use Shared Copy, Save to Store, Free, +7 more or Optimize."><ModuleStore /></AppShot>
+<AppShot :width="1060" :height="770" text="The node_modules Store tab. Try Use Shared Copy, Save to Store, Free (hover the old versions), +2 more or Optimize."><ModuleStore /></AppShot>
 
 **Optimize** does all of it in one go: it keeps an install for each lockfile
 with no copy yet, moves every workspace that has its own copy onto the shared

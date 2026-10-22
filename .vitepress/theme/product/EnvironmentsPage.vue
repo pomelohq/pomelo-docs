@@ -14,10 +14,11 @@ import Step from './Step.vue'
 import './product.css'
 
 const rows = [
-  { name: 'main', agent: 'idle' },
-  { name: 'Login page', branch: 'feat-login', current: true, agent: 'thinking', running: 2, pr: { count: 2, tone: 'warn' } },
-  { name: 'Checkout flow', ticket: 'PROJ-101', status: ['In Review', 'accent'], agent: 'input', running: 3 },
+  { id: 'main', title: 'main', branch: 'main', running: 2 },
+  { id: '101', title: 'Login page', branch: 'feat-login', key: 'PROJ-101', group: 'In progress', agent: 'thinking', running: 2, current: true },
+  { id: '104', title: 'Checkout flow', key: 'PROJ-104', group: 'In review', agent: 'waiting', running: 3 },
 ]
+const creating = [{ title: 'Search filters', key: 'PROJ-107', step: 'Starting services (6 of 8)', progress: 0.7 }]
 const terminal = [
   [['api', 6], [' % ', 'fg'], ['git status --short && git log --oneline -2', 'fg']],
   [[' M ', 1], ['app/controllers/sessions_controller.rb', 'fg']],
@@ -36,14 +37,11 @@ const terminal = [
         already running. Ten of them run side by side and never collide.</p>
       <div class="pp-hero-window">
         <Frame :width="1440" :height="820" window>
-          <AppWindow active="database" :sidebar="260" :dock="300" :bottom="190" language="" cursor="">
-            <template #sidebar>
-              <div style="padding: 10px 10px 0"><WorkspaceCreate /></div>
-              <WorkspacesList :rows="rows" style="padding-top: 0" />
-            </template>
+          <AppWindow active="database" :dock="300" :bottom="190" language="" cursor="">
+            <template #sidebar><WorkspacesList :rows="rows" :creating="creating" /></template>
             <template #dock><DatabasePanel /></template>
             <TabBar nav :tabs="[
-              { title: 'sessions_controller.rb', icon: 'file' },
+              { title: 'sessions_controller.rb', icon: 'file-ruby' },
               { title: 'web/vite', icon: 'terminal' },
               { title: 'users', icon: 'table', detail: '[main]', active: true },
             ]" :buttons="['panel_right', 'panel_bottom', 'maximize']" />
@@ -66,7 +64,7 @@ const terminal = [
           <Step n="01" title="Create one from a branch or a ticket" link="/docs/workspace" more="Workspace lifecycle">
             <template #text>It checks out a worktree of every repo, starts the shared services, writes each service's
               env, runs your setup commands and seeds the databases from main.</template>
-            <div class="pp-stage"><div style="width: 100%; max-width: 280px"><Frame :width="280" :height="236" bare><WorkspaceCreate :stage="4" detail="" /></Frame></div></div>
+            <div class="pp-stage"><div style="width: 100%; max-width: 280px"><Frame :width="256" :height="290" bare><div class="pa-sheet"><WorkspaceCreate :stage="5" detail="api: bundle install" /></div></Frame></div></div>
           </Step>
           <Step n="02" title="Its own ports, databases and URLs" link="/docs/network" more="How the network works">
             <template #text>Ports are handed out so they never clash. Each workspace gets its own databases in the shared
@@ -87,12 +85,12 @@ const terminal = [
             <template #text>A crash, a port already in use or a failed start shows first, with its last line and what
               to do: <b>Use a new port</b>, <b>View logs</b>, <b>Fix with Claude</b> or restart. Shared services stay
               pinned at the bottom. Try the filter above the list.</template>
-            <div class="pp-stage"><div style="width: 100%; max-width: 330px"><Frame :width="330" :height="880" window><ServicesPanel /></Frame></div></div>
+            <div class="pp-stage"><div style="width: 100%; max-width: 320px"><Frame :width="320" :height="900" window><ServicesPanel /></Frame></div></div>
           </Step>
           <Step n="02" title="Open a service as a tab" link="/docs/services#the-service-tab" more="The service tab">
             <template #text>Its URL, port, mode and command, and its logs live, with a filter, pause, follow and wrap.
               Type in the filter to try it.</template>
-            <div class="pp-stage"><div style="width: 100%"><Frame :width="760" :height="380" window><ServiceTab /></Frame></div></div>
+            <div class="pp-stage"><div style="width: 100%"><Frame :width="1000" :height="520" window><ServiceTab /></Frame></div></div>
           </Step>
         </div>
       </div>

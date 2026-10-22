@@ -65,11 +65,10 @@ const mainChat = [
   [['  has to live for a minute and needs an atomic increment...', 'fg']],
 ]
 const statusRows = [
-  { name: 'main', agent: 'idle' },
-  { name: 'Login page', branch: 'feat-login', current: true, agent: 'thinking', running: 2 },
-  { name: 'Checkout flow', ticket: 'PROJ-101', status: ['In Review', 'accent'], agent: 'input', running: 3 },
-  { name: 'Search filters', ticket: 'PROJ-104', status: ['In Progress', 'accent'], agent: 'tools', running: 1 },
-  { name: 'Invoice export', ticket: 'PROJ-97', status: ['Done', 'done'], agent: 'compacting' },
+  { id: 'main', title: 'main', branch: 'main', running: 2 },
+  { id: '101', title: 'Login page', branch: 'feat-login', key: 'PROJ-101', group: 'In progress', agent: 'thinking', running: 2, current: true },
+  { id: '104', title: 'Checkout flow', key: 'PROJ-104', group: 'In progress', agent: 'waiting', running: 3 },
+  { id: '97', title: 'Invoice export', key: 'PROJ-97', group: 'In review', agent: 'compacting' },
 ]
 </script>
 
@@ -82,11 +81,12 @@ const statusRows = [
         fixes go to side agents that start from the right amount of context and hand back what they found.</p>
       <div class="pp-hero-window">
         <Frame :width="1440" :height="820" window>
-          <AppWindow active="" :sidebar="248" :right="520" language="Ruby" cursor="22:5">
+          <AppWindow active="" :right="520" language="Ruby" cursor="22:5">
             <template #sidebar><WorkspacesList /></template>
-            <TabBar nav :tabs="[{ title: 'sessions_controller.rb', icon: 'file', active: true }]"
-              :buttons="['eye', 'diff_unified', 'panel_right', 'panel_bottom', 'maximize']" />
-            <CodeView :code="code" :active="23" :caret="23" :added="[2, 7, 8, 9, 21, 22, 23, 24]" />
+            <TabBar nav :tabs="[{ title: 'sessions_controller.rb', icon: 'file-ruby', active: true }]"
+              :buttons="['panel_right', 'panel_bottom', 'maximize']" />
+            <CodeView :code="code" :active="23" :caret="23" :added="[2, 7, 8, 9, 21, 22, 23, 24]"
+              :crumbs="['api', 'app/controllers', 'sessions_controller.rb']" :symbol="[['class', 'SessionsController'], ['def', 'throttled?']]" tools />
             <template #right>
               <TabBar :tabs="[
                 { title: 'Main', icon: 'sparkle', pinned: true, size: 12 },
@@ -110,7 +110,7 @@ const statusRows = [
             <template #text>Click + in the agent dock and pick what it is for: <b>Ask</b> about the code,
               <b>Review</b> the branch diff, get a <b>Second opinion</b> from another CLI, or <b>Fix</b> a bug.
               Only Fix may edit files; the rest run in plan mode.</template>
-            <div class="pp-stage"><div style="width: 100%; max-width: 380px"><Frame :width="380" :height="700" bare><AgentPopover /></Frame></div></div>
+            <div class="pp-stage"><div style="width: 100%; max-width: 380px"><Frame :width="380" :height="720" bare><AgentPopover /></Frame></div></div>
           </Step>
           <Step n="02" title="Start from just enough context" link="/docs/agents#side-agents" more="How it starts">
             <template #text>A side agent can fork main's whole session, fork and compact it, or start fresh from
@@ -153,25 +153,25 @@ const statusRows = [
     <section id="status" class="pp-section">
       <div class="pp-wrap">
         <h2>Every workspace's agent, at a glance</h2>
-        <p class="pp-sub">Pomelo reads the agents' own activity hooks. The dot on each workspace says whether its
-          agent is thinking, using tools, compacting, waiting for you or done, and a notification tells you when
-          that changes.</p>
+        <p class="pp-sub">Pomelo reads the agents' own activity hooks. Each workspace says in one line whether its
+          agent is working or waiting for you, the title bar points at the one that needs you, and a notification
+          tells you when that changes.</p>
         <div class="pp-grid">
           <div class="pp-card">
-            <div class="pp-stage"><div style="width: 100%; max-width: 280px"><Frame :width="280" :height="250" window>
-              <WorkspacesList :rows="statusRows" /></Frame></div></div>
+            <div class="pp-stage"><div style="width: 100%; max-width: 280px"><Frame :width="280" :height="330" window>
+              <WorkspacesList :rows="statusRows" :creating="[]" /></Frame></div></div>
             <div class="pp-card-text"><h3>Status on every row</h3>
-              <p>Idle, Thinking, Using tools, Compacting and Awaiting input, next to the branch's pull request
-                and running services. Side agents never move the dot.</p></div>
+              <p>Agent working, Waiting for you, or the pull request's trouble, whichever matters most, with the
+                running services along the tile. Side agents never change it.</p></div>
           </div>
           <div class="pp-card">
             <div class="pp-stage pp-legend-stage">
               <ul class="pa pp-legend">
-                <li><i style="background: var(--pa-success)" />Idle<span>finished, waiting for you</span></li>
-                <li><i style="background: var(--pa-warning)" />Thinking<span>working on your prompt</span></li>
-                <li><i style="background: var(--pa-info)" />Using tools<span>an edit, a command, an MCP call</span></li>
-                <li><i style="background: var(--pa-text-accent)" />Compacting<span>freeing up context</span></li>
-                <li><i style="background: var(--pa-error)" />Awaiting input<span>a permission prompt or a question</span></li>
+                <li><b class="pp-pill">Waiting for you</b><span>a permission prompt or a question</span></li>
+                <li><b style="color: var(--pa-error)">CI failed</b><span>the pull request needs a look</span></li>
+                <li><b style="color: var(--pa-info)">Agent working</b><span>thinking, using tools or compacting</span></li>
+                <li><b style="color: var(--pa-warning)">Checks running</b><span>the pull request's checks</span></li>
+                <li><b class="pp-quiet">(nothing)</b><span>idle: done, ready for your next prompt</span></li>
               </ul>
             </div>
             <div class="pp-card-text"><h3>Notified when it matters</h3>
@@ -213,7 +213,7 @@ const statusRows = [
           <Step n="01" title="Detect, draft, verify, repair" link="/docs/quickstart#_5-setting-up" more="Quick Start">
             <template #text>Each phase shows as it runs. The agent works in a terminal you can watch or type into;
               verification is Pomelo's own check, not the agent's word.</template>
-            <div class="pp-stage"><div style="width: 100%"><Frame :width="720" :height="640" window><Onboarding /></Frame></div></div>
+            <div class="pp-stage"><div style="width: 100%"><Frame :width="1048" :height="832" window><Onboarding /></Frame></div></div>
           </Step>
         </div>
       </div>
@@ -223,9 +223,12 @@ const statusRows = [
 
 <style>
 .pp-legend { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; width: 100%; max-width: 360px; }
-.pp-legend li { display: grid; grid-template-columns: 12px auto 1fr; gap: 10px; align-items: center; margin: 0;
+.pp-legend li { display: grid; grid-template-columns: 124px 1fr; gap: 10px; align-items: center; margin: 0;
   font-size: 14px; font-weight: 500; color: var(--vp-c-text-1); }
-.pp-legend li i { width: 8px; height: 8px; border-radius: 50%; }
+.pp-legend li b { font-weight: 500; font-size: 13px; justify-self: start; }
+.pp-legend li b.pp-pill { height: 20px; padding: 0 7px; border-radius: 5px; display: inline-flex; align-items: center;
+  background: var(--pa-attention); color: var(--pa-on-attention); }
+.pp-legend li b.pp-quiet { color: var(--pa-text-placeholder); font-weight: 400; }
 .pp-legend li span { font-weight: 400; color: var(--vp-c-text-2); font-size: 13.5px; }
 .pp-legend-stage { min-height: 290px; }
 </style>
