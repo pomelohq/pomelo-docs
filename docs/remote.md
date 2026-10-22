@@ -124,12 +124,22 @@ The window of a remote project shows:
   shared services, and the workspace's agents with their state; click an agent to read its last turn (or, with
   terminals, to open it).
 
-The app asks the host again every 2.5 seconds while the window is visible, and stops asking while it is
-minimized, covered or on another Space. Each look is a request to `pom server` on the host, all over one SSH
-session; the connection line ends in **via server**. When the host's `pom` has no server, every look is a
-short `pom ... --json` over the shared connection instead, the line says **via ssh**, and the page says why
-(for example "update pom on the VM to get terminals"). If the host's `pom` is on another minor version than
-the app, the page says so too. There is no live stream yet.
+### Live updates
+
+When the host runs `pom server`, the window follows the shown workspace as it changes rather than asking
+again and again. The server looks at the project every second, and at once when an agent reports, and sends
+the workspace list, the services, the agents and the last turn you are reading only when one of them
+changed. A change on the host shows within about a second; nothing crosses the connection while nothing
+changes. The app still reads everything in full every 30 seconds, in case an update went missing, and asks
+for a service's recent output every 2.5 seconds while you read it.
+
+All of it goes over one SSH session; the connection line ends in **via server**. Updates stop while the
+window is minimized, covered or on another Space, and start again with a full read when it shows.
+
+A host whose `pom` has an older server without live updates is asked again every 2.5 seconds instead. When
+the host's `pom` has no server at all, every look is a short `pom ... --json` over the shared connection, the
+line says **via ssh**, and the page says why (for example "update pom on the VM to get terminals"). If the
+host's `pom` is on another minor version than the app, the page says so too.
 
 The editor, the file tree and Git need the project's files on the laptop, so a remote project does not
 offer them: open the worktree in an editor that works over SSH. Creating, renaming or deleting a workspace is
@@ -144,8 +154,10 @@ has terminals, and they run on the host:
   resizing, splitting and the find bar work as on the laptop; each keystroke goes out on its own, at once.
 - **Service output.** The terminal button of a running service opens its live output in a terminal tab, the
   same holder the service runs in on the host.
-- **Agents.** Clicking an agent in the Services panel opens its session in the agent dock. The dock shows the
-  agents running on the host; it does not start new ones there.
+- **Agents.** Clicking an agent in the Services panel opens its session in the agent dock. See
+  [Agents on a remote project](#agents-on-a-remote-project).
+
+A connection holds more than 40 terminals at once: they share one channel for their exits.
 
 What survives what:
 
@@ -163,6 +175,33 @@ screen first.
 
 PTY output and what you type pass through the server without being logged: its log has the method, the size
 and the result of each request, never terminal bytes, input or environment.
+
+## Agents on a remote project
+
+The agent dock of a remote project shows the agents running on the host, and drives them the way it drives
+agents on the laptop:
+
+- **New agent.** The **+** of the dock starts an agent on the host, in the shown workspace, and opens it in
+  the dock: the workspace's main agent when it does not run yet, else another one (`agent-2`, `agent-3`,
+  ...). It runs the same command as `pom agent start` there. The first time an agent runs in a folder it asks
+  whether to trust it; answer in its tab. The **+** shows only when the host's `pom` can start agents; with
+  an older one, start them on the host with `pom -H dev -c ... agent start`.
+- **Who drives.** The same lease rules apply as on the laptop. An agent you start from the app is yours. An
+  agent an orchestrator or another agent drives (for example one a script started with `pom agent start`, or
+  a session `pom agent send --take` took) shows "Watching - an orchestrator drives this session" over its
+  tab. Your keys do not reach it while you watch.
+- **Take over.** **Take over** on that strip makes the session yours: your keys reach it again, and whoever
+  drove it gets it back with `pom agent release` on the host.
+- **Approvals.** A tool call that waits for an approval shows over the tab with **Allow** and **Deny**,
+  answered on the host as if you answered there.
+- **Live state.** The agent's dot in the WORKSPACES list, its state in the Services panel and its last turn
+  come with the live updates, so a turn that ends shows within a second.
+- **Tabs come back.** The agent tabs you had open are kept per host, project and workspace. Opening the
+  project again, or picking the workspace again, attaches them to their agents; an agent that stopped
+  meanwhile gets no tab.
+
+Closing an agent's tab leaves the agent running on the host, unless `agent_tab_close` is `"stop"` in your
+settings: then it stops the agent there, as it does on the laptop.
 
 ## pom server
 
