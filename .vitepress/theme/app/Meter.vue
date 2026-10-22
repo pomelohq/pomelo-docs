@@ -5,13 +5,12 @@ const tone = computed(() => props.used >= 90 ? 'var(--pa-error)' : props.used >=
 </script>
 
 <template>
-  <span class="pa-meter" :style="{ width: width ? width + 'px' : undefined, flex: width ? 'none' : '1', height: height + 'px', borderRadius: height / 2 + 'px' }">
-    <span :style="{ width: Math.min(100, used) + '%', background: tone, borderRadius: height / 2 + 'px' }" />
+  <span class="pa-meter" :style="{ width: width ? width + 'px' : undefined, flex: width ? 'none' : '1', height: height + 'px', borderRadius: Math.ceil(height / 2) + 'px' }">
+    <span :style="{ width: Math.min(100, used) + '%', background: tone, borderRadius: Math.ceil(height / 2) + 'px' }" />
   </span>
 </template>
 
 <style>
-.pa-meter { display: flex; background: rgba(255, 255, 255, 0.1); overflow: hidden; }
-html:not(.dark) .pa-meter { background: rgba(0, 0, 0, 0.1); }
+.pa-meter { display: flex; background: color-mix(in srgb, var(--pa-text) 10%, transparent); overflow: hidden; }
 .pa-meter > span { display: block; height: 100%; }
 </style>

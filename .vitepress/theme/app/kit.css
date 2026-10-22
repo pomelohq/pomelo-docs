@@ -1,0 +1,65 @@
+/* The app's shared controls (buttons, key caps, inputs, segmented toggles, type styles) for the mocks. */
+.pa .pk-title { font-size: 20px; line-height: 28px; font-weight: 600; }
+.pa .pk-heading { font-size: 15px; line-height: 22px; font-weight: 600; }
+.pa .pk-body { font-size: 13px; line-height: 20px; }
+.pa .pk-strong { font-size: 13px; line-height: 20px; font-weight: 500; }
+.pa .pk-small { font-size: 12px; line-height: 16px; }
+.pa .pk-label { font-size: 11px; line-height: 14px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--pa-text-placeholder); }
+.pa .pk-code { font-family: 'Lilex', ui-monospace, monospace; font-size: 13px; line-height: 20px; }
+.pa .pk-code-small { font-family: 'Lilex', ui-monospace, monospace; font-size: 12px; line-height: 16px; }
+.pa .pk-2 { color: var(--pa-text-muted); }
+.pa .pk-3 { color: var(--pa-text-placeholder); }
+.pa .pk-accent { color: var(--pa-text-accent); }
+
+.pk-btn { display: inline-flex; align-items: center; gap: 4px; height: 28px; padding: 0 10px; border-radius: 6px; border: 0;
+  font: 500 13px/1 'IBM Plex Sans', system-ui, sans-serif; color: var(--pa-text); background: transparent; white-space: nowrap; cursor: pointer; flex: none; }
+.pk-btn.primary { background: var(--pa-accent-fill); color: var(--pa-on-accent); }
+.pk-btn.primary:hover { background: color-mix(in srgb, var(--pa-accent-fill) 88%, white); }
+.pk-btn.secondary { background: var(--pa-element-background); box-shadow: inset 0 0 0 1px var(--pa-border); }
+.pk-btn.secondary:hover, .pk-btn.ghost:hover { background: var(--pa-element-hover); }
+.pk-btn.secondary:hover { background: color-mix(in srgb, var(--pa-text) 5%, var(--pa-element-background)); }
+.pk-btn.danger { color: var(--pa-error); }
+.pk-btn.sm { height: 24px; padding: 0 8px; font-size: 12px; }
+.pk-btn.icon { width: 28px; padding: 0; justify-content: center; }
+.pk-btn.sm.icon { width: 24px; }
+.pk-btn.off { opacity: 0.45; cursor: default; }
+
+.pk-kbd { display: inline-flex; align-items: center; gap: 1px; height: 18px; padding: 0 5px; border-radius: 4px; flex: none; white-space: nowrap;
+  background: color-mix(in srgb, var(--pa-text) 6%, transparent); color: var(--pa-text-muted); font: 500 11px/1 'IBM Plex Sans', system-ui, sans-serif; }
+.pk-btn.primary .pk-kbd { background: rgba(255, 255, 255, 0.18); color: var(--pa-on-accent); }
+
+.pk-input { display: flex; align-items: center; gap: 8px; height: 30px; padding: 0 10px; border-radius: 6px; background: var(--pa-editor-background);
+  box-shadow: inset 0 0 0 1px var(--pa-border); color: var(--pa-text-placeholder); font: 400 13px/1 'IBM Plex Sans', system-ui, sans-serif; min-width: 0; }
+.pk-input.focus { box-shadow: inset 0 0 0 1px var(--pa-text-accent), 0 0 0 3px color-mix(in srgb, var(--pa-text-accent) 12%, transparent); color: var(--pa-text); }
+.pk-input .pk-value { color: var(--pa-text); white-space: nowrap; }
+.pk-input .pk-caret { width: 2px; height: 17px; margin-left: -8px; background: var(--pa-player-cursor); flex: none; }
+input.pk-input { width: 100%; outline: none; border: 0; color: var(--pa-text); }
+input.pk-input::placeholder { color: var(--pa-text-placeholder); }
+input.pk-input:focus { box-shadow: inset 0 0 0 1px var(--pa-text-accent), 0 0 0 3px color-mix(in srgb, var(--pa-text-accent) 12%, transparent); }
+
+.pk-seg { display: inline-flex; padding: 2px; gap: 2px; border-radius: 6px; background: var(--pa-background); align-self: flex-start; font-size: 12px; line-height: 16px; }
+.pk-seg > span { padding: 5px 10px; border-radius: 4px; color: var(--pa-text-muted); cursor: pointer; white-space: nowrap; }
+.pk-seg > span.on { background: var(--pa-element-background); color: var(--pa-text); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 4px 12px rgba(0, 0, 0, 0.2); }
+
+.pk-pill { display: inline-flex; align-items: center; gap: 5px; height: 20px; padding: 0 7px; border-radius: 999px; flex: none; white-space: nowrap;
+  font: 500 11px/1 'IBM Plex Sans', system-ui, sans-serif; background: color-mix(in srgb, var(--pa-text) 5%, transparent); color: var(--pa-text-muted); }
+.pk-pill.success { color: var(--pa-success); }
+.pk-pill.warning { color: var(--pa-warning); }
+.pk-pill.danger { color: var(--pa-error); }
+.pk-pill.info { color: var(--pa-info); }
+.pk-pill.attention { background: var(--pa-attention); color: var(--pa-on-attention); }
+.pk-pill .pk-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+.pk-overlay { border-radius: 10px; background: var(--pa-elevated-surface-background); color: var(--pa-text);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 12px 32px rgba(0, 0, 0, 0.5); }
+html:not(.dark) .pk-overlay { box-shadow: 0 0 0 1px rgba(29, 23, 48, 0.12), 0 12px 32px rgba(29, 23, 48, 0.16); }
+.pk-raised { background: var(--pa-element-background); border-radius: 10px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 4px 12px rgba(0, 0, 0, 0.2); }
+html:not(.dark) .pk-raised, html:not(.dark) .pk-seg > span.on { box-shadow: 0 1px 2px rgba(29, 23, 48, 0.1), 0 4px 12px rgba(29, 23, 48, 0.06); }
+.pk-box { width: 14px; height: 14px; border-radius: 4px; box-shadow: inset 0 0 0 1px var(--pa-border); display: inline-flex; align-items: center;
+  justify-content: center; flex: none; cursor: pointer; }
+.pk-box.on { background: var(--pa-accent-fill); box-shadow: none; color: var(--pa-on-accent); }
+.pk-progress { position: relative; display: flex; height: 8px; padding: 2px; border-radius: 4px; background: var(--pa-background);
+  box-shadow: inset 0 0 0 1px var(--pa-border-variant); overflow: hidden; }
+.pk-progress i { display: block; height: 4px; border-radius: 2px; background: var(--pa-info); }
+/* A fragment shown on the app's window background, as the sidebar sits on it. */
+.pa-sheet { height: 100%; padding: 8px; background: var(--pa-background); border-radius: 10px; }

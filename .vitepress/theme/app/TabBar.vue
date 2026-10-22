@@ -2,52 +2,58 @@
 import Icon from './Icon.vue'
 
 // tabs: [{ title, icon, detail, active, preview, pinned, dirty, size }]; buttons: trailing icon names.
+// nav: the back and forward buttons a center pane leads with.
 defineProps({
   tabs: { type: Array, required: true },
   buttons: { type: Array, default: () => [] },
   nav: { type: Boolean, default: false },
+  canForward: { type: Boolean, default: false },
 })
 </script>
 
 <template>
   <div class="pa-tabs">
-    <template v-if="nav">
-      <div class="pa-tab-btn"><Icon name="arrow_left" :size="15" /></div>
-      <div class="pa-tab-btn dim"><Icon name="arrow_right" :size="15" /></div>
-      <div class="pa-tab-sep" />
-    </template>
-    <div v-for="tab in tabs" :key="tab.title" class="pa-tab" :class="{ active: tab.active, preview: tab.preview }">
-      <span v-if="tab.dirty" class="pa-tab-dirty" />
-      <Icon v-if="tab.icon" :name="tab.icon" :size="tab.iconSize || 14" class="pa-tab-icon" />
-      <span class="pa-tab-title" :style="{ fontSize: (tab.size || 13) + 'px' }">{{ tab.title }}</span>
-      <span v-if="tab.detail" class="placeholder" :style="{ fontSize: (tab.size || 13) + 'px' }">{{ tab.detail }}</span>
-      <span class="pa-tab-close" :class="{ pinned: tab.pinned }"><Icon :name="tab.pinned ? 'pin' : 'close'" :size="11" /></span>
-    </div>
-    <div class="pa-tab-fill" />
-    <template v-if="buttons.length">
-      <div class="pa-tab-sep" />
-      <div v-for="button in buttons" :key="button" class="pa-tab-btn"><Icon :name="button" :size="13" /></div>
-    </template>
+    <span v-if="nav" class="pa-tabs-nav">
+      <span class="pa-tab-btn"><Icon name="arrow_left" :size="13" /></span>
+      <span class="pa-tab-btn" :class="{ off: !canForward }"><Icon name="arrow_right" :size="13" /></span>
+    </span>
+    <span class="pa-tabs-list">
+      <span v-for="tab in tabs" :key="tab.title" class="pa-tab" :class="{ active: tab.active, preview: tab.preview }"
+        :style="tab.size ? { fontSize: tab.size + 'px' } : undefined">
+        <Icon v-if="tab.icon" :name="tab.icon" :size="tab.iconSize || 14" class="pa-tab-icon" />
+        <span class="pa-tab-title">{{ tab.title }}</span>
+        <span v-if="tab.detail" class="pa-tab-detail">{{ tab.detail }}</span>
+        <span v-if="tab.dirty" class="pa-tab-dirty" />
+        <Icon v-else :name="tab.pinned ? 'pin' : 'close'" :size="12" class="pa-tab-close" />
+      </span>
+    </span>
+    <span v-if="buttons.length" class="pa-tabs-actions">
+      <span v-for="button in buttons" :key="button" class="pa-tab-btn"><Icon :name="button" :size="13" /></span>
+    </span>
   </div>
 </template>
 
 <style>
-.pa-tabs { flex: none; height: 32px; display: flex; background: var(--pa-tab-bar-background);
-  border-bottom: 1px solid var(--pa-border); }
-.pa-tab { position: relative; display: flex; align-items: center; gap: 6px; padding: 0 10px; height: 32px;
-  background: var(--pa-tab-inactive-background); border-right: 1px solid var(--pa-border); color: var(--pa-text-muted);
-  margin-bottom: -1px; border-bottom: 1px solid var(--pa-border); }
-.pa-tab.active { background: var(--pa-tab-active-background); color: var(--pa-text); border-bottom-color: var(--pa-tab-active-background); }
+.pa-tabs { flex: none; height: 34px; padding: 0 6px; display: flex; align-items: stretch; background: var(--pa-panel-background); }
+.pa-tabs-nav { display: inline-flex; align-items: center; gap: 2px; padding-right: 6px; margin-right: 4px;
+  box-shadow: inset -1px 0 0 var(--pa-border-variant); }
+.pa-tabs-list { flex: 1; min-width: 0; display: flex; align-items: center; gap: 2px; overflow: hidden; }
+.pa-tabs-actions { display: inline-flex; align-items: center; gap: 2px; padding-left: 6px; }
+.pa-tab-btn { width: 26px; height: 24px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center;
+  color: var(--pa-text-placeholder); }
+.pa-tab-btn:hover { background: var(--pa-element-hover); color: var(--pa-text); }
+.pa-tab-btn.off { opacity: 0.4; }
+.pa-tab-btn.off:hover { background: none; color: var(--pa-text-placeholder); }
+.pa-tab { position: relative; flex: 0 1 auto; min-width: min(100px, max-content); height: 26px; padding: 0 10px; gap: 6px;
+  display: inline-flex; align-items: center; white-space: nowrap; border-radius: 6px; font-size: 13px; line-height: 1;
+  color: var(--pa-text-muted); }
+.pa-tab:hover { background: var(--pa-element-hover); color: var(--pa-text); }
+.pa-tab.active { flex-shrink: 0.4; background: var(--pa-editor-background); color: var(--pa-text); font-weight: 500;
+  box-shadow: 0 1px 2px #00000059, 0 4px 12px #00000033; }
+html:not(.dark) .pa-tab.active { box-shadow: 0 1px 2px #1d17301a, 0 4px 12px #1d17300f; }
 .pa-tab.preview .pa-tab-title { font-style: italic; }
-.pa-tab-icon { color: var(--pa-icon-muted); }
-.pa-tab-dirty { width: 6px; height: 6px; border-radius: 50%; background: var(--pa-text-accent); margin: 0 3px; }
-.pa-tab-close { width: 16px; height: 16px; border-radius: 4px; display: flex; align-items: center; justify-content: center;
-  color: var(--pa-icon-muted); visibility: hidden; }
-.pa-tab:hover .pa-tab-close, .pa-tab-close.pinned { visibility: visible; }
-.pa-tab-close:hover { background: var(--pa-ghost-element-hover); }
-.pa-tab-fill { flex: 1; }
-.pa-tab-sep { width: 1px; background: var(--pa-border); }
-.pa-tab-btn { width: 26px; height: 32px; display: flex; align-items: center; justify-content: center; color: var(--pa-icon-muted); }
-.pa-tab-btn:hover { color: var(--pa-icon); }
-.pa-tab-btn.dim { opacity: 0.35; }
+.pa-tab-title { min-width: 0; max-width: 220px; overflow: hidden; text-overflow: ellipsis; }
+.pa-tab-detail { color: var(--pa-text-placeholder); }
+.pa-tab-close { color: var(--pa-text-placeholder); }
+.pa-tab-dirty { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--pa-text-muted); }
 </style>

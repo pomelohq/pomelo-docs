@@ -1,6 +1,7 @@
 <script setup>
 import { computed, nextTick, ref } from 'vue'
 import Icon from './Icon.vue'
+import './data.css'
 // Where the fragment starts, so one page can show each of the tab's states.
 const props = defineProps({
   view: { type: String, default: 'data' },
@@ -10,12 +11,13 @@ const props = defineProps({
 })
 
 const columns = [
-  { name: 'id', type: 'bigint', width: 90, pk: true },
-  { name: 'email', type: 'varchar(255)', width: 190 },
-  { name: 'name', type: 'text', width: 100 },
-  { name: 'org_id', type: 'bigint', width: 130, fk: 'orgs.id' },
-  { name: 'role', type: 'text', width: 90 },
-  { name: 'settings', type: 'jsonb', width: 260 },
+  { name: 'id', type: 'bigint', width: 107, pk: true, first: true, nullable: 'no', default: "nextval('users_id_seq'::regclass)" },
+  { name: 'email', type: 'varchar(255)', width: 154, nullable: 'no' },
+  { name: 'name', type: 'varchar(120)', width: 146 },
+  { name: 'org_id', type: 'bigint', width: 122.5, fk: 'orgs.id' },
+  { name: 'role', type: 'text', width: 96 },
+  { name: 'settings', type: 'jsonb', width: 92 },
+  { name: 'last_seen_at', type: 'timestamptz', width: 180 },
 ]
 const big = {
   theme: 'dark', beta: true, digest: 'weekly', locale: 'en-US',
@@ -23,19 +25,24 @@ const big = {
   saved_views: Array.from({ length: 180 }, (_, i) => ({ name: `View ${i + 1}`, sort: 'updated_at' })),
 }
 const orgs = { 1: ['Acme', 'pro'], 2: ['Globex', 'free'], 3: ['Initech', 'free'] }
-const people = ['Ada', 'Alan', 'Grace', 'Linus', 'Margaret', 'Ken', 'Barbara', 'Dennis', 'Edsger', 'Frances']
-const loaded = people.map((name, i) => [
-  String(101 + i), `${name.toLowerCase()}@example.com`, name, String((i % 3) + 1), i % 4 === 0 ? 'admin' : 'member',
-  i === 1 ? JSON.stringify(big) : i === 2 ? null : JSON.stringify({ theme: i % 2 ? 'dark' : 'light', beta: i % 3 === 0 }),
-])
-const references = [['orders.user_id', i => 3 + (i % 4)], ['login_tokens.user_id', i => i % 3]]
+const people = ['Ann', 'Bob', 'Cy', 'Di', 'Ed', 'Flo', 'Gus', 'Hal']
+const loaded = Array.from({ length: 40 }, (_, i) => {
+  const name = people[i % people.length]
+  return [
+    String(101 + i), `${name.toLowerCase()}@example.com`, name, String((i % 3) + 1), i % 3 === 0 ? 'admin' : 'member',
+    i % 5 === 1 ? JSON.stringify(big) : i % 5 === 2 ? null : JSON.stringify({ theme: i % 2 ? 'light' : 'dark', beta: i % 3 === 0 }),
+    `2026-09-${String(1 + (i % 28)).padStart(2, '0')} 10:${String(i % 60).padStart(2, '0')}:00`,
+  ]
+})
+const indexes = [['users_pkey', 'id', 'primary'], ['users_email_key', 'email', 'unique'], ['index_users_on_org_id', 'org_id', '']]
+const references = [['orders', 'user_id', i => 3 + (i % 4)], ['login_tokens', 'user_id', i => i % 3]]
 
 const view = ref(props.view)
 const side = ref(props.side)
 const details = ref(true)
 const selected = ref(props.cell)
 const filters = ref({})
-const edits = ref(props.edited ? { '3.4': 'admin', '6.2': 'Ken T.' } : {})
+const edits = ref(props.edited ? { '6.2': 'Gus QA' } : {})
 const editing = ref(null)
 const open = ref(new Set(['$']))
 const more = ref(new Set())
@@ -52,11 +59,13 @@ const shown = computed(() => loaded.map((_, r) => r).filter(r => columns.every((
 })))
 const bytes = text => (text.length >= 1024 ? `${(text.length / 1024).toFixed(1)} KB` : `${text.length} B`)
 const summary = v => (Array.isArray(v) ? `[ ${v.length} items ]` : `{ ${Object.keys(v).length} keys }`)
+const isSummary = (r, c) => columns[c].type === 'jsonb' && value(r, c) !== null && value(r, c).length > 300
 function cellText(r, c) {
   const v = value(r, c)
   if (v === null) return 'NULL'
-  if (columns[c].type === 'jsonb' && v.length > 300) return `${summary(JSON.parse(v))} ${bytes(v)}`
-  return v
+  const text = isSummary(r, c) ? `${summary(JSON.parse(v))} ${bytes(v)}` : v
+  // The grid cuts a JSON cell to its first characters, with three dots as the app draws them.
+  return columns[c].type === 'jsonb' && text.length > 9 ? text.slice(0, 7) + '...' : text
 }
 const readOnly = c => (columns[c].pk ? 'Primary key' : null)
 
@@ -83,17 +92,13 @@ function stage(r, c, v) {
   else next[`${r}.${c}`] = v
   edits.value = next
 }
-const statements = computed(() => Object.entries(edits.value).map(([key, v]) => {
-  const [r, c] = key.split('.').map(Number)
-  const set = v === null ? 'NULL' : `'${String(v).replace(/'/g, "''")}'`
-  return `UPDATE "public"."users" SET "${columns[c].name}" = ${set} WHERE "id" = '${loaded[r][0]}';`
-}))
+const changes = computed(() => Object.keys(edits.value).length)
 function say(text) {
   flash.value = text
   setTimeout(() => { if (flash.value === text) flash.value = '' }, 2200)
 }
 function apply() {
-  const count = statements.value.length
+  const count = changes.value
   edits.value = {}
   say(`Saved ${count} ${count === 1 ? 'change' : 'changes'} in one transaction`)
 }
@@ -104,15 +109,15 @@ const DDL = `CREATE TABLE "public"."users" (
     "settings" jsonb,
     CONSTRAINT "users_pkey" PRIMARY KEY (id),
     CONSTRAINT "users_org_id_fkey" FOREIGN KEY (org_id) REFERENCES orgs(id)
-);`
+);
+CREATE INDEX index_users_on_org_id ON public.users USING btree (org_id);`
 const SQL_KEYWORDS = new Set('create table view index unique on using not null default constraint primary key foreign references check as select from where and or in is cascade restrict set delete update no action with without time zone varying if exists alter add column generated always identity'.split(' '))
-// The same coloring the tab gives it: keywords, strings, numbers, quoted names.
 const ddl = DDL.split('\n').map(line => {
   const parts = []
   const re = /'[^']*'?|"[^"]*"?|\d[\d.]*|[A-Za-z_]\w*|[^A-Za-z0-9_'"]+/g
   for (const [token] of line.matchAll(re)) {
-    const kind = token[0] === "'" ? 'string' : token[0] === '"' ? 'property' : /^\d/.test(token) ? 'number'
-      : SQL_KEYWORDS.has(token.toLowerCase()) ? 'keyword' : ''
+    const kind = token[0] === "'" ? 'str' : token[0] === '"' ? 'key' : /^\d/.test(token) ? 'num'
+      : SQL_KEYWORDS.has(token.toLowerCase()) ? 'kw' : 'plain'
     parts.push([kind, token])
   }
   return parts
@@ -137,270 +142,277 @@ function lines(v, path, depth, key, out) {
   if (entries.length > limit) out.push({ depth: depth + 1, more: path, hidden: entries.length - limit, parts: [] })
   out.push({ depth, parts: [[Array.isArray(v) ? ']' : '}', 'plain']] })
 }
+const treeOf = v => { const out = []; lines(JSON.parse(v), '$', 0, undefined, out); return out }
 const current = computed(() => {
   const [r, c] = selected.value
   const v = value(r, c)
-  let tree = null
-  if (v !== null && columns[c].type === 'jsonb') {
-    tree = []
-    lines(JSON.parse(v), '$', 0, undefined, tree)
-  }
-  return { r, c, v, tree }
+  return { r, c, v, tree: v !== null && columns[c].type === 'jsonb' ? treeOf(v) : null }
 })
 function toggle(path) {
   const next = new Set(open.value)
   next.has(path) ? next.delete(path) : next.add(path)
   open.value = next
 }
-function expandAll() {
+function expandAll(v) {
   const next = new Set()
-  const walk = (v, path) => {
-    if (v && typeof v === 'object') {
+  const walk = (x, path) => {
+    if (x && typeof x === 'object') {
       next.add(path)
-      ;(Array.isArray(v) ? v : Object.values(v)).forEach((x, i) => walk(x, `${path}.${Array.isArray(v) ? i : Object.keys(v)[i]}`))
+      ;(Array.isArray(x) ? x : Object.values(x)).forEach((y, i) => walk(y, `${path}.${Array.isArray(x) ? i : Object.keys(x)[i]}`))
     }
   }
-  walk(JSON.parse(current.value.v), '$')
+  walk(JSON.parse(v), '$')
   open.value = next
 }
 </script>
 
 <template>
-  <div class="pa-tv">
-    <div class="pa-tv-main">
-      <div class="row pa-tv-bar">
-        <Icon name="table" :size="12" class="icon-muted" />
-        <span class="muted">api</span><span class="placeholder">/</span><span class="muted">dev</span><span class="placeholder">/</span>
-        <span class="pa-strong">users</span>
-        <span class="placeholder pa-tv-on">on</span><Icon name="branch" :size="11" class="accent" /><span class="mono accent pa-small">feat-login</span>
-        <span class="grow" />
-        <div class="row pa-tv-seg">
-          <span v-for="[id, text] in [['data', 'Data'], ['structure', 'Structure'], ['ddl', 'DDL']]" :key="id"
-            :class="{ on: view === id }" @click="view = id">{{ text }}</span>
-        </div>
-        <span v-if="view === 'data'" class="pa-rows pa-click pa-tv-keyed" :class="{ on: details }" @click="details = !details">Details <span class="pa-tv-kbd"><Icon name="shift" :size="11" /><Icon name="return" :size="11" /></span></span>
-        <Icon name="rotate_cw" :size="13" class="icon-muted" />
+  <div class="pa-dt pa-tv">
+    <div class="pa-dt-bar">
+      <span class="pa-dt-crumb"><Icon name="table" :size="14" />api<i>/</i>dev<i>/</i><b>users</b></span>
+      <span class="pa-dt-on">on<Icon name="branch" :size="12" /><span class="mono">feat-login</span></span>
+      <span class="grow" />
+      <div class="pa-dt-seg">
+        <span v-for="[id, text] in [['data', 'Data'], ['structure', 'Structure'], ['ddl', 'DDL']]" :key="id"
+          :class="{ on: view === id }" @click="view = id">{{ text }}</span>
       </div>
-      <div v-if="view === 'data'" class="row pa-tv-query">
-        <div class="pa-input grow"><span class="mono muted">WHERE</span><span class="mono placeholder">id &gt; 10</span></div>
-        <div class="pa-input grow"><span class="mono muted">ORDER BY</span><span class="mono placeholder">id</span></div>
-        <span class="pa-rows">500 rows</span>
-      </div>
+      <span v-if="view === 'data'" class="pa-dt-btn secondary" :class="{ on: details }" @click="details = !details">Details
+        <span class="pa-dt-kbd"><Icon name="shift" :size="11" /><Icon name="return" :size="11" /></span></span>
+      <span class="pa-dt-btn icon"><Icon name="rotate_cw" :size="13" /></span>
+    </div>
 
-      <template v-if="view === 'data'">
-        <div class="pa-tv-grid mono">
+    <template v-if="view === 'data'">
+      <div class="row pa-tv-query">
+        <div class="pa-dt-field grow"><b>Where</b><span class="mono placeholder">id &gt; 10</span></div>
+        <div class="pa-dt-field grow"><b>Order by</b><span class="mono placeholder">id</span></div>
+        <span class="pa-tv-rows">500 rows</span>
+      </div>
+      <div class="pa-dt-split">
+        <div class="pa-dt-card grow pa-tv-grid mono">
           <div class="pa-tv-head">
             <span class="pa-tv-num" />
             <span v-for="col in columns" :key="col.name" class="pa-tv-h" :style="{ width: col.width + 'px' }">
-              <Icon v-if="col.pk" name="key" :size="10" class="warn" /><Icon v-else-if="col.fk" name="arrow_up_right" :size="10" class="pa-tv-hint" />
-              <span>{{ col.name }}</span><span class="placeholder pa-tv-type">{{ col.type }}</span>
+              <Icon v-if="col.pk" name="key" :size="10" class="warn" /><Icon v-else-if="col.fk" name="arrow_up_right" :size="10" class="accent" />
+              <span>{{ col.name }}</span><span v-if="col.width > 100" class="placeholder pa-tv-type">{{ col.type }}</span>
             </span>
           </div>
-          <div class="pa-tv-filters mono">
-          <span class="pa-tv-num" />
-          <span v-for="(col, c) in columns" :key="col.name" class="pa-tv-fcell" :style="{ width: col.width + 'px' }">
-            <input v-model="filters[c]" placeholder="filter" spellcheck="false" />
-          </span>
-        </div>
-
+          <div class="pa-tv-filters">
+            <span class="pa-tv-num" />
+            <span v-for="(col, c) in columns" :key="col.name" class="pa-tv-fcell" :style="{ width: col.width + 'px' }">
+              <input v-model="filters[c]" placeholder="filter" spellcheck="false" />
+            </span>
+          </div>
           <div v-for="(r, i) in shown" :key="r" class="pa-tv-row" :class="{ sel: selected[0] === r }">
             <span class="pa-tv-num pa-click" @click="pick(r, selected[1])">{{ i + 1 }}</span>
             <span v-for="(col, c) in columns" :key="col.name" class="pa-tv-c"
-              :class="{ on: selected[0] === r && selected[1] === c, edited: `${r}.${c}` in edits, muted: value(r, c) === null || cellText(r, c) !== value(r, c) }"
-              :style="{ width: col.width + 'px' }" @click="pick(r, c)" @dblclick="startEdit(r, c)">
+              :class="{ on: selected[0] === r && selected[1] === c, edited: `${r}.${c}` in edits }"
+              :style="{ width: col.width + 'px', paddingLeft: col.first ? '6.5px' : undefined }" @click="pick(r, c)" @dblclick="startEdit(r, c)">
               <input v-if="editing && editing.r === r && editing.c === c" v-model="editing.text" class="pa-tv-edit"
                 @keydown.enter="keep" @keydown.esc="editing = null" @blur="editing && keep()" />
-              <template v-else>
-                <span class="trunc grow" :class="{ 'pa-tv-link': col.fk && value(r, c) !== null, 'pa-tv-json': col.type === 'jsonb' && value(r, c) !== null && cellText(r, c) === value(r, c) }">{{ cellText(r, c) }}<span v-if="col.fk && value(r, c) !== null" class="placeholder pa-tv-name">{{ orgs[value(r, c)][0] }}</span></span>
-                <span v-if="col.fk && value(r, c) !== null" class="pa-tv-go pa-tv-hint" title="Open the org" @click.stop="follow(r, c)"><Icon name="arrow_up_right" :size="10" /></span>
+              <template v-else-if="value(r, c) === null"><span class="pa-tv-null">NULL</span></template>
+              <template v-else-if="col.fk">
+                <span class="trunc grow muted"><u>{{ value(r, c) }}</u><span class="pa-tv-org">{{ orgs[value(r, c)][0] }}</span></span>
+                <span class="pa-tv-go" title="Open the org" @click.stop="follow(r, c)"><Icon name="arrow_up_right" :size="10" /></span>
               </template>
+              <span v-else class="trunc grow" :class="{ placeholder: isSummary(r, c), 'pa-j-str': col.type === 'jsonb' && !isSummary(r, c) }">{{ cellText(r, c) }}</span>
             </span>
           </div>
         </div>
-        <div v-if="statements.length" class="row pa-tv-pending">
-          <span class="warn pa-strong">{{ statements.length }} {{ statements.length === 1 ? 'change' : 'changes' }}</span>
-          <span class="muted">not saved - into myproject_feat-login</span><span class="grow" />
-          <span class="pa-rows pa-click" @click="say('Opens the UPDATE statements in an editor tab')">Review SQL</span>
-          <span class="pa-rows pa-click" @click="edits = {}">Discard</span>
-          <span class="pa-rows pa-click pa-tv-keyed" @click="apply">Apply <span class="pa-tv-kbd"><Icon name="command" :size="11" /><span>S</span></span></span>
-        </div>
-        <div v-else class="row pa-tv-page">
-          <Icon name="chevron_left" :size="12" class="icon-muted" /><Icon name="arrow_left" :size="12" class="icon-muted" />
-          <span class="muted">1-{{ shown.length }} of {{ shown.length === loaded.length ? '1234' : shown.length }}</span>
-          <Icon name="arrow_right" :size="12" class="icon-muted" />
-          <span class="grow muted pa-tv-flash">{{ flash }}</span><span class="pa-rows">Export CSV</span>
-        </div>
-      </template>
 
-      <div v-else-if="view === 'structure'" class="pa-tv-struct mono">
-        <div class="pa-tv-shead pa-sans"><span style="width:120px">COLUMN</span><span style="width:120px">TYPE</span><span style="width:50px">NULL</span><span class="grow">DEFAULT</span><span style="width:110px">KEY</span></div>
-        <div v-for="col in columns" :key="col.name" class="pa-tv-srow">
-          <span style="width:120px">{{ col.name }}</span><span class="muted" style="width:120px">{{ col.type }}</span>
-          <span class="muted" style="width:50px">{{ col.pk || col.name === 'email' ? 'no' : 'yes' }}</span>
-          <span class="placeholder grow">{{ col.pk ? "nextval('users_id_seq')" : '' }}</span>
-          <span style="width:110px" :class="col.pk ? 'warn' : 'accent'">{{ col.pk ? 'primary' : col.fk || '' }}</span>
+        <div v-if="details" class="pa-dt-card pa-tv-side">
+          <div class="row pa-tv-shead">
+            <div class="pa-dt-seg">
+              <span :class="{ on: side === 'value' }" @click="side = 'value'">Value</span>
+              <span :class="{ on: side === 'row' }" @click="side = 'row'">Row</span>
+            </div>
+            <span class="grow" /><span class="pa-dt-btn icon" @click="details = false"><Icon name="close" :size="11" /></span>
+          </div>
+          <div v-if="side === 'value'" class="pa-tv-sbody">
+            <div class="row pa-tv-vtitle">
+              <span class="mono">{{ columns[current.c].name }}</span><span class="mono placeholder pa-tv-type">{{ columns[current.c].type }}</span>
+              <span class="grow" /><span class="placeholder pa-tv-small">row {{ loaded[current.r][0] }}</span>
+            </div>
+            <div v-if="current.tree" class="pa-dt-json">
+              <div class="pa-dt-json-bar"><span class="placeholder">{{ summary(JSON.parse(current.v)) }}</span><span class="grow" />
+                <span class="pa-link" @click="expandAll(current.v)">Expand all</span><span class="pa-link" @click="open = new Set()">Collapse</span>
+                <span class="pa-link" @click="say('Opens the value in an editor tab; saving it stages the change')">Open in tab</span></div>
+              <div class="pa-dt-tree mono">
+                <div v-for="(line, i) in current.tree.slice(0, 200)" :key="i" class="pa-dt-line" :style="{ paddingLeft: line.depth * 14 + 'px' }">
+                  <span class="pa-dt-fold" @click="line.toggle && line.depth === 0 && toggle(line.toggle)"><Icon v-if="line.toggle && line.depth === 0" :name="line.isOpen ? 'chevron_down' : 'chevron_right'" :size="9" /></span>
+                  <span v-for="([text, kind], j) in (line.head || [])" :key="`h${j}`" :class="`pa-j-${kind}`">{{ text }}</span>
+                  <span v-if="line.toggle && line.depth > 0" class="pa-dt-fold" @click="toggle(line.toggle)"><Icon :name="line.isOpen ? 'chevron_down' : 'chevron_right'" :size="9" /></span>
+                  <span v-if="line.more" class="pa-link" @click="more = new Set([...more, line.more])">show {{ line.hidden }} more</span>
+                  <span v-for="([text, kind], j) in line.parts" :key="j" :class="`pa-j-${kind}`">{{ text }}</span>
+                </div>
+              </div>
+            </div>
+            <div v-else class="pa-tv-box mono" :class="{ placeholder: current.v === null, warn: `${current.r}.${current.c}` in edits }" @click="startEdit(current.r, current.c)">{{ current.v ?? 'NULL' }}</div>
+            <div class="row pa-tv-small" style="gap: 6px">
+              <span class="placeholder">{{ current.v === null ? '' : current.tree ? bytes(current.v) : `${current.v.length} chars` }}</span><span class="grow" />
+              <template v-if="!readOnly(current.c)">
+                <span v-if="current.v !== null" class="pa-link" @click="stage(current.r, current.c, null)">Set NULL</span>
+                <span v-if="`${current.r}.${current.c}` in edits" class="pa-link" @click="stage(current.r, current.c, loaded[current.r][current.c])">Revert</span>
+              </template>
+              <span v-else class="placeholder">{{ readOnly(current.c) }}</span>
+              <span v-if="current.v !== null && !current.tree" class="pa-link" @click="say('Opens the value in an editor tab; saving it stages the change')">Open in tab</span>
+              <span class="pa-link" @click="say('Copied')">Copy</span>
+            </div>
+            <template v-if="columns[current.c].fk && current.v !== null">
+              <div class="pa-dt-label pa-tv-sec">orgs where id = {{ current.v }}</div>
+              <div class="row pa-tv-kv mono"><span class="muted">id</span><span>{{ current.v }}</span></div>
+              <div class="row pa-tv-kv mono"><span class="muted">name</span><span>{{ orgs[current.v][0] }}</span></div>
+              <div class="row pa-tv-kv mono"><span class="muted">plan</span><span>{{ orgs[current.v][1] }}</span></div>
+            </template>
+          </div>
+          <div v-else class="pa-tv-sbody pa-tv-record">
+            <template v-for="(col, c) in columns" :key="col.name">
+              <template v-if="col.type === 'jsonb' && value(selected[0], c)">
+                <div class="row pa-tv-kv mono pa-click" :class="{ on: selected[1] === c }" @click="pick(selected[0], c)"><span class="muted">{{ col.name }}</span></div>
+                <div class="pa-dt-json pa-tv-rjson">
+                  <div class="pa-dt-json-bar"><span class="placeholder">jsonb - {{ bytes(value(selected[0], c)) }}</span>
+                    <span class="pa-link" @click="expandAll(value(selected[0], c))">Expand all</span><span class="pa-link" @click="open = new Set()">Collapse</span>
+                    <span class="pa-link" @click="say('Copied')">Copy</span><span class="pa-link" @click="say('Opens the value in an editor tab')">...</span></div>
+                  <div class="pa-dt-tree mono">
+                    <div v-for="(line, i) in treeOf(value(selected[0], c)).slice(0, 60)" :key="i" class="pa-dt-line" :style="{ paddingLeft: line.depth * 14 + 'px' }">
+                      <span class="pa-dt-fold" @click="line.toggle && line.depth === 0 && toggle(line.toggle)"><Icon v-if="line.toggle && line.depth === 0" :name="line.isOpen ? 'chevron_down' : 'chevron_right'" :size="9" /></span>
+                      <span v-for="([text, kind], j) in (line.head || [])" :key="`h${j}`" :class="`pa-j-${kind}`">{{ text }}</span>
+                      <span v-if="line.toggle && line.depth > 0" class="pa-dt-fold" @click="toggle(line.toggle)"><Icon :name="line.isOpen ? 'chevron_down' : 'chevron_right'" :size="9" /></span>
+                      <span v-for="([text, kind], j) in line.parts" :key="j" :class="`pa-j-${kind}`">{{ text }}</span>
+                    </div>
+                  </div>
+                </div>
+              </template>
+              <div v-else class="row pa-tv-kv mono pa-click" :class="{ on: selected[1] === c, edited: `${selected[0]}.${c}` in edits }" @click="pick(selected[0], c)">
+                <span class="muted">{{ col.name }}</span>
+                <span class="trunc" :class="{ muted: col.fk, placeholder: value(selected[0], c) === null }" @click.stop="col.fk ? follow(selected[0], c) : pick(selected[0], c)">{{ col.fk ? `${value(selected[0], c)} - ${orgs[value(selected[0], c)][0]} (orgs)` : value(selected[0], c) ?? 'NULL' }}</span>
+                <Icon v-if="col.fk" name="arrow_up_right" :size="10" class="muted" />
+              </div>
+            </template>
+            <div class="pa-dt-label pa-tv-sec">Referenced by</div>
+            <div v-for="[table, column, count] in references" :key="table" class="row pa-tv-ref mono pa-click" @click="say(`Opens ${table} where ${column} = '${loaded[selected[0]][0]}'`)">
+              <span class="grow">{{ table }}.{{ column }}</span><span class="pa-tv-count">{{ count(selected[0]) }}</span><Icon name="arrow_up_right" :size="10" class="icon-muted" />
+            </div>
+          </div>
         </div>
-        <div class="pa-tv-shead pa-sans" style="margin-top:12px"><span class="grow">REFERENCED BY</span><span style="width:110px">ON DELETE</span></div>
-        <div v-for="[name] in references" :key="name" class="pa-tv-srow"><span class="grow accent">{{ name }}</span><span class="muted" style="width:110px">cascade</span></div>
       </div>
+      <div v-if="changes" class="row pa-tv-pending">
+        <span class="warn pa-tv-changes">{{ changes }} {{ changes === 1 ? 'change' : 'changes' }}</span>
+        <span class="muted">not saved - into myproject_feat-login</span><span class="grow" />
+        <span class="pa-dt-btn" @click="say('Opens the UPDATE statements in an editor tab')">Review SQL</span>
+        <span class="pa-dt-btn" @click="edits = {}">Discard</span>
+        <span class="pa-dt-btn primary" @click="apply">Apply <span class="pa-dt-kbd"><Icon name="command" :size="10" />S</span></span>
+      </div>
+      <div class="pa-dt-status">
+        <span class="pa-dt-btn icon"><Icon name="chevron_left" :size="12" /></span><span class="pa-dt-btn icon"><Icon name="arrow_left" :size="12" /></span>
+        <span class="muted">1-{{ shown.length }} of {{ shown.length === loaded.length ? '1234' : shown.length }}</span>
+        <span class="pa-dt-btn icon"><Icon name="arrow_right" :size="12" /></span>
+        <span class="grow muted pa-tv-flash">{{ flash }}</span>
+        <span class="pa-dt-btn"><Icon name="download" :size="13" />Export CSV</span>
+      </div>
+    </template>
 
-      <div v-else class="pa-tv-struct mono"><pre class="pa-tv-ddl"><template v-for="(line, i) in ddl" :key="i"><span
-        v-for="(part, j) in line" :key="j" :style="part[0] ? { color: `var(--pa-syntax-${part[0]})` } : undefined">{{ part[1] }}</span>
-</template></pre></div>
+    <div v-else-if="view === 'structure'" class="pa-dt-card pa-tv-sheet">
+      <div class="pa-tv-srow head pa-dt-label"><span style="width: 188px">Column</span><span style="width: 168px">Type</span><span style="width: 58px">Null</span><span style="width: 410px">Default</span><span>Key</span></div>
+      <div v-for="col in columns" :key="col.name" class="pa-tv-srow mono">
+        <span style="width: 188px">{{ col.name }}</span><span class="muted" style="width: 168px">{{ col.type }}</span>
+        <span class="muted" style="width: 58px">{{ col.nullable || 'yes' }}</span>
+        <span class="placeholder trunc" style="width: 410px">{{ col.default || '' }}</span>
+        <span v-if="col.pk" class="warn pa-tv-sans">primary</span>
+        <span v-else-if="col.fk" class="accent pa-tv-sans row" style="gap: 4px"><Icon name="arrow_up_right" :size="10" />{{ col.fk }}</span>
+      </div>
+      <div class="pa-tv-srow head pa-dt-label gap"><span style="width: 268px">Index</span><span class="grow">Columns</span><span style="width: 120px">Kind</span></div>
+      <div v-for="[name, cols, kind] in indexes" :key="name" class="pa-tv-srow mono">
+        <span style="width: 268px">{{ name }}</span><span class="muted grow">{{ cols }}</span><span class="muted" style="width: 120px">{{ kind }}</span>
+      </div>
+      <div class="pa-tv-srow head pa-dt-label gap"><span style="width: 268px">Referenced by</span><span class="grow">Column</span><span style="width: 120px">On delete</span></div>
+      <div v-for="[table, column] in references" :key="table" class="pa-tv-srow mono">
+        <span class="accent" style="width: 268px">{{ table }}</span><span class="muted grow">{{ column }}</span><span class="muted" style="width: 120px">cascade</span>
+      </div>
     </div>
 
-    <div v-if="view === 'data' && details" class="pa-tv-side">
-      <div class="row pa-tv-shead2">
-        <div class="row pa-tv-seg">
-          <span :class="{ on: side === 'value' }" @click="side = 'value'">Value</span>
-          <span :class="{ on: side === 'row' }" @click="side = 'row'">Row</span>
-        </div>
-        <span class="grow" /><span class="pa-click icon-muted" @click="details = false"><Icon name="close" :size="11" /></span>
-      </div>
-      <div v-if="side === 'value'" class="pa-tv-sbody">
-        <div class="row" style="gap:6px">
-          <span class="mono">{{ columns[current.c].name }}</span><span class="mono placeholder pa-xs">{{ columns[current.c].type }}</span>
-          <span v-if="columns[current.c].pk" class="warn pa-xs pa-tv-pill">primary key</span><span class="grow" />
-          <span class="placeholder pa-xs">row {{ loaded[current.r][0] }}</span>
-        </div>
-        <div v-if="current.tree" class="pa-tv-jbox">
-          <div class="row pa-tv-jbar pa-xs"><span class="placeholder">{{ summary(JSON.parse(current.v)) }}</span><span class="grow" />
-            <span class="pa-link" @click="expandAll">Expand all</span><span class="pa-link" @click="open = new Set()">Collapse</span>
-            <span class="pa-link" @click="say('Opens the value in an editor tab; saving it stages the change')">Open in tab</span></div>
-          <div class="pa-tv-tree mono">
-            <div v-for="(line, i) in current.tree.slice(0, 400)" :key="i" class="row pa-tv-line" :style="{ paddingLeft: line.depth * 14 + 'px' }">
-              <span class="pa-tv-fold" @click="line.toggle && line.depth === 0 && toggle(line.toggle)"><Icon v-if="line.toggle && line.depth === 0" :name="line.isOpen ? 'chevron_down' : 'chevron_right'" :size="9" /></span>
-              <span v-for="([text, kind], j) in (line.head || [])" :key="`h${j}`" :class="`pa-tv-${kind}`">{{ text }}</span>
-              <span v-if="line.toggle && line.depth > 0" class="pa-tv-fold" @click="toggle(line.toggle)"><Icon :name="line.isOpen ? 'chevron_down' : 'chevron_right'" :size="9" /></span>
-              <span v-if="line.more" class="pa-link" @click="more = new Set([...more, line.more])">show {{ line.hidden }} more</span>
-              <span v-for="([text, kind], j) in line.parts" :key="j" :class="`pa-tv-${kind}`">{{ text }}</span>
-            </div>
-          </div>
-        </div>
-        <div v-else class="pa-tv-box mono" :class="{ placeholder: current.v === null, warn: `${current.r}.${current.c}` in edits }" @click="startEdit(current.r, current.c)">{{ current.v ?? 'NULL' }}</div>
-        <div class="row pa-xs" style="gap:8px">
-          <span class="placeholder">{{ current.v === null ? '' : current.tree ? bytes(current.v) : `${current.v.length} chars` }}</span><span class="grow" />
-          <template v-if="!readOnly(current.c)">
-            <span v-if="current.v !== null" class="pa-link" @click="stage(current.r, current.c, null)">Set NULL</span>
-            <span v-if="`${current.r}.${current.c}` in edits" class="pa-link" @click="stage(current.r, current.c, loaded[current.r][current.c])">Revert</span>
-          </template>
-          <span v-else class="placeholder">{{ readOnly(current.c) }}</span>
-          <span v-if="current.v !== null && !current.tree" class="pa-link" @click="say('Opens the value in an editor tab; saving it stages the change')">Open in tab</span>
-          <span class="pa-link" @click="say('Copied')">Copy</span>
-        </div>
-        <template v-if="columns[current.c].fk && current.v !== null">
-          <div class="pa-tv-sec">ORGS WHERE ID = {{ current.v }}</div>
-          <div class="row pa-tv-kv mono"><span class="muted">id</span><span>{{ current.v }}</span></div>
-          <div class="row pa-tv-kv mono"><span class="muted">name</span><span>{{ orgs[current.v][0] }}</span></div>
-          <div class="row pa-tv-kv mono"><span class="muted">plan</span><span>{{ orgs[current.v][1] }}</span></div>
-          <div class="row pa-tv-kv pa-click" @click="follow(current.r, current.c)"><span class="grow pa-tv-hint">Open orgs #{{ current.v }}</span><Icon name="arrow_up_right" :size="10" class="icon-muted" /></div>
-        </template>
-      </div>
-      <div v-else class="pa-tv-sbody">
-        <template v-for="(col, c) in columns" :key="col.name">
-          <template v-if="col.type === 'jsonb' && value(selected[0], c)">
-            <div class="row pa-tv-kv mono pa-click" :class="{ on: selected[1] === c }" @click="pick(selected[0], c)"><span class="muted">{{ col.name }}</span></div>
-            <div class="pa-tv-jbox" style="margin-left:10px">
-              <div class="row pa-tv-jbar pa-xs"><span class="placeholder">jsonb - {{ bytes(value(selected[0], c)) }}</span><span class="grow" />
-                <span class="pa-link" @click="say('Copied')">Copy</span><span class="pa-link" @click="say('Opens the value in an editor tab')">Open in tab</span></div>
-              <div class="pa-tv-tree mono pa-small placeholder">{{ summary(JSON.parse(value(selected[0], c))) }}</div>
-            </div>
-          </template>
-          <div v-else class="row pa-tv-kv mono pa-click" :class="{ on: selected[1] === c, edited: `${selected[0]}.${c}` in edits }" @click="pick(selected[0], c)">
-            <span class="muted">{{ col.name }}</span>
-            <span class="trunc grow" :class="{ 'pa-tv-hint': col.fk, placeholder: value(selected[0], c) === null }" @click.stop="col.fk ? follow(selected[0], c) : pick(selected[0], c)">{{ col.fk ? `${value(selected[0], c)} - ${orgs[value(selected[0], c)][0]} (orgs)` : value(selected[0], c) ?? 'NULL' }}</span>
-            <Icon v-if="col.fk" name="arrow_up_right" :size="10" class="pa-tv-hint" />
-          </div>
-        </template>
-        <div class="pa-tv-sec">REFERENCED BY</div>
-        <div v-for="[name, count] in references" :key="name" class="row pa-tv-kv mono pa-click" @click="say(`Opens ${name.split('.')[0]} where ${name.split('.')[1]} = '${loaded[selected[0]][0]}'`)">
-          <span class="grow">{{ name }}</span><span class="placeholder pa-xs pa-sans pa-tv-pill">{{ count(selected[0]) }} rows</span><Icon name="arrow_up_right" :size="10" class="icon-muted" />
-        </div>
-        <div class="placeholder pa-xs" style="margin-top:8px">Double-click a value to edit it.</div>
-      </div>
+    <div v-else class="pa-dt-card pa-tv-sheet">
+      <pre class="mono pa-tv-ddl"><template v-for="(line, i) in ddl" :key="i"><span v-for="(part, j) in line" :key="j" :class="`pa-tv-sql-${part[0]}`">{{ part[1] }}</span>
+</template></pre>
+      <span class="pa-link pa-tv-copy" @click="say('Copied')">Copy</span>
     </div>
   </div>
 </template>
 
 <style>
-.pa-tv { height: 100%; display: flex; background: var(--pa-editor-background); font-size: 12px; }
-.pa-tv-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-.pa-tv-bar { height: 36px; padding: 0 10px; gap: 6px; font-size: 12.5px; border-bottom: 1px solid var(--pa-border-variant); flex: none; }
-.pa-tv-on { margin-left: 4px; font-size: 12px; }
-.pa-tv-query { height: 32px; padding: 0 8px; gap: 8px; border-bottom: 1px solid var(--pa-border-variant); flex: none; }
-.pa-tv-keyed { gap: 6px; }
-.pa-tv .pa-input { height: 24px; padding: 0 6px; gap: 8px; border-radius: 4px; display: flex; align-items: center; font-size: 11px;
-  border: 1px solid var(--pa-border-variant); background: var(--pa-editor-background); }
-.pa-tv .pa-rows { height: 22px; padding: 0 6px; border-radius: 4px; border: 1px solid var(--pa-border-variant); font-size: 12px;
-  display: inline-flex; align-items: center; white-space: nowrap; }
-.pa-tv-kbd { display: inline-flex; align-items: center; gap: 1px; font-size: 11px; color: var(--pa-text-muted); }
-.pa-tv-name { margin-left: 6px; }
-.pa-tv-pill { border: 1px solid var(--pa-border-variant); border-radius: 9px; padding: 0 7px; }
-.pa-tv-jbox { border: 1px solid var(--pa-border-variant); border-radius: 6px; background: var(--pa-editor-background); }
-.pa-tv-jbar { height: 26px; padding: 0 8px; gap: 4px; border-bottom: 1px solid var(--pa-border-variant); }
-.pa-tv-plain { color: var(--pa-text); }
-.pa .pa-click { cursor: pointer; }
-.pa .pa-rows.on, .pa .pa-rows.pa-click:hover { background: var(--pa-element-selected); }
-.pa-tv-seg { gap: 2px; padding: 2px; border-radius: 5px; background: var(--pa-element-background); font-size: 11.5px; }
-.pa-tv-seg span { padding: 2px 9px; border-radius: 4px; color: var(--pa-text-muted); cursor: pointer; }
-.pa-tv-seg span:hover { background: var(--pa-ghost-element-hover); }
-.pa-tv-seg span.on { background: var(--pa-element-selected); color: var(--pa-text); }
-.pa-tv-filters { height: 26px; display: flex; border-bottom: 1px solid var(--pa-border-variant); flex: none; background: var(--pa-editor-background); }
-.pa-tv-fcell { padding: 2px; flex: none; display: flex; }
-.pa-tv-fcell input { width: 100%; border: 1px solid var(--pa-border-variant); border-radius: 3px; background: none; color: var(--pa-text);
-  font: inherit; font-size: 11px; padding: 0 6px; outline: none; }
-.pa-tv-fcell input:focus { border-color: var(--pa-border-focused); }
+.pa-tv { font-size: 13px; }
+.pa-tv-query { flex: none; height: 36px; padding: 0 12px 8px 10px; }
+.pa .pa-tv-query { flex: none; gap: 8px; }
+.pa-tv-query .pa-tv-rows { line-height: 28px; }
+.pa-tv-rows { flex: none; width: 66px; text-align: right; font-weight: 500; }
+.pa-tv-grid { font-size: 12px; }
+.pa-tv-head { flex: none; height: 31px; display: flex; box-shadow: inset 0 -1px 0 var(--pa-border-variant); }
+.pa-tv-h { padding: 0 4px; gap: 5px; display: flex; align-items: center; flex: none; overflow: hidden; white-space: nowrap;
+  box-shadow: inset -1px 0 0 var(--pa-border); }
+.pa-tv-type { font-size: 11px; }
+.pa-tv-filters { flex: none; height: 27px; display: flex; box-shadow: inset 0 -1px 0 var(--pa-border-variant); }
+.pa-tv-fcell { padding: 3px 2px 4px 1px; flex: none; display: flex; }
+.pa-tv-fcell input { width: 100%; border: 0; box-shadow: inset 0 0 0 1px var(--pa-border-variant); border-radius: 3px; background: none;
+  color: var(--pa-text); font: inherit; font-size: 12px; padding: 0 6px; outline: none; }
+.pa-tv-fcell input:focus { box-shadow: inset 0 0 0 1px var(--pa-border-focused); }
 .pa-tv-fcell input::placeholder { color: var(--pa-text-placeholder); }
-.pa-tv-grid { flex: 1; min-height: 0; overflow: hidden; }
-.pa-tv-head { height: 30px; display: flex; border-bottom: 1px solid var(--pa-border-variant); color: var(--pa-text-muted); background: var(--pa-panel-background); }
-.pa-tv-h { padding: 0 8px; gap: 5px; display: flex; align-items: center; flex: none; overflow: hidden; white-space: nowrap; border-right: 1px solid color-mix(in srgb, var(--pa-border) 80%, transparent); }
-.pa-tv-row { height: 26px; display: flex; border-bottom: 1px solid var(--pa-border-variant); }
-.pa-tv-row:hover { background: color-mix(in srgb, var(--pa-text) 2.5%, transparent); }
+.pa-tv-row { flex: none; height: 26px; display: flex; box-shadow: inset 0 -1px 0 var(--pa-border-variant); }
 .pa-tv-row.sel { background: var(--pa-element-selected); }
-.pa-tv-type { font-size: 10.5px; }
-.pa-tv-hint, .pa .pa-tv-link { color: var(--pa-hint); }
-.pa-tv-link { text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--pa-hint) 50%, transparent); }
-.pa-tv-json { color: var(--pa-syntax-string); }
-.pa-tv-num { width: 40px; flex: none; color: var(--pa-text-placeholder); font-size: 11px; padding-right: 8px;
+.pa-tv-num { width: 41px; flex: none; color: var(--pa-text-placeholder); font-size: 11px; padding-right: 10px;
   display: flex; align-items: center; justify-content: flex-end; }
-.pa-tv-c { padding: 0 4px; display: flex; align-items: center; gap: 4px; overflow: hidden; white-space: nowrap; flex: none; cursor: default; }
-.pa-tv-c.muted { color: var(--pa-text-muted); }
-.pa-tv-c { padding: 0 8px; }
-.pa-tv-c.on { outline: 1px solid var(--pa-text-accent); outline-offset: -1px; border-radius: 2px; }
-.pa-tv-c.edited { background: color-mix(in srgb, var(--pa-warning) 12%, transparent); color: var(--pa-warning); }
-.pa-tv-go { color: var(--pa-text-accent); cursor: pointer; opacity: 0; display: flex; }
-.pa-tv-row:hover .pa-tv-go, .pa-tv-c.on .pa-tv-go { opacity: 1; }
+.pa-tv-c { padding: 0 8px; display: flex; align-items: center; gap: 4px; overflow: hidden; white-space: nowrap; flex: none; }
+.pa-tv-c.on { box-shadow: inset 0 0 0 1px var(--pa-text-accent); border-radius: 2px; }
+.pa-tv-c.edited { background: color-mix(in srgb, var(--pa-warning) 13%, transparent); color: var(--pa-warning); }
+.pa-tv-c u { text-decoration-color: var(--pa-text-placeholder); text-underline-offset: 3px; }
+.pa-tv-org { margin-left: 7px; }
+.pa-tv-null { color: var(--pa-text-placeholder); font-style: italic; }
+.pa-tv-go { color: var(--pa-text-muted); cursor: pointer; display: none; }
+.pa-tv-c.on .pa-tv-go, .pa-tv-c:hover .pa-tv-go { display: flex; }
 .pa-tv-edit { width: 100%; font: inherit; color: var(--pa-text); background: var(--pa-editor-background); border: 1px solid var(--pa-border-focused);
   border-radius: 3px; outline: none; padding: 0 3px; height: 20px; }
-.pa .pa-sans { font-family: 'IBM Plex Sans', system-ui, sans-serif; }
-.pa-tv-pending { height: 34px; padding: 0 10px; gap: 8px; border-top: 1px solid var(--pa-border-variant); flex: none;
-  background: color-mix(in srgb, var(--pa-warning) 7%, transparent); }
-.pa-tv-page { height: 28px; padding: 0 8px; gap: 4px; border-top: 1px solid var(--pa-border-variant); flex: none; }
-.pa-tv-flash { padding-left: 8px; }
-.pa-tv-struct { flex: 1; padding: 12px; overflow: hidden; }
-.pa-tv-shead { display: flex; gap: 8px; padding: 0 8px 6px; font-size: 10.5px; font-weight: 600; color: var(--pa-text-placeholder); border-bottom: 1px solid var(--pa-border-variant); }
-.pa-tv-srow { display: flex; gap: 8px; height: 26px; align-items: center; padding: 0 8px; border-bottom: 1px solid var(--pa-border-variant); }
-.pa .accent { color: var(--pa-text-accent); }
-.pa-tv-ddl { margin: 0; padding: 10px; border-radius: 6px; border: 1px solid var(--pa-border-variant); background: var(--pa-panel-background);
-  line-height: 18px; white-space: pre; color: var(--pa-text); }
-.pa-tv-side { width: 330px; flex: none; border-left: 1px solid var(--pa-border-variant); background: var(--pa-panel-background); display: flex; flex-direction: column; }
-.pa-tv-shead2 { height: 36px; padding: 0 10px; flex: none; }
-.pa-tv-sbody { flex: 1; overflow: auto; padding: 4px 10px 10px; display: flex; flex-direction: column; gap: 6px; }
-.pa-tv-box { padding: 8px; border-radius: 6px; border: 1px solid var(--pa-border-variant); background: var(--pa-editor-background); white-space: pre-wrap; word-break: break-all; }
-.pa-link { color: var(--pa-text-accent); cursor: pointer; padding: 0 3px; border-radius: 3px; }
-.pa-link:hover { background: var(--pa-ghost-element-hover); }
-.pa-tv-tree { padding: 6px 6px 6px 8px; }
-.pa-tv-line { height: 18px; white-space: pre; }
-.pa-tv-fold { width: 12px; flex: none; color: var(--pa-icon-muted); cursor: pointer; display: flex; }
-.pa-tv-key { color: var(--pa-syntax-property); } .pa-tv-str { color: var(--pa-syntax-string); } .pa-tv-num { }
-.pa-tv-line .pa-tv-num { color: var(--pa-syntax-number); width: auto; background: none; display: inline; font-size: inherit; }
-.pa-tv-bool { color: var(--pa-syntax-boolean); } .pa-tv-const { color: var(--pa-syntax-constant); }
-.pa-tv-punct { color: var(--pa-syntax-punctuation-bracket); } .pa-tv-muted { color: var(--pa-text-placeholder); }
-.pa-tv-sec { font-size: 10.5px; font-weight: 600; color: var(--pa-text-placeholder); margin-top: 8px; font-family: 'IBM Plex Sans', system-ui, sans-serif; }
-.pa-tv-kv { height: 24px; gap: 8px; padding: 0 4px; border-radius: 4px; }
+.pa-tv-side { width: 300px; flex: none; }
+.pa-tv-shead { flex: none; height: 38px; padding: 0 6px 0 12px; box-shadow: inset 0 -1px 0 var(--pa-border-variant); }
+.pa-tv-sbody { flex: 1; min-height: 0; overflow: hidden; padding: 11px 10px 10px; display: flex; flex-direction: column; gap: 8px; }
+.pa-tv-vtitle { gap: 6px; height: 18px; }
+.pa-tv-small { font-size: 12px; }
+.pa-tv-box { padding: 11px 10px; border-radius: 6px; box-shadow: inset 0 0 0 1px var(--pa-border-variant); white-space: pre-wrap; word-break: break-all; font-size: 12px; }
+.pa-tv-sec { margin-top: 6px; }
+.pa-tv-record .pa-tv-sec { margin: 12px 0 6px; }
+.pa-tv-ref { flex: none; height: 28px; gap: 8px; padding: 0 4px 0 6px; border-radius: 4px; font-size: 12px; }
+.pa-tv-ref:hover { background: var(--pa-ghost-element-hover); }
+.pa-tv-record { gap: 0; padding: 10px 10px 6px; }
+.pa-tv-record .pa-tv-kv { padding: 0 11px 0 10px; }
+.pa-tv-kv { flex: none; height: 28px; gap: 8px; padding: 0 8px; border-radius: 4px; font-size: 12px; }
 .pa-tv-kv > span:first-child { width: 110px; flex: none; }
-.pa-tv-kv.on { box-shadow: inset 2px 0 0 var(--pa-text-accent); }
-.pa-tv-kv.on { background: var(--pa-element-selected); }
+.pa-tv-kv.on { background: var(--pa-element-selected); box-shadow: inset 2px 0 0 var(--pa-text-accent); }
 .pa-tv-kv.edited { background: color-mix(in srgb, var(--pa-warning) 12%, transparent); }
 .pa-tv-kv.pa-click:hover:not(.on) { background: var(--pa-ghost-element-hover); }
+.pa-tv-rjson { margin: 0 0 6px 10px; flex: none; }
+.pa-tv-count { height: 18px; padding: 0 7px; border-radius: 9px; font-size: 11px; display: inline-flex; align-items: center;
+  box-shadow: inset 0 0 0 1px var(--pa-border-variant); color: var(--pa-text-muted); }
+.pa-tv-pending { flex: none; height: 38px; margin: 6px 8px 0; padding: 0 8px 0 12px; gap: 8px; border-radius: 6px;
+  background: color-mix(in srgb, var(--pa-warning) 9%, var(--pa-panel-background)); }
+.pa-tv-pending > .muted { font-size: 12px; }
+.pa-tv-pending .pa-dt-btn { font-size: 12.5px; }
+.pa-tv-changes { font-weight: 500; }
+.pa-tv .pa-tv-pending + .pa-dt-status { height: 38px; padding-top: 6px; }
+.pa-tv-flash { padding-left: 8px; }
+.pa-tv .pa-dt-status .pa-dt-btn.icon { width: 22px; }
+.pa-tv .pa-dt-status { padding: 8px 7px 0 12px; }
+.pa-tv-sheet { flex: 1; margin: 0 8px 40px; padding: 10px 12px; }
+.pa-tv-sheet .pa-tv-srow.head { height: 30px; }
+.pa-tv-srow { flex: none; height: 31px; padding: 0 8px; gap: 0; display: flex; align-items: center; font-size: 12px;
+  box-shadow: inset 0 -1px 0 var(--pa-border-variant); white-space: nowrap; }
+.pa-tv-srow > span { flex: none; }
+.pa-tv-srow > .grow { flex: 1; }
+.pa-tv-srow.head { height: 26px; }
+.pa-tv-srow.gap { margin-top: 16px; }
+.pa-tv-sans { font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 13px; }
+.pa-tv-ddl { margin: 2px 0 0; padding: 10px 10px 9px; border-radius: 6px; box-shadow: inset 0 0 0 1px var(--pa-border-variant);
+  font-size: 12px; line-height: 18px; white-space: pre; color: var(--pa-text); overflow: hidden; }
+.pa-tv-sql-kw { color: var(--pa-syntax-keyword); }
+.pa-tv-sql-key { color: var(--pa-syntax-property); }
+.pa-tv-sql-str { color: var(--pa-success); }
+.pa-tv-sql-num { color: var(--pa-syntax-number); }
+.pa-tv-copy { align-self: flex-start; margin-top: 16px; font-size: 12px; }
 </style>
+

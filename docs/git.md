@@ -25,7 +25,7 @@ File**, **Mark as Reviewed**, **Copy Path**, **Copy Relative Path** and
 **Discard Uncommitted Changes**, and a repo's remote for **Fetch**,
 **Pull**, **Pull (Rebase)**, **Push** and **Force Push**.
 
-<AppShot :width="360" :height="470" text="The Changes tab: one commit per repo from the staged files. Click a file to stage it."><GitPanel /></AppShot>
+<AppShot :width="380" :height="640" text="The Changes tab: one commit per repo from the staged files. Click a file to stage it."><GitPanel /></AppShot>
 
 ### Staging part of a file
 
@@ -50,7 +50,7 @@ two buttons in its tab bar switch between **unified** and **split**
 (side-by-side, when the pane has room for it); the choice is kept for every
 diff and matches **Split Diff** in the editor's menu.
 
-<AppShot :width="720" :height="345" text="A branch diff, split. The two buttons switch to unified."><DiffView /></AppShot>
+<AppShot :width="886" :height="450" text="A branch diff, split. The two buttons switch to unified."><DiffView /></AppShot>
 
 ## Pull requests
 

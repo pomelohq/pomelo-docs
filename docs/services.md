@@ -69,7 +69,7 @@ service restarts, and the choice is kept per workspace.
 
 ## The Services panel
 
-<AppShot :width="330" :height="880" text="The Services panel. The filter and the hover buttons work."><ServicesPanel /></AppShot>
+<AppShot :width="322" :height="902" text="The Services panel. The filter and the hover buttons work."><ServicesPanel /></AppShot>
 
 Open it with `ctrl-shift-s` or the Services button in the status bar (its
 tooltip shows the key). The header names the workspace; its two buttons
@@ -105,7 +105,7 @@ its menu. Hover a repo's row to start or stop all of its services.
 
 ### Menus
 
-<AppShot :width="270" :height="342" :window="false" text="A running service's menu"><ContextMenu :width="270" header="api &gt; server - pid 48123" :items='[{"text":"Stop","icon":"stop","hint":"S"},{"text":"Restart","icon":"rotate_cw","hint":"R"},{"text":"Open in Tab","icon":"file","hint":"Enter"},{"text":"View Logs","icon":"terminal","hint":"L"},{"text":"Use a New Port...","icon":"server"},"-",{"text":"Mode","icon":"grid","hint":"dev","submenu":true},{"text":"Env","icon":"key","hint":"local","submenu":true},"-",{"text":"Open in Browser","icon":"arrow_up_right"},{"text":"Copy URL","icon":"copy"},{"text":"Copy Command","icon":"copy"},"-",{"text":"Ask Claude About This Service","icon":"sparkle"}]' /></AppShot>
+<AppShot :width="270" :height="335" :window="false" text="A running service's menu"><ContextMenu :width="270" header="api &gt; server - pid 48123" :items='[{"text":"Stop","icon":"stop","hint":"S"},{"text":"Restart","icon":"rotate_cw","hint":"R"},{"text":"Open in Tab","icon":"file","hint":"Enter"},{"text":"View Logs","icon":"terminal","hint":"L"},{"text":"Use a New Port...","icon":"server"},"-",{"text":"Mode","icon":"grid","hint":"dev","submenu":true},{"text":"Env","icon":"key","hint":"local","submenu":true},"-",{"text":"Open in Browser","icon":"arrow_up_right"},{"text":"Copy URL","icon":"copy"},{"text":"Copy Command","icon":"copy"},"-",{"text":"Ask Claude About This Service","icon":"sparkle"}]' /></AppShot>
 
 Right-click (or `...`):
 
@@ -127,7 +127,7 @@ Right-click (or `...`):
 
 ### The service tab
 
-<AppShot :width="760" :height="380" text="A service tab. Type in Filter lines to try it."><ServiceTab /></AppShot>
+<AppShot :width="1002" :height="522" text="A service tab. Type in Filter lines to try it."><ServiceTab /></AppShot>
 
 Click a service to open it as a tab (a preview tab, replaced by the next
 one you click; **View logs** keeps it open). The tab has:

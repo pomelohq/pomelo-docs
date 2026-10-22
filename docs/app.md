@@ -5,7 +5,7 @@ to day. It is one Rust program with a GPU-rendered UI and the core built
 in (no port, no browser), so everything you see is the real state of your
 worktrees, services and agents. This page is the tour.
 
-<AppShot :width="1440" :height="860" :window="false" text="The Pomelo window: workspaces, the Services panel, the editor and a terminal"><HeroWindow /></AppShot>
+<AppShot :width="1440" :height="900" :window="false" text="The Pomelo window: workspaces, the Files panel, the editor and the agent"><HeroWindow /></AppShot>
 
 ## Layout
 
@@ -54,7 +54,7 @@ Each row is a workspace:
   the branch, then how many services run (`2 running`) and what is wrong
   with the pull request (`Checks pending`, `CI failed`, `Conflict`).
 
-<AppShot :width="280" :height="210" text="Workspace rows"><WorkspacesList /></AppShot>
+<AppShot :width="256" :height="560" text="The workspaces sidebar: main, a workspace being created, then workspaces grouped by ticket status"><WorkspacesList /></AppShot>
 
 Click a row to switch to it; click the ticket status under the name to open
 the ticket the same way as **Open Ticket** below. Each workspace keeps its own tabs,
