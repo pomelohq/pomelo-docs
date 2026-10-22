@@ -45,9 +45,9 @@ All of them take `--json`.
 
 | Command | What it does |
 |---|---|
-| `pom agent ls [ws] [--all-workspaces]` | The workspace's sessions: role, state, turn, holder, age. A session whose agent is gone shows `died`. |
+| `pom agent ls [ws] [--all-workspaces]` | The workspace's sessions: role, state, reason, turn, holder, age. A session whose agent is gone shows `died`. |
 | `pom agent start [ws] [--role r] [--fresh] [options]` | Starts the main agent (or reuses it), or with `--fresh` a new role on a conversation of its own. You hold its lease. |
-| `pom agent send <handle> <text \| --file f> [--queue] [--take]` | Submits exactly one turn and prints its number. |
+| `pom agent send <handle> <text \| --file f> [--queue] [--take] [--timeout d]` | Submits exactly one turn and prints its number. |
 | `pom agent wait <handle> [--until turn-end\|idle\|awaiting_input] [--turn n] [--timeout d]` | Blocks until that happens. |
 | `pom agent ask <handle> <text> [--take] [--timeout d]` | `send`, `wait` and `read` in one. |
 | `pom agent read <handle> [--turn n \| --since n] [--full]` | What the agent did in a turn (the last by default). |
@@ -58,9 +58,12 @@ All of them take `--json`.
 | `pom agent release <handle>` | Hands it back. |
 | `pom agent stop <handle>` | Ends the session. |
 
-- **`send` rules.** It is refused unless the session is idle. Only a person or an orchestrator may
-  `--queue` (the turn is delivered once the session is idle, in order) or `--take` (take the session over
+- **`send` rules.** It is refused while the session is working (`thinking`, `tool_use`, `compacting`) or
+  waits on an approval (`awaiting_input` with reason `pending_approval`). Only a person or an orchestrator
+  may `--queue` (the turn is delivered once the session is idle, in order) or `--take` (take the session over
   first).
+- **`--queue` timeout.** A queued send waits 30 minutes unless `--timeout` says otherwise. It then exits 2
+  with error `timeout`, and the message names the state and reason it was still waiting on.
 - **`start` options:**
   - `--prompt <text>` or `--prompt-file <file>`, and `--system-prompt-file <file>`, added to Pomelo's own;
   - `--tools <list>` (the tool set the session has at all), `--allowed-tools <list>` and
@@ -106,6 +109,18 @@ Pomelo never edits Claude's own config to skip the question.
 - **Turns.** A turn starts when the agent takes a prompt and ends at its Stop hook. Every turn records who
   sent it: `human`, `orchestrator` or `agent`.
 - **States.** `idle`, `thinking`, `tool_use`, `compacting` and `awaiting_input` (a permission is needed).
+- **Reason.** `pom agent ls --json` gives each session a `reason` next to its state:
+
+  | Reason | Means |
+  |---|---|
+  | `pending_approval` | A permission or a question waits on an answer. A send is refused. |
+  | `idle_notification` | The agent's "waiting for your input" reminder. The session is idle. |
+  | `stop` | The last turn ended. |
+  | `interrupted` | The last turn was interrupted. |
+  | `stale` | A working state that no event has refreshed for 15 minutes. |
+  | `null` | Nothing more to say (the agent is working, or has just started). |
+
+  Sessions recorded by an older version have no stored reason; Pomelo works it out from the last event.
 - **Death.** A session counts as dead only after several checks in a row find no agent. `wait` then reports
   `cause`:
   - `killed`: it was stopped;
@@ -159,7 +174,8 @@ The same rules apply to `pom agent` and to the agent MCP tools.
 - **Never itself.** A session never drives itself.
 - **Identity.** An agent is recognized by the process it runs in, not by what its environment says.
 - **Codes.** A refusal names its reason: `other_workspace`, `self`, `depth`, `rate`, `rate_hour`, `busy`,
-  `queue`, `wait_cap`, `approve_always`, `lease`, `not_drivable`.
+  `queue`, `wait_cap`, `approve_always`, `lease`, `not_drivable`. A `busy` refusal also carries the
+  session's `state` and `reason`.
 
 ## A policy for tool calls
 
