@@ -324,8 +324,118 @@ dev-proxy, which reads the **branch** from the hostname and forwards to that
 one workspace. Nothing to configure — the hostname names the branch.
 
 ::: tip Requirements
-The dev-proxy only routes hosts ending in `.localhost`, so register the
-`.localhost` URL above as an allowed redirect URI in your OAuth app (most
-dev/test apps allow it). Each branch is its own host — there is no
-single-URL-for-every-branch mode.
+The dev-proxy routes hosts ending in `.localhost` (and in `proxy.domain`, see
+below), so register the `.localhost` URL above as an allowed redirect URI in
+your OAuth app (most dev/test apps allow it). Each branch is its own host —
+there is no single-URL-for-every-branch mode.
 :::
+
+## Reach it from another machine
+
+By default the dev-proxy and the webhook relay listen on loopback only, and
+service hosts end in `.localhost`. When Pomelo runs on another machine (a Linux
+VM, a homelab box) you can open its workspaces from your laptop's browser
+through a reverse proxy that terminates TLS, with no SSH tunnel:
+`https://web.web.proj-101.dev.example.net`.
+
+Five machine settings, under `proxy` in `~/.config/pomelo/settings.json`,
+control this. Set them in **Settings > Dev Services > Remote Access** or with
+`pom proxy config`:
+
+| Setting | Default | What it does |
+|---|---|---|
+| `proxy.bind` | `127.0.0.1` | Another address the proxy and relay listen on. Loopback stays bound too, so `pom` and services on the machine keep working. `0.0.0.0` or `::` listens on every address. |
+| `proxy.domain` | `localhost` | Service hosts become `<service>.<repo>.<workspace>.<domain>`. `.localhost` hosts keep routing. |
+| `proxy.public_scheme` | `http` | The scheme in service URLs. Use `https` when the reverse proxy terminates TLS. |
+| `proxy.public_port` | `0` (the proxy's port) | The port in service URLs. 443 with https (or 80 with http) leaves the port out. |
+| `proxy.trusted_proxies` | `[]` | Addresses or CIDR ranges whose `X-Forwarded-Proto` and `X-Forwarded-Host` the proxy believes. |
+
+```bash
+pom proxy config                                   # show them (-o json for scripts)
+pom proxy config set bind 100.64.0.10              # the VM's Tailscale or LAN address
+pom proxy config set domain dev.example.net
+pom proxy config set public_scheme https
+pom proxy config set public_port 443
+pom proxy config set trusted_proxies 127.0.0.1     # where the reverse proxy connects from
+pom proxy config reset bind                        # back to the default
+```
+
+With those settings, `{{web.web.url}}` resolves to
+`https://web.web.proj-101.dev.example.net` and `{{web.web.ws}}` to
+`wss://web.web.proj-101.dev.example.net`; with `public_port 8443` they keep
+`:8443`. When the domain, scheme or port changes, Pomelo rewrites every
+workspace's env files and lists the running services that still use the old
+URLs. Restart those services. A new `bind` or `trusted_proxies` takes effect
+when the proxy restarts: the app restarts its own; stop `pom proxy` and run it
+again.
+
+::: warning No authentication
+The dev-proxy and the relay have no login. Anyone who can reach the bind
+address can open every workspace's services, including its admin pages and
+APIs. Bind a private address only (Tailscale, a LAN you trust), or keep
+loopback and put an authenticating reverse proxy in front. Pomelo never binds
+`0.0.0.0` unless you set it. A non-loopback bind is logged when the proxy
+starts, flagged by `pom doctor` and the app's doctor, and shown on the Dev
+Services page.
+:::
+
+### Forwarded headers
+
+Every request the proxy forwards carries `X-Forwarded-Host` (the host the
+browser asked for) and `X-Forwarded-Proto`, so a backend builds correct
+redirects and absolute URLs. The proxy believes the values that come in only
+from an address in `trusted_proxies`. From anyone else it replaces them with
+the request's own `Host` and `http`, so a client cannot claim https or another
+host. `X-Forwarded-For` gets the client address appended, as before.
+
+### Cookies
+
+With `proxy.domain` left at `localhost`, nothing changes: `Secure` is dropped
+(the proxy is plain http) and a deployed backend's cookie loses its `Domain`.
+With a real domain, a `Set-Cookie` from a workspace service is changed only
+where the browser would otherwise reject it:
+
+- `Domain` stays when it covers the public host (`Domain=.dev.example.net` on
+  `web.web.proj-101.dev.example.net`); any other `Domain` is removed, so the
+  cookie lands on the host itself.
+- `Secure` stays when `public_scheme` is `https`, and goes under plain http.
+- `SameSite` is left as it is (except a deployed backend's `SameSite=None`
+  under plain http, which becomes `Lax` as before).
+- Paths under `/_pom_dev/<repo>/<service>` are rewritten as before.
+
+A request that still uses a `.localhost` host gets the localhost rewrite.
+
+### Sample Caddyfile
+
+On the VM, with the proxy bound to loopback (or to a private address) on its
+default port 8767, Caddy serves a wildcard certificate for
+`*.dev.example.net` and forwards every request to the proxy. Point
+`*.dev.example.net` at the VM in DNS (or in your Tailscale or LAN DNS).
+
+```text
+*.dev.example.net {
+	# A wildcard certificate needs the DNS-01 challenge: build Caddy with your
+	# DNS provider's module, or use `tls internal` for Caddy's own CA and trust
+	# its root on your laptop.
+	tls {
+		dns <provider> {env.DNS_API_TOKEN}
+	}
+
+	reverse_proxy 127.0.0.1:8767 {
+		header_up X-Forwarded-Proto https
+	}
+}
+```
+
+Then, on the VM:
+
+```bash
+pom proxy config set domain dev.example.net
+pom proxy config set public_scheme https
+pom proxy config set public_port 443
+pom proxy config set trusted_proxies 127.0.0.1
+```
+
+Caddy keeps the `Host` header and sets `X-Forwarded-Host` itself. If Caddy runs
+on another machine, bind the proxy to the VM's private address, have
+`reverse_proxy` point there, and trust Caddy's address instead of `127.0.0.1`.
