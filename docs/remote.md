@@ -118,8 +118,9 @@ there.
 The window of a remote project shows:
 
 - The host's workspaces in the WORKSPACES list, with how many services each runs. Pick one to look at it.
-- A line with the connection: connected (and when it last answered), connecting, or disconnected with
-  SSH's reason and a **Reconnect** button. What was read before stays on screen while the host is away.
+- A line with the connection: connected (and when it last answered), connecting, reconnecting, or
+  disconnected with SSH's reason and a **Reconnect** button. What was read before stays on screen while the
+  host is away. See [When the connection drops](#when-the-connection-drops).
 - The workspace's services by repo, with **Start**, **Stop**, **Restart** and their recent output, the
   shared services, and the workspace's agents with their state; click an agent to read its last turn (or, with
   terminals, to open it).
@@ -145,7 +146,8 @@ A host whose `pom` has an older server without live updates is asked again every
 server without live output is asked for the service's recent output every 2.5 seconds while you read it. When
 the host's `pom` has no server at all, every look is a short `pom ... --json` over the shared connection, the
 line says **via ssh**, and the page says why (for example "update pom on the VM to get terminals"). If the
-host's `pom` is on another minor version than the app, the page says so too.
+host's `pom` is on another minor version than the app, the page says so too, with a button to update it: see
+[Updating pom on the host](#updating-pom-on-the-host).
 
 The editor, the file tree and Git need the project's files on the laptop, so a remote project does not
 offer them: open the worktree in an editor that works over SSH.
@@ -169,9 +171,10 @@ that shows its steps as they go:
 cancelled or failed create stays as a card with **Retry**, which goes on from the step it stopped at, like a
 create on the laptop; the workspace also shows as stopped part-way in `pom ws ls` on the host.
 
-The jobs run on the host, not in the app: closing the app or losing the connection does not stop them. A card
-whose connection comes back within half a minute picks up at the step it last showed; after that it fails
-with the reason, and `pom ws ls` on the host tells how the job ended.
+The jobs run on the host, not in the app: closing the app or losing the connection does not stop them. While
+the app reconnects, the card waits; once the connection is back it picks up at the step it last showed (the
+server keeps a job's steps for 10 minutes after it ends). If the app gives up reconnecting, the card fails
+with the reason after half a minute, and `pom ws ls` on the host tells how the job ended.
 
 Renaming or deleting a workspace, and the other items of a local workspace's menu, are done on the host for
 now: `pom -H dev -c ... ws rename <branch> <name>` or `ws delete <branch>`. With a `pom` on the host that
@@ -194,8 +197,9 @@ A connection holds more than 40 terminals at once: they share one channel for th
 What survives what:
 
 - **Closing the app, a lost connection or a laptop asleep** leaves every shell, service and agent running on
-  the host. A lost connection ends the tab's stream with a note; reopening the tab, or the app, attaches
-  again and replays the shell's recent output (the last 1 MiB). Reconnecting a tab on its own comes later.
+  the host. A lost connection keeps the tab as it was and carries it on once the app reconnects (see
+  [When the connection drops](#when-the-connection-drops)); reopening the tab, or the app, attaches again and
+  replays the shell's recent output (the last 1 MiB).
 - **Closing a terminal tab** ends its shell on the host. Closing a service's or an agent's tab only stops
   watching it.
 - **The server stopping** (idle exit, `pom server stop`, an update) does not stop shells either: they run in
@@ -207,6 +211,34 @@ screen first.
 
 PTY output and what you type pass through the server without being logged: its log has the method, the size
 and the result of each request, never terminal bytes, input or environment.
+
+## When the connection drops
+
+The app notices a dropped connection at once when SSH or the network says so, and within 15 seconds when the
+host just stops answering (a laptop lid closed, Wi-Fi gone). It then reconnects on its own, as the same app,
+and nothing on the host stops meanwhile:
+
+- **Reconnecting.** The connection line, and a yellow strip over each remote terminal, say "Lost connection
+  to dev. Reconnecting..." with the next attempt. Attempts come after 0.5, 1, 2, 4, 8 and 15 seconds (give or
+  take a fifth), and at once when the window comes to the front or the laptop wakes from sleep. What you type
+  while it reconnects is not sent later: the terminal refuses it, so nothing lands in a shell by surprise.
+- **Back.** Each terminal carries on from the last byte it showed: no output is lost and none comes twice. A
+  key you typed just as the connection dropped reaches the shell once. A service output you were reading
+  goes on where it stopped (with a `--- api/web restarted ---` line if the service restarted meanwhile), the
+  live updates send every value again, and a workspace job's card picks up at its last step. A terminal that
+  was gone longer than its 1 MiB of recent output clears and shows the last 1 MiB.
+- **Disconnected.** After the last attempt the line and the strips turn red with **Reconnect** (on the page)
+  and **Retry** (on a terminal). The screen stays as it was until you retry.
+
+The server keeps what it needs to carry a client's terminals and streams on for 10 minutes after the client
+went (`retained` in `pom server status --json`). A shell whose command ended while you were away shows as
+exited when the app reconnects.
+
+**The server restarted.** When the server the app reconnects to is a new one (it crashed, was stopped, or
+was updated), the app says once "pom server on dev restarted; terminals and services kept running". Shells,
+services and agents run in their own holders, so they are all still there and every tab carries on from its
+last byte. Keys the old server may not have typed yet are dropped rather than sent again, so nothing is ever
+typed twice.
 
 ## Agents on a remote project
 
@@ -264,6 +296,30 @@ pom server run             # start one in the background yourself
   plain SSH as before, without terminals. A server from before terminals still serves the rest; updating
   `pom` on the host brings them.
 
+## Updating pom on the host
+
+When the host's `pom server` is on another minor version than the app, the project's page says
+"pom 0.8.2 on dev, the app is 0.9.3." with **Update pom on dev**. The button installs the app's own version
+on the host:
+
+1. It asks the host what machine it is (`uname -sm`; Linux on x86_64 or aarch64).
+2. It downloads `pom-<version>-linux-<arch>.tar.gz` from the app's release on GitHub over HTTPS, on the
+   laptop, and checks it against the release's `checksums-linux.txt`. A tarball that does not match is
+   refused and nothing is installed.
+3. It streams the tarball through SSH into a temporary folder on the host and runs its
+   `install.sh --cli-only`, which puts `pom` in `~/.local/bin`. The host downloads nothing itself.
+4. It stops the old version's server and reconnects, which starts the new one. Terminals, services and
+   agents keep running throughout, and every tab carries on.
+
+The page shows each step while it runs, and the reason if one fails (the host unreachable, a download that
+timed out, a checksum that did not match). A development build of the app, which has no release to download,
+and a host whose `pom` lives elsewhere (`--pom-path`) show the commands to run on the host instead:
+
+```sh
+curl -fLO https://github.com/pomelohq/pomelo/releases/download/v0.9.3/pom-0.9.3-linux-$(uname -m).tar.gz
+tar -xzf pom-0.9.3-linux-*.tar.gz && pom server stop && pom-0.9.3/install.sh --cli-only
+```
+
 ## Open in Editor
 
 **Open in Editor** on a remote project's page, in a workspace's right-click menu, and **Open in External
@@ -290,6 +346,7 @@ port, add a `Host` entry with its `Port` to `~/.ssh/config` and use that alias i
 - `Permission denied (publickey)`: the app and scripts never prompt, so add the key to your SSH agent
   (`ssh-add`) or check `~/.ssh/config`.
 - `pom is not installed on dev`: install it in `~/.local/bin`, or set `--pom-path` with `pom host add`.
-- A version warning: update `pom` on the older side; both should be on the same minor version.
+- A version warning: **Update pom on dev** on the project's page installs the app's version there, or update
+  `pom` on the older side by hand; both should be on the same minor version.
 - The page says it reads over SSH: update `pom` on the host (`pom host test dev` shows its version). On the
   host, `pom server status` and the server log say whether a server runs and what it served.
