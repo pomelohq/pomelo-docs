@@ -125,6 +125,21 @@ with **Fix with Claude** (or **Open pom.yml** when Claude Code is not
 installed). The same check is `pom doctor` and the agent's `config_doctor`
 tool.
 
+`pom doctor` also looks at the machine:
+
+- **Disk space** - a warning when the filesystem of your home folder,
+  Pomelo's state folder or Docker's data root (`docker info`'s
+  `DockerRootDir`) is more than 80% full, and on Linux when an LVM thin pool's
+  data or metadata is (read with `lvs` when it runs without root; skipped
+  otherwise). Each warning lists the commands that free space: `pom ws gc`,
+  `pom modules prune`, `pom db clean`, and for Docker `docker system df`,
+  `docker builder prune`, `docker image prune -a`. `pom disk` shows the same
+  numbers (`pom disk --json`: `{schema: "pom.disk/v1", filesystems,
+  thin_pools, findings}`).
+- **Linux safety** - see [Linux](./install#linux): Docker nested in an LXC
+  container, a load far past the CPUs, and processes stuck in uninterruptible
+  sleep.
+
 ## Onboarding agent
 
 A new project's `pom.yml` is drafted from what Pomelo detects in each repo.
