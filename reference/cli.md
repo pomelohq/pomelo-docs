@@ -93,12 +93,12 @@ A service is `name` or `repo/name`.
 
 | Command | What it does |
 | --- | --- |
-| `pom agent ls [workspace] [--all-workspaces]` | The workspace's agent sessions: role, state, reason, turn, holder |
+| `pom agent ls [workspace] [--all-workspaces]` | The workspace's agent sessions: role, state, turn, holder |
 | `pom agent start [workspace] [--role r] [--fresh] [--trust] [--prompt text \| --prompt-file f]` | [--system-prompt-file f] [--tools t] [--allowed-tools t] [--disallowed-tools t] [--permission-mode m] [--model m] [--extra-mcp-config f] start (or reuse) a session; --fresh starts role r on a new conversation; --trust says yes to the agent's prompt to trust the folder (else exit 7) |
 | `pom agent read <workspace/role> [--turn n \| --since n] [--full]` | What the agent did in a turn (the last by default), from its transcript |
 | `pom agent watch [workspace] [--from-start] [--timeout d]` | Stream the workspace's agent events as NDJSON |
 | `pom agent stop <workspace/role>` | End a session |
-| `pom agent send <workspace/role> <text \| --file f> [--queue] [--take] [--timeout d]` | Submit one turn (refused while working or pending approval; --queue waits until idle, 30 min unless --timeout; --take takes the session over) |
+| `pom agent send <workspace/role> <text \| --file f> [--queue] [--take]` | Submit one turn (refused unless idle; --queue waits, --take takes the session over) |
 | `pom agent wait <workspace/role> [--until idle\|awaiting_input\|turn-end] [--turn n] [--timeout d]` | Exit 0 reached, 2 timeout, 3 awaiting input, 4 died |
 | `pom agent ask <workspace/role> <text \| --file f> [--take] [--timeout d]` | Send, wait for the turn to end, and read it |
 | `pom agent interrupt <workspace/role>` | Stop the current turn |
