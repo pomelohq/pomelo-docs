@@ -24,7 +24,9 @@ Workspace**:
   are used. More can be added later. Each row says whether its
   `node_modules` will be instant (from the shared store), installed once
   (then kept for the next workspace), or handled by the package manager's
-  own store.
+  own store. Next to each repo is the branch it will use, a new one from
+  main or the same branch taken over from origin; click it to pick another
+  branch in that repo.
 - **Environment** - when the config defines `environments`, the profile the
   services point at (`local` by default).
 - **Data** - when a ticked repo has `seed_from_main`, choose **Copy from
@@ -32,12 +34,15 @@ Workspace**:
   From the CLI: `pom ws create <branch> --fresh-db`.
 
 The footer sums up what **Create** will make, for example
-`3 repos - 1 installs once - databases copied from main - local`.
+`3 repos, 1 installs once, databases copied from main, local`.
+**Create** (`enter`) and **Cancel** (`escape`) sit next to it.
 
 <AppShot :width="620" :height="554" :window="false" text="Create Workspace. Pick a ticket (typing filters, arrows and Enter work), switch its source, toggle repos, pick an environment and the data."><CreateWorkspaceForm /></AppShot>
 
-Pomelo builds the workspace through a staged pipeline and shows each stage
-on a card at the top of the sidebar:
+Pomelo builds the workspace through a staged pipeline. While it runs, the
+workspace sits in the sidebar as a dim tile that fills from the bottom as
+stages finish, with the stage it is on and how far along it is; a red ring
+marks a run that failed:
 
 <AppShot :width="256" :height="290" :window="false" text="A workspace being created"><div class="pa-sheet"><WorkspaceCreate /></div></AppShot>
 
@@ -48,6 +53,7 @@ on a card at the top of the sidebar:
 5. Configuring repos (env files)
 6. Running setup commands
 7. Seeding databases
+8. Saving the workspace's baseline snapshot
 
 The per-repo stages run in parallel. Each worktree uses the existing local
 branch, else tracks `origin/<branch>`, else starts a new branch. A failed
@@ -138,8 +144,12 @@ pom modules clear    # remove every copy
 
 ## Switch
 
-Select any workspace in the sidebar to switch to it (or `ctrl-shift-w`).
-Each keeps its own tabs, terminals, and agent; switching never restarts
+Select any workspace in the sidebar to switch to it, or press `cmd-alt-o`
+for the workspace switcher: type to filter, `enter` switches, `cmd-n` starts
+a new workspace. The switcher lists the workspaces that need you first (an
+agent waiting, then a pull request in trouble), then main, then the rest in
+the sidebar's order, each with its tile and its one status line. Each
+workspace keeps its own tabs, terminals, and agent; switching never restarts
 anything. Drag rows to reorder them; main stays first.
 
 ## Rename

@@ -6,18 +6,23 @@ Pomelo commits, pushes and reviews across every repo of a workspace at once.
 
 The Git panel works on all of the workspace's repos at once, in three tabs:
 
-- **Changes** - the files the branch changed, **Staged** and **Not
-  staged**, by repo. Type a message and **Commit** makes one commit per
-  repo that has staged files, all with the same message; **Amend** amends
-  them. The overflow menu has **Stash All**, **Stash Pop**, **Discard
-  Tracked Changes**, the commit options **Amend**, **Signoff** and **Skip
-  Hooks**, and **Pull**, **Push** and **Fetch All**; the view options show
-  the files **By Repo** or as **One Timeline**, as a tree or a list.
-- **Remote** - per repo, what is **Not pushed**, **Not published** or **On
-  origin, not pulled**, the files changed on the branch, and the branch's
-  pull request: its title, checks, reviews, and **Merge conflict** when it
-  has one. **Create Pull Request** opens GitHub's page for a pushed branch.
-- **History** - the branch's commits.
+- **Changes** - a card per repo with the files the branch changed,
+  **Staged** and **Not staged**. Type a message and **Commit** makes one
+  commit per repo that has staged files, all with the same message;
+  **Amend** amends them. The footer names the branch, how many repos are on
+  it and what is left to push. The overflow menu has **Stash All**, **Stash
+  Pop**, **Discard Tracked Changes**, the commit options **Amend**,
+  **Signoff** and **Skip Hooks**, and **Pull**, **Push** and **Fetch All**;
+  the view options show the files as a **Tree** or a **List**, grouped by
+  **Staged & Not Staged** or not at all.
+- **Remote** - a card per repo that says what to do next (**Push**,
+  **Publish**, **Pull**): what is **Not pushed**, **Not published** or **On
+  origin, not pulled**, the files changed on the branch with how many you
+  have reviewed, and the branch's pull request: its title, checks, reviews,
+  and **Merge conflict** when it has one. **Create Pull Request** opens
+  GitHub's page for a pushed branch.
+- **History** - the branch's commits, **By Repo** or as **One Timeline**
+  (the view options).
 
 The sync button follows the branch: **Publish**, **Push**, **Pull**,
 **Sync** or **Up to date**. Right-click a file for **Open Diff**, **Open

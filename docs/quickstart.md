@@ -36,15 +36,18 @@ project menu (click the project name, top left) starts one from any window.
 
 ## 3. New project - Repositories
 
-**New project** opens as a tab in three steps. The first asks for:
+**New project** opens as a tab in three steps, **Repositories**, **Setup**
+and **Review**, shown at the top; **Continue** (`enter`) moves on and
+**Cancel** (`escape`) leaves. The first asks for:
 
 - a **Session name** - the project is created at `~/pom/<name>`, shown
   under the field,
 - the **Default branch** (`main` unless you change it) - main's branch in
   every repo,
-- your **Repositories**: under **Folders**, **Choose folders...** takes a
-  folder with a `.git` inside, or a folder of repos; under **Git URLs**,
-  paste one or several URLs (SSH or HTTPS) and **Add**.
+- your **Repositories**: the **Folders** / **Git URLs** toggle picks how.
+  With **Folders**, **Choose folders...** takes a folder with a `.git`
+  inside, or a folder of repos; with **Git URLs**, paste one or several URLs
+  (SSH or HTTPS) and **Add**.
 
 Each repo shows the alias it will get (edit it), the stacks Pomelo detected
 in it, its compose file and how many gitignored `.env` files it has. A URL is
@@ -69,8 +72,9 @@ files** lists the containers one set of which will serve every workspace.
 - **Create a first workspace** on the branch you type.
 
 **Review** sums up what will happen. Nothing in your repos changes: Pomelo
-works in its own clones under the session folder. **Create** (`cmd-enter`)
-starts it; your agent-or-manual choice is remembered for next time.
+works in its own clones under the session folder. **Create myproject**
+(`cmd-enter`) starts it; your agent-or-manual choice is remembered for next
+time.
 
 ## 5. Setting up
 
@@ -84,9 +88,10 @@ The tab follows the setup, phase by phase:
    tokens.
 3. **Configure with** the agent (**Configure with Claude Code**) - the agent CLI runs in the agent dock:
    watch it, type to it, or stop it. The tab lists what `pom.yml` sets up
-   so far. **Skip the agent - finish manually** stops it and goes on with
-   the draft; **Let the agent finish it after all** brings it back. Claude
-   Code says when it is done; for Codex and Gemini CLI press **It is done -
+   so far. **Skip the agent** stops it and goes on with the draft; **Let
+   Claude Code finish it** (or the agent you picked) brings it back, and
+   **Hide agent CLI** / **Show agent CLI** folds the agent dock. Claude Code
+   says when it is done; for Codex and Gemini CLI press **It is done -
    verify**. With **Set up manually** this phase is **Draft pom.yml**.
 4. **Verify** - the config doctor, then each repo's setup and migrations in
    main, then every service booted once (it must answer on its port, or stay
@@ -100,9 +105,9 @@ The tab follows the setup, phase by phase:
 **Pause** holds the setup between steps; **Cancel** stops it and removes
 what it created: the session folder, its secrets and its services.
 
-When every check passes, the tab shows the project **is ready**: how many
-repos, services, shared services and databases it has, what each repo
-runs, and what to do next - open the first workspace (or **Create a
+When every check passes, the tab shows **myproject is ready**: how many
+repositories, services, shared services and databases it has, what each
+repo runs, and what to do next - open the first workspace (or **Create a
 workspace**), **Start main's services**, or **Open pom.yml**.
 
 If something still keeps a project from running later (a tool not

@@ -10,9 +10,14 @@ worktrees, services and agents. This page is the tour.
 ## Layout
 
 - **Title bar** - the project name (click it to switch projects), the
-  active workspace's branch, and at the right the agents'
-  [usage chip](./agents#usage-and-plan-limits) and the app menu.
+  active workspace's branch, and at the right a yellow **needs you** pill
+  when a workspace's agent waits for you (click it, or `cmd-alt-a`, to go
+  there), the agents' [usage chip](./agents#usage-and-plan-limits) and the
+  app menu.
 - **WORKSPACES sidebar** - every workspace of the project, on the left.
+
+The sidebar, the docks and the center sit as rounded panels on the window
+background, with a small gap between them instead of dividing lines.
 - **Center** - the editor: tabs and splits for files, diffs, tickets and
   other items.
 - **Docks** - function panels (Files, Services, Git, Database), the
@@ -44,24 +49,32 @@ projects. See [Quick Start](./quickstart).
 
 Each row is a workspace:
 
-- its name (the display name, or the branch) and a **PR pill** with the
-  number of pull requests, colored by their state; click it to open the Git
-  panel,
-- the agent's state as a colored dot: **Thinking**, **Using tools**,
-  **Compacting**, **Awaiting input** or **Idle** (see
-  [Agent status](./agent-status)),
-- under the name, the ticket key and its status (colored by category), or
-  the branch, then how many services run (`2 running`) and what is wrong
-  with the pull request (`Checks pending`, `CI failed`, `Conflict`).
+- a square **tile** with the ticket key (`PROJ` over `101`), or a short
+  name from the branch for a workspace without a ticket. The current
+  workspace's tile is filled with the accent. Along the tile's bottom, a
+  moving bar while the agent works, else a dot per running service,
+- its name (the display name, or the branch),
+- at most one line saying what needs you or what is going on, the most
+  important first: a yellow **Waiting for you** pill when the agent waits,
+  what is wrong with the pull request (**CI failed**, **Conflict**,
+  **Changes requested**), **Agent working**, or **Checks running**. A quiet
+  workspace shows just its name (see [Agent status](./agent-status)),
+- a red **PR pill** with the number of pull requests, only while one is in
+  trouble; click it to open the Git panel.
+
+With **Group Workspaces by Ticket Status** on in Settings, the list is
+split under its tickets' statuses: **In progress**, **In review**,
+**Backlog**, **Done** and **Other**, each with its count. Click a group to
+fold it, drag it to move it.
 
 <AppShot :width="256" :height="560" text="The workspaces sidebar: main, a workspace being created, then workspaces grouped by ticket status"><WorkspacesList /></AppShot>
 
-Click a row to switch to it; click the ticket status under the name to open
-the ticket the same way as **Open Ticket** below. Each workspace keeps its own tabs,
+Click a row to switch to it, or press `cmd-alt-o` for the
+[workspace switcher](./workspace#switch). Each workspace keeps its own tabs,
 terminals and agent; switching never restarts anything. Drag rows to
 reorder them; **main** always stays first. The **+** in the header opens
 **New Workspace** (`cmd-n`), and workspaces being created or deleted show
-their stages and progress at the top, with **Retry** when one fails.
+as a tile that fills as their stages finish, with **Retry** when one fails.
 
 Main's row warns `not cloned: ...` when the config names repos main has no
 clone of.
@@ -80,9 +93,10 @@ Right-click a row for:
 | **Delete Workspace** | branch workspaces | Stops it and removes its worktrees, databases and folder. |
 
 Fold the sidebar (`cmd-b`, or the button in its footer) to a **rail** of
-round badges: the ticket number or a short name inside, the **ring colored
-by the agent's state**, and small dots for running services plus a pull
-request mark underneath.
+the same tiles. The rail only raises what needs you: a tile turns yellow
+while its agent waits, gets a red ring while a pull request is in trouble,
+and shows the working bar or the running services along its bottom. Hover a
+tile for its name, ticket, agent state, services and pull requests.
 
 ## Editor
 
@@ -355,9 +369,12 @@ the current notice. Every notification, notice and toast is listed in the
 ## Command palette
 
 `cmd-shift-p` lists the window's commands (as `workspace: <name>`, with
-their keys), each panel's commands and the editor's. Commands with no
-default key, such as **Open Project Config** or **Add Repository**, live
-here.
+their keys), each panel's commands and the editor's. Typing filters them and
+lights the matched letters; when nothing matches, the palette says so. The
+footer shows the keys: `enter` runs, the arrows move, `escape` closes.
+Commands with no default key, such as **Open Project Config** or **Add
+Repository**, live here. **Go to File** (`cmd-p`) works the same way over
+the workspace's files.
 
 ## The menu bar
 
@@ -385,7 +402,10 @@ Layout**. While an update downloads, the title bar shows its progress; see
 
 ## Settings
 
-`cmd-,` opens Settings in its own window:
+`cmd-,` opens Settings in its own window. The pages are listed on the left
+under **Search settings...**; click a page's arrow to show its sections and
+jump to one. The page itself sits on an inset panel, with **Edit in
+settings.json** at its top right:
 
 | Page | What's there |
 | --- | --- |
