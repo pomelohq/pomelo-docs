@@ -1,12 +1,14 @@
 # Install
 
-Pomelo is a **native macOS app**. Download the DMG, drag it to Applications,
-open it. That's the whole install - no account, no separate CLI to install,
-no runtime.
+Pomelo is a **native app for macOS and Linux**. On a Mac, download the DMG,
+drag it to Applications, open it. On Linux, unpack a tarball and run its
+`install.sh` (see [Linux](#linux)). No account, no runtime.
 
 ::: info Requirements
-macOS 14 (Sonoma) or later - Apple Silicon - signed with an Apple
-Developer ID and notarized, so it opens without Gatekeeper warnings.
+macOS 14 (Sonoma) or later, Apple Silicon - signed with an Apple Developer
+ID and notarized, so it opens without Gatekeeper warnings.
+Linux x86_64 or aarch64 with glibc (Ubuntu 24.04 or newer is tested), on
+Wayland or X11; the `pom` CLI alone needs no desktop.
 :::
 
 ## Download
@@ -15,6 +17,39 @@ Developer ID and notarized, so it opens without Gatekeeper warnings.
 2. Download **`Pomelo-<version>.dmg`**.
 3. Open it and drag **Pomelo** into **Applications**.
 4. Launch Pomelo (Applications or Spotlight).
+
+## Linux
+
+Each [release](https://github.com/pomelohq/pomelo/releases/latest) has two
+tarballs per architecture (`x86_64`, `aarch64`):
+
+- **`Pomelo-<version>-linux-<arch>.tar.gz`** - the app and the `pom` CLI.
+- **`pom-<version>-linux-<arch>.tar.gz`** - the `pom` CLI alone, for a server
+  without a desktop. It needs no display libraries.
+
+```bash
+tar xzf Pomelo-<version>-linux-x86_64.tar.gz
+./pomelo-<version>/install.sh            # app + pom into ~/.local
+./pomelo-<version>/install.sh --cli-only # only ~/.local/bin/pom
+```
+
+`install.sh` copies the files under `~/.local` (set `PREFIX` for another
+place) and writes a desktop entry that points at the installed app, so
+Pomelo shows in the app grid and the dock with its icon. Make sure
+`~/.local/bin` is on your `PATH` to run `pom` in a terminal.
+
+Shared services need **Docker Engine** with the **Compose plugin**, and your
+user in the `docker` group:
+
+```bash
+sudo apt install docker.io docker-compose-v2 git
+sudo usermod -aG docker $USER   # then log out and back in
+pom doctor                      # checks git, Docker, Compose and the tools pom.yml uses
+```
+
+On Linux the keys use **Ctrl** where macOS uses **Cmd**, the window draws its
+own title bar, and Pomelo does not update itself: install a newer tarball
+over the old one.
 
 ## First run
 
@@ -40,9 +75,10 @@ projects use.
 | **claude** | The agent, setting up a project, Fix with Claude, usage | `npm i -g @anthropic-ai/claude-code` |
 | **codex**, **gemini** | Optional: setting up a project, second opinions | their own installers |
 
-The `pom` CLI ships inside the app at
+On macOS the `pom` CLI ships inside the app at
 `/Applications/Pomelo.app/Contents/MacOS/pom`; add that folder to your
-`PATH` if you want it in a terminal. Its commands are listed in the
+`PATH` if you want it in a terminal. On Linux `install.sh` puts it in
+`~/.local/bin`. Its commands are listed in the
 [pom CLI reference](/reference/cli).
 
 ## Existing config carries over
@@ -54,7 +90,7 @@ Normalize** removes them (see [Project config](./project-config)).
 
 ## Updates
 
-Pomelo updates itself, in the background and on your schedule. With
+On macOS, Pomelo updates itself, in the background and on your schedule. With
 **Settings > General > Check for Updates Automatically** on (the default),
 the installed app looks for a newer release at launch and every hour, and
 stays quiet unless it finds one.
