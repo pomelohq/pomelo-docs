@@ -276,6 +276,116 @@ The app can do the same when its pull requests refresh, set by
 Either way a workspace with uncommitted or unpushed work is kept: its delete
 stops before changing anything and says why.
 
+## Sync on push
+
+When someone pushes to a workspace's branch on GitHub (a teammate, CI, an
+agent on another machine), Pomelo can bring the workspace up to date by
+itself. GitHub posts a webhook to the relay; the relay checks its signature,
+finds the workspaces that have that repo on that branch, and syncs each one.
+
+### Set it up
+
+In the project, on the machine that runs its workspaces:
+
+```sh
+pom github webhook setup
+```
+
+```text
+Payload URL:   https://hooks.dev.example.net/_pom/github
+Content type:  application/json
+Secret:        3f9c...e21a
+               (shown once; it is stored in the project's secret store)
+Events:        Just the push event
+```
+
+Enter those under the repository's **Settings > Webhooks** for every repo of
+the project. The command never talks to GitHub. To add the hook from a
+terminal instead:
+
+```sh
+gh api repos/myorg/api/hooks -f name=web -F active=true -f 'events[]=push' \
+  -f config[url]=https://hooks.dev.example.net/_pom/github \
+  -f config[content_type]=json -f config[secret]=<secret>
+```
+
+GitHub must be able to reach the payload URL. Locally it is
+`http://127.0.0.1:8766/_pom/github`, which only a tunnel can reach; with
+`proxy.domain` set it is `hooks.<domain>` (see
+[Route GitHub webhooks to the relay](./network#route-github-webhooks-to-the-relay)).
+GitHub's **Recent Deliveries** shows a green `ping` once it works, and
+`pom sync status` lists it as `pong`. `--rotate` makes a new secret (update it
+on GitHub too); `--json` prints `{schema: "pom.github/v1", payload_url,
+secret, secret_created, ...}`, with `secret` only when it was just made.
+
+### What a push does
+
+`sync.on_push` in `pom.yml` decides, per project:
+
+```yaml
+sync:
+  on_push: pull     # pull | notify | off; notify by default
+```
+
+- **`notify`** (default) - Pomelo fetches the branch and tells you: the app
+  shows **feat-login: 3 new commits on GitHub (api)** with **Pull** when the
+  worktree could take them cleanly. Nothing in the worktree changes.
+- **`pull`** - a clean worktree that is only behind is fast-forwarded
+  (`git fetch origin <branch>`, then `git merge --ff-only`). Then, by what the
+  push changed:
+  - a lockfile or other setup file (`package-lock.json`, `yarn.lock`,
+    `Gemfile.lock`, `go.sum`, `.nvmrc`...) runs the repo's `setup` and
+    restarts all of its running services;
+  - a migration (`db/migrate/`, `migrations/`, `schema.rb`...) runs the
+    repo's `migrate`;
+  - otherwise only the running services whose `dir` contains a changed file
+    restart (a service without `dir` counts every file).
+
+  A sleeping workspace is only fast-forwarded; nothing starts.
+- **`off`** - pushes are recorded and ignored.
+
+Pomelo never pulls over your work. A worktree with uncommitted changes
+(untracked files included, except the files Pomelo copied or generated) or
+with local commits GitHub does not have is left exactly as it is, and the
+notice says why: **not pulled: uncommitted changes** or **not pulled: local
+commits GitHub does not have**. Pushes that arrive within 5 seconds of each
+other (a rebase pushed commit by commit, several repos at once) sync once,
+and a workspace never runs two syncs at the same time. A deleted branch only
+gets a notice; tags are ignored.
+
+### See what happened
+
+```sh
+pom sync status            # the last 20 deliveries and outcomes
+pom sync status --json     # {schema: "pom.sync/v1", events: [...]}
+```
+
+```text
+2026-10-22T09:15:04Z  push        pulled      myproject/feat-login api  2 commits  restarted api/web
+2026-10-22T09:15:00Z  push        queued      myproject/feat-login api  - sync.on_push: pull
+2026-10-22T09:02:11Z  push        dirty       myproject/feat-search api  1 commit  - 1 uncommitted change; the worktree was left as it is
+2026-10-22T08:58:40Z  ping        pong
+```
+
+Each line is also in `sync/pushes.ndjson` in Pomelo's state folder
+(`pom.push/v1`), and each delivery shows in the app's **Dev Requests** log
+as `POST /_pom/github`. `pom ws ls --json` gives every workspace
+`remote_ahead` (commits `origin/<branch>` has that the worktree does not, as
+of the last fetch) and `last_sync` (`{time, outcome, repo, commits,
+restarted, detail}` of the last push that reached it, or `null`).
+
+::: warning Security
+A delivery is trusted only when its `X-Hub-Signature-256` matches the
+project's secret (HMAC-SHA256 of the body, compared in constant time).
+Without a secret the endpoint answers `403`, and with a wrong or missing
+signature `401`, and nothing happens. The secret is per project, kept
+encrypted in the project's secret store under the internal name
+`__github_webhook` (it never appears in `pom.yml` or in an agent's
+`secrets_list`), and a delivery only reaches the repos of the project whose
+secret signed it. Even a trusted push only ever fetches and fast-forwards:
+it never resets, merges or rebases a branch.
+:::
+
 ## Move a workspace
 
 A workspace you started on one machine (the laptop, say) can open on another (a dev VM) exactly as you left

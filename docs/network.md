@@ -296,6 +296,11 @@ Stopped workspaces are skipped; a body over 32 MB is forwarded empty. The
 Dev Requests tab shows each delivery, so a branch that answered with an error
 or refused the connection stands out.
 
+Paths starting with `/_` belong to the relay itself (repo names and aliases
+may not start with `_`): `/_pom/github` receives signed GitHub pushes and
+syncs the workspaces on that branch, see
+[Sync on push](./workspace#sync-on-push).
+
 To use it, expose **one** public URL that forwards to `http://127.0.0.1:8766`,
 then let the provider call `/<repo>/<service>/<their-path>`:
 
@@ -439,3 +444,34 @@ pom proxy config set trusted_proxies 127.0.0.1
 Caddy keeps the `Host` header and sets `X-Forwarded-Host` itself. If Caddy runs
 on another machine, bind the proxy to the VM's private address, have
 `reverse_proxy` point there, and trust Caddy's address instead of `127.0.0.1`.
+
+### Route GitHub webhooks to the relay
+
+[Sync on push](./workspace#sync-on-push) needs GitHub to reach the webhook
+relay (port 8766), not the proxy. Give the relay its own name,
+`hooks.dev.example.net`, which the wildcard certificate already covers. A site
+block for an exact name wins over the wildcard one:
+
+```text
+hooks.dev.example.net {
+	tls {
+		dns <provider> {env.DNS_API_TOKEN}
+	}
+
+	# Only GitHub's endpoint is public; the per-service relay paths stay private.
+	handle /_pom/github {
+		reverse_proxy 127.0.0.1:8766
+	}
+	handle {
+		respond 404
+	}
+}
+```
+
+`pom github webhook setup` then prints
+`https://hooks.dev.example.net/_pom/github`. GitHub's servers must reach that
+name over the internet, so a VM only on Tailscale or a LAN needs a public way
+in for that one path: a Caddy on a public host, Tailscale Funnel, or a tunnel
+such as `cloudflared tunnel --url http://127.0.0.1:8766`. Every delivery is
+checked against the project's webhook secret before anything happens, and an
+unsigned or wrongly signed one gets `401`.
