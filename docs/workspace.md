@@ -111,7 +111,7 @@ are left alone.
 what to do where cloning is not possible (**Hard Links**, **Copy** or **Run
 Install**), and sets a **Size Limit** (20 GB) and **Remove Unused After** (14
 days); copies over the limit or unused that long are removed after each new
-workspace. **Open Store** (or `node_modules Store` in the command palette)
+workspace, and at most once a day when the app starts or `pom start` runs. **Open Store** (or `node_modules Store` in the command palette)
 shows each repo of the open project by lockfile version:
 
 - **Current on main** - the copy for main's lockfile, with the workspaces using
@@ -162,10 +162,67 @@ with Claude** to suggest one. The branch never changes.
 Right-click a branch workspace and choose **Delete Workspace**, then
 confirm. A staged pipeline tears it down: stopping services > releasing
 ports and slots > running `pre_delete` commands > removing worktrees and
-databases > cleaning up folders. A local branch with unpushed or unmerged
-commits is kept, and a database whose name does not depend on the branch
-(so main uses it too) is never dropped. The **main** workspace can't be
+databases > cleaning up folders > cleaning up agent state and volumes. A
+local branch with unpushed or unmerged commits is kept, and a database whose
+name does not depend on the branch (so main uses it too) is never dropped. The **main** workspace can't be
 deleted.
+
+The last stage, cleaning up agent state and volumes, removes what the
+workspace's agents left in Pomelo's state folder (their sessions, the
+workspace's session index, leases and log) and any Docker volume labelled
+`pom.workspace=<project>/<branch>`. Pomelo creates no per-workspace volumes
+itself; give that label to volumes your own tooling makes for one workspace
+and they go with it. Shared services' volumes never carry it.
+
+```sh
+pom ws delete feat-login
+```
+
+## Clean up merged workspaces
+
+`pom ws gc` finds the workspaces whose pull request is merged in every repo of
+the workspace that has one, lists each with the reason, and deletes them
+through the same pipeline:
+
+```sh
+pom ws gc --dry-run   # list them; nothing is deleted
+pom ws gc             # ask for each one
+pom ws gc --yes       # delete them all without asking
+pom ws gc --closed    # closed (unmerged) pull requests count too
+```
+
+```text
+feat-login  api #12 merged, web #7 merged
+feat-search  api #15 merged
+  kept: web has 1 uncommitted change
+  (--force deletes it anyway)
+```
+
+A workspace with uncommitted changes (untracked files included, except the
+files Pomelo copied or generated) or with commits no remote has is **kept**,
+and the reason is printed; `--force` deletes it anyway. Commits that are in
+the pull request count as pushed, so a squash-merged branch whose remote
+branch was deleted is not held back. On a terminal `pom ws gc` asks for each
+workspace; anywhere else it refuses to delete without `--yes` (or lists with
+`--dry-run`). It reads the pull requests with the GitHub token the PR tab uses
+(`GH_TOKEN`, `GITHUB_TOKEN`, or the project's `github` secret). `--json`
+prints `{schema: "pom.ws-gc/v1", workspaces: [{branch, reason, prs, action,
+notes}]}`, where `action` is `deleted`, `kept`, `skipped`, `failed` or
+`would_delete`.
+
+The app can do the same when its pull requests refresh, set by
+`workspaces.auto_cleanup` in `settings.json`:
+
+```json
+{ "workspaces": { "auto_cleanup": "ask" } }
+```
+
+- `"off"` (default) - nothing happens.
+- `"ask"` - a notice says **N workspaces have merged PRs** with **Clean up**.
+- `"auto"` - they are deleted without asking, except the one on screen.
+
+Either way a workspace with uncommitted or unpushed work is kept: its delete
+stops before changing anything and says why.
 
 ## Agent tools (MCP)
 

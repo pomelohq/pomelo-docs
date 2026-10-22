@@ -51,6 +51,22 @@ On Linux the keys use **Ctrl** where macOS uses **Cmd**, the window draws its
 own title bar, and Pomelo does not update itself: install a newer tarball
 over the old one.
 
+On Linux `pom doctor` also warns about a machine that is about to hang. Each
+check reads `/proc` and `/run` only; none runs a command inside a container:
+
+- **Docker nested in an LXC container** (`systemd-detect-virt --container`,
+  `container=lxc` in PID 1's environment, or `/run/systemd/container`).
+  Docker inside LXC is known to hang `runc exec` (`docker exec`, exec
+  healthchecks) when the host kernel misbehaves, which can freeze the host.
+  Prefer a VM; if it must stay in LXC, give the container `nesting=1` and
+  `keyctl=1` and keep its kernel current. Pomelo's own health checks run from
+  the host and never `docker exec`.
+- **High load** - the 1-minute load average above twice the CPU count.
+- **Stuck processes** - processes in state `D` (uninterruptible sleep) at two
+  scans 1 s apart that started more than 30 s ago, listed by pid and name.
+  They wait on the kernel (a disk, network storage, a hung `runc`) and cannot
+  be killed; `dmesg` usually says why.
+
 ## First run
 
 The first window is the welcome page:
