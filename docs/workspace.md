@@ -157,6 +157,58 @@ anything. Drag rows to reorder them; main stays first.
 **Rename...** in a workspace's menu sets its display name, with **Refine
 with Claude** to suggest one. The branch never changes.
 
+## Sleep and wake
+
+A workspace you are not using can **sleep**: its services and agent sessions
+stop, while its worktrees, databases and leased ports stay exactly as they
+are. Waking it starts what ran when it went to sleep - the same services, on
+the same ports, in dependency order, and its `claude` session again.
+
+```sh
+pom ws sleep feat-login           # stop its services and agents
+pom ws sleep feat-login --force   # even while an agent is working
+pom ws wake feat-login            # start what ran before
+```
+
+Sleeping is refused while one of the workspace's agents is in a turn
+(thinking, running a tool, compacting) or waits for an approval; `--force`
+puts it to sleep anyway. An agent started for one task with
+`pom agent start --role <role>` is listed but not restarted on wake.
+
+In the app, a workspace's menu has **Sleep Workspace** or **Wake Workspace**,
+and a sleeping row says **Asleep**. `pom ws ls` marks it `sleeping`, and
+`pom ws ls --json` gives each workspace a `state` (`running`, `sleeping` or
+`queued`). The state lives in the workspace's `.pom-workspace.json`.
+
+Opening a sleeping workspace's service through the dev proxy wakes it: the
+browser gets the waiting page, titled **Waking feat-login**, which reloads
+itself once the service answers. A burst of requests wakes it once.
+
+### Idle sleep and a running limit
+
+Two choices in `settings.json` keep a machine with many workspaces from
+running them all:
+
+```json
+{ "workspaces": { "idle_sleep_minutes": 60, "max_running": 3 } }
+```
+
+- **`idle_sleep_minutes`** (default `0`, never) - a workspace that has had no
+  dev proxy request, no agent activity and no service start for that long is
+  put to sleep. One whose agent is working never is.
+- **`max_running`** (default `0`, any number) - how many workspaces may run
+  at once, across every project on the machine. Starting or waking one more
+  (`pom start`, `pom ws wake`, the app's Wake, a proxy request) first puts the
+  least recently used idle workspace to sleep. When every running workspace
+  has an agent at work, the new one is **queued** instead and starts, with what
+  it was asked to start, as soon as a slot frees; the longest waiting goes
+  first. `pom ws wake` says it is queued and exits 0; `pom start` exits 1 so a
+  script does not wait on services that are not starting.
+
+`pom proxy` and the app check once a minute. The dev proxy keeps each
+workspace's last request in `proxy/activity.json` in Pomelo's state folder,
+written at most every 30 seconds.
+
 ## Delete
 
 Right-click a branch workspace and choose **Delete Workspace**, then

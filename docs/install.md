@@ -67,6 +67,25 @@ check reads `/proc` and `/run` only; none runs a command inside a container:
   They wait on the kernel (a disk, network storage, a hung `runc`) and cannot
   be killed; `dmesg` usually says why.
 
+### Workspace limits
+
+The [`limits:`](./services#resource-limits) caps in `pom.yml` use cgroup v2
+through your systemd user manager, which Ubuntu 24.04 runs for every login
+and ssh session. `pom doctor` reports what keeps them from holding:
+
+- **No systemd user session** (`$XDG_RUNTIME_DIR/systemd/private` is missing):
+  workspaces run uncapped. Run pom from a login or ssh session. In a container
+  or another tree delegated to you, set `POM_CGROUP_ROOT` to a cgroup v2
+  directory you may write to; `POM_CGROUP=off` turns limits off.
+- **Missing controllers** - your cgroup tree must offer `cpu` and `memory`
+  (Ubuntu delegates both to user sessions by default).
+- **Lingering off** - capped processes run under your user manager, which
+  stops at your last logout. Keep them across logouts with:
+
+```bash
+loginctl enable-linger $USER
+```
+
 ## First run
 
 The first window is the welcome page:

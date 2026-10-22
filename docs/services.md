@@ -263,6 +263,57 @@ repos:
 The hook runs after `cd` into the worktree, before `cmd`. Failures abort
 startup. A service-level `pre_start` replaces the repo-level one.
 
+## Resource limits
+
+On a Linux machine running many workspaces, one workspace running heavy tests
+should not starve the rest. A `limits:` block in `pom.yml` caps the CPU and
+memory each workspace's processes may use together - its services, its agents
+and its terminals:
+
+```yaml
+limits:
+  cpu: 2          # cores, or a percentage of one core: "200%"
+  memory: 4G      # K, M, G or T
+  workspaces:
+    feat-heavy-tests: { cpu: 4, memory: 8G }   # by branch; unset keys use the values above
+```
+
+Each workspace gets a systemd user slice,
+`pom.slice/pom-<project>.slice/pom-<project>-<workspace>.slice`, with
+`CPUQuota`, `MemoryMax` and swap off (`MemorySwapMax=0`), and every process
+Pomelo starts for it runs in a scope inside it. A workspace over its memory
+cap has its biggest process killed by the kernel inside that slice; one over
+its CPU cap is slowed. Other workspaces keep running. Processes keep running
+when the app quits, as without limits.
+
+Shared services are not counted and run without a cap unless you give an
+image service its own:
+
+```yaml
+shared_services:
+  postgres:
+    cpu: 2
+    memory: 2G    # Docker cpus / mem_limit
+```
+
+Limits need Linux with cgroup v2 and a systemd user session; see
+[Linux](./install#workspace-limits). On macOS the keys are read but nothing
+is capped, and `pom doctor` says so.
+
+`pom ps` shows what each workspace uses, above the list of holders. A
+workspace with limits is measured from its slice (`memory.current`,
+`cpu.stat`), with its caps; others add up their processes:
+
+```text
+WORKSPACE            HOLDERS  CPU%   MEM    LIMIT        FROM
+myproject/feat-login 3        112.4  1830M  200% / 4096M cgroup
+myproject/main       2        3.1    412M   -            processes
+```
+
+`pom ps --json` prints `{schema: "pom.ps/v1", workspaces: [{project,
+workspace, holders, cpu_percent, memory_bytes, cpu_limit_percent,
+memory_limit_bytes, source}], holders: [...]}`.
+
 ## From a terminal
 
 `pom start <target>`, `pom stop`, `pom restart`, `pom status`, `pom logs`
