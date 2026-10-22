@@ -1,8 +1,5 @@
 @import './tokens.css';
 
-@font-face { font-family: 'Lilex'; src: url('/fonts/Lilex-Regular.ttf') format('truetype'); font-weight: 400; font-display: swap; }
-@font-face { font-family: 'Lilex'; src: url('/fonts/Lilex-Bold.ttf') format('truetype'); font-weight: 700; font-display: swap; }
-
 /* The app window drawn in HTML: the app's UI font at its sizes, colors only from tokens.css. */
 .pa {
   font-family: 'IBM Plex Sans', system-ui, sans-serif;
@@ -15,7 +12,7 @@
   text-align: left;
 }
 .pa *, .pa *::before, .pa *::after { box-sizing: border-box; }
-.pa .mono { font-family: 'Lilex', ui-monospace, monospace; }
+.pa .mono { font-family: 'IBM Plex Mono', ui-monospace, monospace; }
 .pa .muted { color: var(--pa-text-muted); }
 .pa .placeholder { color: var(--pa-text-placeholder); }
 .pa .trunc { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }

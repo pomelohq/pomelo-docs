@@ -154,7 +154,7 @@ function typed() { listOpen.value = true; highlighted.value = 0; ticket.value = 
 .pa-cw-source:hover, .pa-cw-source.open { background: var(--pa-ghost-element-hover); color: var(--pa-text); }
 .pa-cw-input { width: 100%; height: 32px; padding: 0 8px; display: flex; align-items: center; border-radius: 6px; border: 1px solid var(--pa-border-variant);
   background: var(--pa-editor-background); color: var(--pa-text); font: inherit; font-size: 13px; outline: none; }
-input.pa-cw-input.mono { font-family: 'Lilex', ui-monospace, monospace; }
+input.pa-cw-input.mono { font-family: 'IBM Plex Mono', ui-monospace, monospace; }
 .pa-cw-input:focus { border-color: var(--pa-border-focused); }
 .pa-cw-input::placeholder { color: var(--pa-text-placeholder); }
 .pa-cw-menu, .pa-cw-list { position: absolute; z-index: 5; top: calc(100% + 4px); left: 0; padding: 4px; border-radius: 8px; border: 1px solid var(--pa-border);
