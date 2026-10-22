@@ -92,8 +92,11 @@ The **Dev Requests** tab (**Open Requests** in Settings, or `Dev Requests` in
 the command palette) lists every `/_pom_dev/` request the proxy handled, page
 loads and failed requests on a service hostname (a page's module and asset
 requests are left out, so they don't push everything else out), and every
-webhook the relay fanned out, newest first. Filter by kind, to errors only, or by path
-or service. Select a row to see it beside the list:
+webhook the relay fanned out, newest first. The toolbar filters by kind
+(**All**, **Proxy**, **Webhooks**), by status (**Any Status**, **Errors**)
+and by path or service, and shows whether the proxy and the webhook relay
+are up, with **Restart**. Select a row to see it beside the list: the
+service, when it arrived, the profile and the target URL, then:
 
 - **Request** - the headers and body that came in (JSON is indented, keys in
   the order they were sent; **Copy** puts the body on the clipboard).

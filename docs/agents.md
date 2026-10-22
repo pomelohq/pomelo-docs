@@ -103,7 +103,7 @@ no tokens are spent to know it.
 
 The chip at the right of the title bar shows the Claude account signed in
 on this Mac, a bar of its **5-hour** window and both windows' use:
-`dev 23% 5h 29% wk`. Click it for a card with the account, its plan, each
+`dev 8% 5h 26% wk`. Click it for a card with the account, its plan, each
 window with when it resets, **Open Agent Usage** and **Refresh Now**. The
 bars turn yellow at 70% and red at 90%.
 

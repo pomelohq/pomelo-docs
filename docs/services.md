@@ -74,8 +74,12 @@ service restarts, and the choice is kept per workspace.
 Open it with `ctrl-shift-s` or the Services button in the status bar (its
 tooltip shows the key). The header names the workspace; its two buttons
 open the **Secrets** tab (the project's encrypted `{{secret.NAME}}` values)
-and the **Environment** tab (each service's resolved env and where each
-value comes from).
+and the **Environment** tab. The Environment tab picks a **Repo**,
+**Service**, **Branch** and **Profile** at the top, then lists the
+service's databases for that branch and its resolved env, each value
+tagged by where it comes from: **own** (set in the repo's env), a preset
+such as **rails**, or **resolved** (filled in by Pomelo). Secret values stay
+masked until you click the eye; every value has a copy button.
 
 - **Filter by name** narrows the list by service or repo name, and **All**,
   **Running**, **Failed** and **Stopped** filter by state, each with its
@@ -137,10 +141,10 @@ one you click; **View logs** keeps it open). The tab has:
 - **What went wrong**, for a crashed or failed service: `Crashed 2m ago -
   exit 1`, `Port 5173 is already in use` or `Could not start`, the output,
   and **Use a new port**, **Fix with Claude** and **Restart**.
-- **Facts**: its status and PID, its **URL** (with copy), its **Port**
-  (**Change** moves it to a new free port), its **Mode** and **Env
-  profile** (pickers when there is a choice), its **Env file** (**Open**
-  opens it) and its **Command** (with copy).
+- **Facts**, on one card: its **Status** (`Running - up 12m`) and **PID**,
+  its **URL** (with copy), its **Port** (**Change** moves it to a new free
+  port), its **Env profile** and **Mode** (pickers when there is a choice),
+  its **Env file** (**Open** opens it) and its **Command** (with copy).
 - **The console**, while it runs: the tab is the service's live terminal.
   Click in it and type, and the keys, paste and the mouse go to the
   process, so prompts, REPLs and interactive CLIs work as in a terminal.
