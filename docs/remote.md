@@ -292,9 +292,52 @@ pom server run             # start one in the background yourself
 - **Log.** `$XDG_STATE_HOME/pom/server/<version>.log` (else `~/.local/state/pom/server/`), rotated at 5 MiB
   with one `.log.1` kept. It records connections and each request's method, size, duration and result,
   never what a request or an answer carried: no service output and no job steps.
+- **Settings.** Three keys under `server` in `~/.config/pomelo/settings.json` tune it, each read on the
+  machine it names:
+
+  | Key | Default | Where | What |
+  | --- | --- | --- | --- |
+  | `server.idle_exit_minutes` | `30` | the host | minutes without a client before the server exits; `0` never |
+  | `server.reconnect_retention_minutes` | `10` | the host | minutes the server keeps a dropped client's terminals and streams for a reconnect |
+  | `server.unconfirmed_input_kib` | `64` | your Mac | KiB of typed input the app keeps to send again after a drop; the server drops what it already typed |
+
+  The server reads its two when it starts (`pom server stop` to apply a change); the app reads its key when
+  a remote project opens.
 - **Fallback.** A host whose `pom` predates `pom server`, or speaks another protocol version, is read with
   plain SSH as before, without terminals. A server from before terminals still serves the rest; updating
   `pom` on the host brings them.
+
+### Starting it with systemd
+
+The on-demand start is enough for most hosts. To have the server start with your user manager instead (on
+Linux, with systemd), install its unit once on the host:
+
+```sh
+pom server install-unit     # writes ~/.config/systemd/user/pom-server.service and enables it
+systemctl --user start pom-server
+pom server uninstall-unit   # disables and removes it
+```
+
+The unit runs `pom server run --foreground` with the `PATH` you installed it from and restarts the server
+if it fails (`Restart=on-failure`); a server that stops on purpose or after its idle time stays stopped until
+the next connection starts one, so set `server.idle_exit_minutes` to `0` to keep it running. Nothing installs
+the unit for you, and `--json` prints what it did. On macOS both commands say they are Linux only.
+
+Without lingering, systemd stops your user manager and removes `$XDG_RUNTIME_DIR`, with the server's socket,
+at your last logout: the server exits and forgets the terminals it kept for the app (they keep running). Keep
+it across logouts with `loginctl enable-linger $USER`; `pom doctor` warns when lingering is off.
+
+### Checking it with pom doctor
+
+On a host that runs or ran `pom server`, `pom doctor` adds:
+
+- whether the server of this `pom` version runs, with its pid, uptime, connections, open streams and what it
+  keeps for apps that dropped (`retained`), and whether the systemd unit is installed;
+- a warning when the socket folder is open to other users, and an error when it is not a folder or belongs to
+  another user (the server cannot start);
+- a warning, with the `kill` to stop it, for a server of an older `pom` version that still runs, and one for a
+  newer server than the `pom` you ran;
+- a warning when lingering is off while the server or its unit is in use (Linux only).
 
 ## Updating pom on the host
 
@@ -349,4 +392,4 @@ port, add a `Host` entry with its `Port` to `~/.ssh/config` and use that alias i
 - A version warning: **Update pom on dev** on the project's page installs the app's version there, or update
   `pom` on the older side by hand; both should be on the same minor version.
 - The page says it reads over SSH: update `pom` on the host (`pom host test dev` shows its version). On the
-  host, `pom server status` and the server log say whether a server runs and what it served.
+  host, `pom server status`, `pom doctor` and the server log say whether a server runs and what it served.
