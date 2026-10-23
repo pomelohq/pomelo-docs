@@ -21,8 +21,9 @@ The keys at the top of `pom.yml`.
 | `preset` | string or list | - | Presets whose services run once per workspace, outside any repo. |
 | `seed` | list of commands | - | Runs once in the workspace folder when a workspace is created, before each repo's seed. |
 | `prepare_main` | list | reset, migrate, seed, snapshot | The phases Prepare Main runs, in order: `reset`, `migrate`, `seed` and `snapshot`, which saves main's databases as the `main__baseline` snapshot new workspaces copy from without disconnecting main. Other names are skipped; a list with none of them runs only `reset`. |
-| `sync` | map | - | Keep Main Fresh; see Sync. |
+| `sync` | map | - | Keep Main Fresh, auto-push and sync on push; see Sync. |
 | `agents` | map | - | A policy for the workspace's coding agents; see Agents. |
+| `limits` | map | - | CPU and memory caps per workspace; see Limits. |
 | `workspaces` | map | - | Ignored. Workspace groups; nothing reads them now. |
 | `combinations` | map | - | Ignored. Repo combinations; `config_normalize` deletes them. |
 | `code_agents` | map | - | Ignored. Agent switches; the app's Settings hold these now. |
@@ -65,6 +66,7 @@ Each entry of `repos:` is one repository, keyed by its clone folder name.
 | `repos.<repo>.env` | map | - | The repo's environment, with templates resolved; services get it injected, and it is written to `.env.local` where the repo keeps env files (a root `.env` or `.env.development`, `apps/<name>/.env`, a service's `dir`). If any value is a map, the keys are file names instead: each file gets its own keys on top of `*`, the base for every file. Edit it here, never in the generated file. |
 | `repos.<repo>.services` | map | - | The repo's long-running processes; see Services. |
 | `repos.<repo>.lifecycle` | map | - | How the repo is built and run; see Repo lifecycle. |
+| `repos.<repo>.test` | map | - | How `pom run` runs the repo's tests; see Repo test profile. |
 | `repos.<repo>.pre_start` | command | - | Same as `lifecycle.pre_start`. |
 | `repos.<repo>.commands` | map | - | Same as `lifecycle.commands`. |
 | `repos.<repo>.setup` | list of commands | - | Same as `lifecycle.setup`. |
@@ -72,6 +74,7 @@ Each entry of `repos:` is one repository, keyed by its clone folder name.
 | `repos.<repo>.seed` | list of commands | - | Same as `lifecycle.seed`. |
 | `repos.<repo>.pre_delete` | list of commands | - | Same as `lifecycle.pre_delete`. |
 | `repos.<repo>.copy` | list of globs | - | Same as `lifecycle.copy`. |
+| `repos.<repo>.modules_private` | list of folder names | [.prisma, @prisma, prisma] | Entries at the top of `node_modules` each workspace keeps to itself instead of sharing through the node_modules store. A name starting with `.` is a folder a tool generates (no package name starts with `.`): the store never keeps it, and each workspace's setup generates its own. Any other name is an installed package (scoped ones like `@prisma` included; quote a name starting with `@` in YAML): the store keeps it, but every workspace gets a writable copy rather than a hard link, for tools that write into it or copy files out of it with their mode. `.prisma`, `@prisma` and `prisma` are always private; list more here, merged with the presets' lists. |
 | `repos.<repo>.tasks` | list | - | Same as `lifecycle.tasks`. |
 | `repos.<repo>.shortcuts` | list | - | Older name of `tasks`. |
 | `repos.<repo>.plugins` | map | - | Ignored. Plugin settings; `config_normalize` deletes them. |
@@ -105,6 +108,11 @@ env:
     DATABASE_URL: postgresql://{{shared.postgres.url}}/{{db.main}}
   .env.test.local:
     DATABASE_URL: postgresql://{{shared.postgres.url}}/{{db.test}}
+
+test:
+  command: bin/rspec
+
+modules_private: [.generated-client, "@myorg"]
 ```
 
 ## Repo lifecycle
@@ -138,6 +146,28 @@ setup: [npm ci, npm run build]
 seed: [bin/rails db:seed]
 
 copy: [config/master.key]
+```
+
+## Repo test profile
+
+How `pom run` runs the repo's tests. With a `test:` block, `pom run test` (or `pom run` of `command`) applies the test profile without `--profile test`: variables the env file sets replace the workspace's dev values, except connection values (a template with a `db.`, `shared.`, `slot.`, `branch`, `bind_ip` or `<repo>.<service>` token, and `PORT`), which always keep the workspace's.
+
+| Key | Type | Default | What it does |
+|---|---|---|---|
+| `repos.<repo>.test.command` | command | `commands.test` | What `pom run test` runs, with the test profile. Running this command by hand (`pom run "bin/rspec"`) applies the profile too. |
+| `repos.<repo>.test.env_file` | path | `.env.test` | The env file the test profile reads, relative to the repo folder; `<env_file>.local` is read after it and wins. A file Pomelo generated is skipped. |
+| `repos.<repo>.test.env` | map | - | Variables set under the test profile, with templates resolved. They win over everything, connection values included, so this is where a test database goes. |
+
+Examples, each written under `repos.<repo>.test`:
+
+```yaml
+command: bin/rspec
+
+env_file: apps/web/.env.test
+
+env:
+  DATABASE_URL: "{{db.test.url}}"
+  SOME_ALLOWED_DOMAINS: ""
 ```
 
 ## Services
@@ -216,10 +246,10 @@ The background-job queue a worker service drains, in the workspace's Redis slot.
 
 | Key | Type | Default | What it does |
 |---|---|---|---|
-| `repos.<repo>.services.<service>.queue.kind` | string | - | `sidekiq` or `bullmq`. |
-| `repos.<repo>.services.<service>.queue.prefix` | string | `bull` | BullMQ's key prefix. |
+| `repos.<repo>.services.<service>.queue.kind` | string | - | `sidekiq`, or `bullmq` (also `bull`) for BullMQ and Bull v3/v4. |
+| `repos.<repo>.services.<service>.queue.prefix` | string | `bull` | The Bull or BullMQ key prefix queues are found under. |
 | `repos.<repo>.services.<service>.queue.queues` | list | every queue found | The queues to watch. |
-| `repos.<repo>.services.<service>.queue.redis` | string | the repo's first Redis | The shared Redis service the queue lives in. |
+| `repos.<repo>.services.<service>.queue.redis` | string | the Redis the env points at | The shared Redis service the queue lives in. Without it, the one the service's or repo's env references (`{{shared.<name>...}}`), else the repo's only shared Redis; `--redis` overrides both. |
 
 Examples, each written under `repos.<repo>.services.<service>.queue`:
 
@@ -269,7 +299,7 @@ db_name: "{{branch.safe}}_reports"
 
 ## Shared services
 
-Each entry of `shared_services:` runs once for every workspace: a Docker `image` or a `cmd`, never both. `postgres`, `redis`, `minio`, `opensearch` and `zincsearch` (by name or `type:`) get a working image, ports, credentials and healthcheck filled in.
+Each entry of `shared_services:` runs once for every workspace: a Docker `image` or a `cmd`, never both. `postgres`, `redis`, `minio`, `opensearch` and `zincsearch` (by name or `type:`) get a working image, ports and credentials filled in.
 
 | Key | Type | Default | What it does |
 |---|---|---|---|
@@ -282,11 +312,13 @@ Each entry of `shared_services:` runs once for every workspace: a Docker `image`
 | `shared_services.<name>.environment` | map | filled for well-known services | Environment for the container or command. In a `cmd` service, `$PORT` and `${PORT}` in a value become its port. |
 | `shared_services.<name>.volumes` | list | filled for well-known services | For an `image`: Docker volumes. |
 | `shared_services.<name>.command` | string | - | For an `image`: the container's command. |
-| `shared_services.<name>.healthcheck` | map | filled for well-known services | When the service counts as up; see Shared service healthcheck. |
+| `shared_services.<name>.healthcheck` | map | - | When the service counts as up; see Shared service healthcheck. |
 | `shared_services.<name>.db_user` | string | postgres for a Postgres | For an `image`: the login `{{shared.<name>.url}}` and `.user` carry. |
 | `shared_services.<name>.db_password` | string | postgres for a Postgres | For an `image`: the password `{{shared.<name>.url}}` and `.pass` carry. |
 | `shared_services.<name>.capacity` | number | - | For an `image`: how many workspaces share one instance. Each gets a slot, `{{shared.<name>.slot}}` (a Redis database number, for example); when an instance is full another starts at base port + instance. |
 | `shared_services.<name>.slot_reset` | string | - | For an `image` with `capacity`: a command run inside the instance's container to empty one slot, with `{{slot}}` replaced by its number. It runs when a workspace gives its slot back (deleted, or its folder is gone) and before a slot is handed to a new workspace, so no workspace sees another's data; a slot whose reset fails is not handed out. The redis preset empties the Redis database. |
+| `shared_services.<name>.cpu` | cores | - | For an `image`: the CPU its container may use (Docker `cpus`). Shared services are unlimited without it. |
+| `shared_services.<name>.memory` | size | - | For an `image`: the memory its container may use (Docker `mem_limit`). |
 | `shared_services.<name>.host` | string | `localhost` | The host the app's database and storage browsers connect to. Templates always use `127.0.0.1`. |
 
 Examples, each written under `shared_services.<name>`:
@@ -307,29 +339,31 @@ ports: ["5432"]
 capacity: 64
 
 slot_reset: redis-cli -n {{slot}} FLUSHDB | grep -qx OK
+
+cpu: 2
+
+memory: 2G
 ```
 
 ## Shared service healthcheck
 
-When the shared service counts as up.
+When the shared service counts as up. Pomelo always asks from the host, on the published port: a Postgres startup handshake, a Redis `PING`, or for anything else a TCP connection that stays open. It never runs a check inside a container, and the generated compose file turns every image's own healthcheck off (`disable: true`), since a `docker exec` on a timer can hang the machine when the container runtime stalls.
 
 | Key | Type | Default | What it does |
 |---|---|---|---|
-| `shared_services.<name>.healthcheck.test` | command or list | - | A shell command, or a Docker-style `[CMD, ...]` list, that succeeds once the service is up. A `cmd` service waits up to 30 seconds for it before the services that use it start. |
-| `shared_services.<name>.healthcheck.interval` | duration | - | For an `image`: time between checks. |
-| `shared_services.<name>.healthcheck.timeout` | duration | - | For an `image`: how long one check may take. |
-| `shared_services.<name>.healthcheck.retries` | number | - | For an `image`: failed checks before the container counts as unhealthy. |
+| `shared_services.<name>.healthcheck.test` | command or list | the built-in probe | A check run on the host, never in the container, with `$PORT` set to the service's host port: a shell command, `[CMD, ...]` (run as is) or `[CMD-SHELL, line]`. Ready once it exits 0. A command not installed on the host (exit 127) falls back to the built-in probe. A `cmd` service waits up to 30 seconds for it before the services that use it start. |
+| `shared_services.<name>.healthcheck.interval` | duration | `1s` | Time between checks while Pomelo waits for the service (at most 1s). |
+| `shared_services.<name>.healthcheck.timeout` | duration | `3s` | How long one check may take before it counts as failed. |
+| `shared_services.<name>.healthcheck.retries` | number | - | Not used; kept so older files load. |
 
 Examples, each written under `shared_services.<name>.healthcheck`:
 
 ```yaml
 test: curl -sf http://127.0.0.1:$PORT/health
 
-interval: 5s
+interval: 500ms
 
-timeout: 3s
-
-retries: 10
+timeout: 5s
 ```
 
 ## Presets
@@ -348,13 +382,14 @@ Each entry of `presets:` is a reusable repo fragment. A repo (or the workspace, 
 | `presets.<preset>.seed` | list of commands | - | As on a repo. |
 | `presets.<preset>.pre_delete` | list of commands | - | As on a repo. |
 | `presets.<preset>.copy` | list of globs | - | As on a repo. |
+| `presets.<preset>.modules_private` | list of folder names | - | As on a repo, added to the repo's own list. |
 | `presets.<preset>.seed_from_main` | bool | `false` | As on a repo. |
 | `presets.<preset>.tasks` | list | - | As on a repo. |
 | `presets.<preset>.shortcuts` | list | - | Older name of `tasks`. |
 
 ## Sync
 
-Keep Main Fresh: pulling the main workspace on a schedule.
+Keep Main Fresh (pulling the main workspace on a schedule), auto-push, and what a GitHub push for a workspace's branch does.
 
 | Key | Type | Default | What it does |
 |---|---|---|---|
@@ -362,6 +397,7 @@ Keep Main Fresh: pulling the main workspace on a schedule.
 | `sync.interval_sec` | number | `180` | Seconds between pushes when `auto_push` is on; at least 30. |
 | `sync.refresh_main` | bool | `false` | Keep Main Fresh: pull and migrate the main workspace on a schedule. Once it is set in the app, the app's choice wins. |
 | `sync.refresh_interval_sec` | number | `1800` | Seconds between Keep Main Fresh runs. |
+| `sync.on_push` | pull, notify or off | `notify` | What a signed GitHub push for a workspace's branch does (see `pom github webhook setup`). `pull` fast-forwards a clean worktree, runs setup when a lockfile changed and migrate when a migration did, then restarts the services whose `dir` the change touched; a worktree with uncommitted changes or local commits is never touched and gets a notice. `notify` only fetches and tells you; `off` ignores pushes. |
 
 Examples, each written under `sync`:
 
@@ -369,6 +405,8 @@ Examples, each written under `sync`:
 refresh_main: true
 
 refresh_interval_sec: 1800
+
+on_push: pull
 ```
 
 ## Agents
@@ -387,6 +425,44 @@ agents:
   policy: ./scripts/agent-policy.sh
 
 policy_timeout_sec: 10
+```
+
+## Limits
+
+How much CPU and memory each workspace's processes (its services, agents and terminals) may use together, on Linux with a systemd user session (cgroup v2). A workspace over its memory cap has its biggest process killed inside it, and one over its CPU cap is slowed, so the other workspaces and the machine keep running. Shared services are not counted; cap them with `cpu` and `memory` on the shared service. On macOS the keys are read but nothing is limited.
+
+| Key | Type | Default | What it does |
+|---|---|---|---|
+| `limits.cpu` | cores or percent | - | The CPU every workspace may use at most: cores (`2`, `1.5`) or a percentage of one core (`200%`). |
+| `limits.memory` | size | - | The memory every workspace may use at most (`4G`, `512M`). Past it the kernel kills a process of that workspace. |
+| `limits.workspaces` | map | - | Caps for single workspaces, by branch; see A workspace's limits. |
+
+Examples, each written under `limits`:
+
+```yaml
+cpu: 2
+
+memory: 4G
+
+workspaces:
+  feat-heavy-tests: { cpu: 4, memory: 8G }
+```
+
+## A workspace's limits
+
+One workspace's own cap, by branch name. A key it leaves out takes the value from `limits:`.
+
+| Key | Type | Default | What it does |
+|---|---|---|---|
+| `limits.workspaces.<branch>.cpu` | cores or percent | `limits.cpu` | This workspace's CPU cap. |
+| `limits.workspaces.<branch>.memory` | size | `limits.memory` | This workspace's memory cap. |
+
+Examples, each written under `limits.workspaces.<branch>`:
+
+```yaml
+cpu: 4
+
+memory: 8G
 ```
 
 ## code_agents (ignored)

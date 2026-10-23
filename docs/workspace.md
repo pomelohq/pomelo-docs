@@ -104,18 +104,34 @@ second name, so they are made **read-only**: a tool that edits one in place
 (hand edits, a patch that is not in the stored copy) fails instead of changing
 it for every workspace. Reinstalling and upgrading packages work as usual.
 
-Some tools generate per-workspace output inside `node_modules`. The store
-never keeps or links these **private folders**, so each workspace's setup
-generates its own writable copy. `.prisma` (written by `prisma generate`) is
-private by default; list more with `modules_private` on the repo in `pom.yml`.
-Each entry is a folder name at the top of `node_modules`:
+Some entries of `node_modules` must stay private to each workspace. List them
+with `modules_private` on the repo in `pom.yml` (or in a preset; a preset's
+list is added to the repo's). Each entry is a name at the top of
+`node_modules`, and what happens depends on the name:
+
+- **Generated folders** - a name starting with `.` (no package name can) is a
+  folder a tool writes in each workspace. The store never keeps or links it, so
+  each workspace's setup generates its own. `.prisma` (written by
+  `prisma generate`) is private by default.
+- **Private packages** - any other name, scoped ones like `@myorg` included,
+  is an installed package. The store keeps it, but each workspace gets a
+  **writable copy** instead of hard links. Use it for a package a tool writes
+  into or copies files out of: `prisma generate` copies runtime files out of
+  `@prisma/client` keeping their mode, so read-only hard links would make the
+  next generate fail. `@prisma` and `prisma` are private by default.
 
 ```yaml
+presets:
+  orm:
+    modules_private: [.generated-client]
 repos:
   api:
+    preset: orm
     setup: [npm install, npx prisma generate]
-    modules_private: [.generated-client]
+    modules_private: ["@myorg"]
 ```
+
+Quote a name that starts with `@`, as YAML requires.
 
 A workspace that gets `node_modules` from the store has no `.prisma` until its
 setup runs `prisma generate`, so keep that step in `setup`. Copies stored
@@ -124,7 +140,12 @@ keeps the workspace's own private folders. Build caches such as `.cache` and
 `.vite` need nothing: each workspace creates its own.
 
 pnpm and Yarn's hard-link and Plug'n'Play modes share packages themselves and
-are left alone.
+are left alone. When a repo has more than one lockfile, the package manager
+its `setup` steps install with decides which one counts (`yarn`,
+`npm ci` / `npm install`, `pnpm install`, `bun install`), then
+`packageManager` in `package.json`, then pnpm, Yarn, npm and Bun in that
+order. A repo with a stray `pnpm-lock.yaml` that installs with `yarn` still
+uses the store.
 
 **Settings > Dev Services > Shared node_modules** turns the store off, picks
 what to do where cloning is not possible (**Hard Links**, **Copy** or **Run
