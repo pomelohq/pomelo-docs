@@ -354,7 +354,7 @@ VM, a homelab box) you can open its workspaces from your laptop's browser
 through a reverse proxy that terminates TLS, with no SSH tunnel:
 `https://web.web.proj-101.dev.example.net`.
 
-Five machine settings, under `proxy` in `~/.config/pomelo/settings.json`,
+Seven machine settings, under `proxy` in `~/.config/pomelo/settings.json`,
 control this. Set them in **Settings > Dev Services > Remote Access** or with
 `pom proxy config`:
 
@@ -365,6 +365,8 @@ control this. Set them in **Settings > Dev Services > Remote Access** or with
 | `proxy.public_scheme` | `http` | The scheme in service URLs. Use `https` when the reverse proxy terminates TLS. |
 | `proxy.public_port` | `0` (the proxy's port) | The port in service URLs. 443 with https (or 80 with http) leaves the port out. |
 | `proxy.trusted_proxies` | `[]` | Addresses or CIDR ranges whose `X-Forwarded-Proto` and `X-Forwarded-Host` the proxy believes. |
+| `proxy.token_env` | `POM_PROXY_TOKEN` | The environment variable holding the token other machines present. The token itself is never stored in settings. |
+| `proxy.allow_unauthenticated` | `false` | Serve a non-loopback `bind` with no token. |
 
 ```bash
 pom proxy config                                   # show them (-o json for scripts)
@@ -374,6 +376,7 @@ pom proxy config set public_scheme https
 pom proxy config set public_port 443
 pom proxy config set trusted_proxies 127.0.0.1     # where the reverse proxy connects from
 pom proxy config reset bind                        # back to the default
+pom proxy token new                                # the token other machines present
 ```
 
 With those settings, `{{web.web.url}}` resolves to
@@ -385,15 +388,59 @@ URLs. Restart those services. A new `bind` or `trusted_proxies` takes effect
 when the proxy restarts: the app restarts its own; stop `pom proxy` and run it
 again.
 
-::: warning No authentication
-The dev-proxy and the relay have no login. Anyone who can reach the bind
-address can open every workspace's services, including its admin pages and
-APIs. Bind a private address only (Tailscale, a LAN you trust), or keep
-loopback and put an authenticating reverse proxy in front. Pomelo never binds
-`0.0.0.0` unless you set it. A non-loopback bind is logged when the proxy
-starts, flagged by `pom doctor` and the app's doctor, and shown on the Dev
-Services page.
-:::
+### The proxy token
+
+When `bind` is not loopback, other machines must present a token, and the
+proxy and the relay refuse to start without one:
+
+```text
+dev proxy: refusing to listen on 100.64.0.10: other machines could open every workspace with no token. ...
+```
+
+`pom proxy token new` makes a random token and keeps it encrypted in pom's
+secrets; `pom proxy token` shows it and `pom proxy token rm` removes it. To
+manage it yourself, put it in `POM_PROXY_TOKEN` (or the variable
+`proxy.token_env` names) where the app or `pom proxy` starts; the variable wins
+over the kept token. A token is at least 16 characters of letters, digits,
+`-`, `_`, `.` and `~`. Restart the proxy after changing it.
+
+Requests from the machine itself (loopback, or one of its own addresses) need
+no token, so `pom`, services and a reverse proxy on the same machine work as
+before. From anywhere else:
+
+- **A browser** opens a link once with the token added:
+  `https://web.web.proj-101.dev.example.net/?pom_token=<token>`. The proxy
+  answers with a redirect to the same page without it and sets an HttpOnly
+  `pom_token` cookie for the whole `proxy.domain` (`Secure` under https,
+  `SameSite=Lax`, 30 days), so every service host opens after that.
+- **A script** sends the `X-Pom-Token: <token>` header.
+- **A webhook provider** posting to the relay gets the token in the URL it
+  is given: `https://hooks.dev.example.net/api/server/stripe?pom_token=<token>`.
+  `/_pom/github` needs no token: it checks GitHub's signature instead.
+
+The token is taken out of the header, cookie and query before a request goes
+on, so services and the Dev Requests tab never see it.
+
+`pom proxy config set allow_unauthenticated true` serves a non-loopback bind
+with no token. Anyone who can reach the address then opens every workspace's
+services, including admin pages and APIs, so use it only on a network you
+trust. `pom doctor` and the app's doctor report a bind that will not start,
+and warn while the flag is on with no token.
+
+### Requests the proxy refuses
+
+- **Other host names.** The proxy answers only `*.localhost`, hosts under
+  `proxy.domain`, loopback addresses and the bind address. A request for any
+  other name gets `421`, so a web page whose own name resolves to your
+  machine (DNS rebinding) cannot read your workspaces.
+- **Web pages calling pom.** Paths under `/_pom/` belong to pom and never
+  reach a service. They, and every request to the relay, refuse a request
+  another web page makes (`Sec-Fetch-Site: cross-site` or `same-site`, or an
+  `Origin` other than the request's own host) with `403`. `pom proxy fault`
+  and webhook providers send neither, so they work as before.
+
+Requests to your services are not checked beyond the host name: their own
+CSRF protection applies as it would in production.
 
 ### Forwarded headers
 
