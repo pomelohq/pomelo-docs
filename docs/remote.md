@@ -120,19 +120,15 @@ The window of a remote project shows:
 - The host before the project name in the title bar, its server icon wearing a dot for the connection:
   green connected, yellow reconnecting, red disconnected. Click it to pick another project on that host.
 - The host's workspaces in the WORKSPACES list, with how many services each runs. Pick one to look at it.
-- The workspace's files in the file tree and the editor, read only, when the host's `pom server` reads
-  files: see [Files on a remote project](#files-on-a-remote-project). With an older server, a page takes the
-  editor's place instead:
-- A page in place of the editor. Under the project name, one line says how the connection is: connected
-  (and when it last answered), connecting, reconnecting, or disconnected with SSH's reason and a
-  **Reconnect** button. What was read before stays on screen while the host is away. See
-  [When the connection drops](#when-the-connection-drops).
-- A card with the host and its address, the workspace and its folder there, what runs here (terminals,
-  services and agents) and what stays on the host (the editor, files and Git, which **Open in Editor**
-  reaches over SSH).
-- The workspace's services by repo, with **Start**, **Stop**, **Restart** and their recent output, the
-  shared services, and the workspace's agents with their state; click an agent to read its last turn (or, with
-  terminals, to open it).
+- The Files and Services panels in the left dock and the tabs in the middle, as for a local project: see
+  [Files on a remote project](#files-on-a-remote-project) and
+  [Services on a remote project](#services-on-a-remote-project). Agents are in the agent dock.
+- While no tab is open, the middle says where the host stands. Under the project name, one line says how the
+  connection is: connected (and when it last answered), connecting, reconnecting, or disconnected with SSH's
+  reason and a **Reconnect** button; a banner says when the host's `pom` needs updating. A card gives the host
+  and its address, the workspace and its folder there, what runs here (terminals, services and agents) and
+  what stays on the host, with **Open in Editor**. What was read before stays on screen while the host is
+  away. See [When the connection drops](#when-the-connection-drops).
 
 ### Live updates
 
@@ -142,8 +138,7 @@ the workspace list, the services, the agents and the last turn you are reading o
 changed. A change on the host shows within about a second; nothing crosses the connection while nothing
 changes. The app still reads everything in full every 30 seconds, in case an update went missing.
 
-A service's output that you read in the Services panel streams in as the service prints it (the last 400
-lines stay on screen). When the service restarts, the output goes on from the new run after a
+A service's output that you read in its tab streams in as the service prints it. When the service restarts, the output goes on from the new run after a
 `--- api/web restarted ---` line; a stopped service shows what it printed last, and its output comes in again
 once it starts. Reading output never stops or slows the service: a reader that falls far behind skips ahead
 to the last 1 MiB, as a terminal does.
@@ -164,9 +159,8 @@ worktree in an editor that works over SSH.
 ### Files on a remote project
 
 When the host's `pom server` reads files, the window shows the shown workspace's files as it shows a local
-project's: the file tree on the left (the Files panel) and the editor in the middle. The Services panel
-moves off the page to the same place: switch between the two with their buttons at the left of the status
-bar. The files stay on the host; the app reads them through the same SSH session.
+project's: the file tree on the left (the Files panel) and the editor in the middle. Switch between the Files
+and Services panels with their buttons at the left of the status bar. The files stay on the host; the app reads them through the same SSH session.
 
 - **The tree** fills in as the host walks the workspace, and then follows it: a file an agent or a shell
   creates, changes or deletes on the host shows within about a second. Like on the laptop, `.git`,
@@ -186,8 +180,49 @@ The server reads only inside the workspace: a path with `..`, an absolute path, 
 leads out of the workspace are refused, and so is anything that is not a regular file or folder. The server
 log keeps the method and the size of each read, never a path or a file's contents.
 
-A host whose `pom` predates reading files keeps the page, with a banner that says so and
+On a host whose `pom` predates reading files the Files panel stays empty, and the middle says so with
 **Update pom on dev** (see [Updating pom on the host](#updating-pom-on-the-host)).
+
+### Services on a remote project
+
+The Services panel is in the left dock and a service opens in a tab in the middle, as for a local project, with
+the same controls; the server on the host answers them, reading the workspace there exactly as the app reads a
+local one:
+
+- **The panel.** The summary of what runs, with **Start all**, **Stop all** and **Restart failed**; what needs
+  attention (a crash with its telling line, a port in use); the services by repo with their pips, ports,
+  modes and uptimes; the shared services at the bottom with the repos that use them; the name filter and
+  the All, Running, Failed and Stopped filters; the keyboard and the right-click menus.
+- **Actions.** Start, stop, restart and **Use a New Port...** run on the host and the panel waits for them as
+  it does locally. Stopping a shared service asks first while other workspaces' services run.
+- **A service's tab.** Its facts card (status, PID, URL, port, env profile, env file, mode, command), the
+  mode and env profile pickers, which apply from the next start and restart a running service, and its
+  output, streamed as it prints (with a separator when it restarts). While it runs, typing goes to its
+  console on the host, as locally. A shared service's tab shows its last 200 lines, read again every few
+  seconds.
+- **Open in Browser** goes through the host's dev proxy once it is forwarded here (see [Ports](#ports)).
+  Before that, the URL shown is the host's, and opening it says it answers on the host only. A host whose
+  dev proxy has a public address (`proxy.domain` in its settings) opens at that address directly.
+- **Shared services' addresses.** A shared service forwarded here shows its port here, in the panel and in
+  its tab's connection string.
+- **Run Task.** A repo's commands (its `shortcuts`) run on the host, in the repo's worktree with the
+  workspace's env, as a card in the WORKSPACES list with the command's output and how it exited.
+- **Ports.** The arrow button at the top of the panel opens the [Ports](#ports) tab.
+- **Changes on the host** (a service started by `pom` there, an agent restarting one) show within about a
+  second, pushed by the server.
+
+What differs from a local project:
+
+- **Fix with Claude** and **Ask Claude About This Service** are left out: agents run on the host, so start
+  one in the agent dock.
+- The **Secrets** and **Environment** tabs are not in the panel; read a repo's env with `pom -H dev env ls api`
+  instead.
+- **Dev Requests** and the node_modules **Store** show this machine.
+- A mode picked for a service lasts while the host's `pom server` runs, as one picked locally lasts while
+  the app runs.
+- A host whose `pom` predates this panel shows **Services need a newer pom on dev; update it there**, and a
+  control its server does not offer yet is left out (see
+  [Updating pom on the host](#updating-pom-on-the-host)).
 
 ### Creating, sleeping and waking workspaces
 
@@ -224,9 +259,9 @@ has terminals, and they run on the host:
 
 - **Terminal tabs.** A new tab starts your login shell on the host, in the shown workspace's worktree. Typing,
   resizing, splitting and the find bar work as on the laptop; each keystroke goes out on its own, at once.
-- **Service output.** The terminal button of a running service opens its live output in a terminal tab, the
-  same holder the service runs in on the host.
-- **Agents.** Clicking an agent in the Services panel opens its session in the agent dock. See
+- **Service output.** A running service's tab types into its console on the host, the same holder the
+  service runs in there.
+- **Agents.** The agent dock opens the workspace's agents on the host. See
   [Agents on a remote project](#agents-on-a-remote-project).
 
 A connection holds more than 40 terminals at once: they share one channel for their exits.
@@ -295,7 +330,7 @@ agents on the laptop:
   drove it gets it back with `pom agent release` on the host.
 - **Approvals.** A tool call that waits for an approval shows over the tab with **Allow** and **Deny**,
   answered on the host as if you answered there.
-- **Live state.** The agent's dot in the WORKSPACES list, its state in the Services panel and its last turn
+- **Live state.** The agent's dot in the WORKSPACES list, its state in the agent dock and its last turn
   come with the live updates, so a turn that ends shows within a second.
 - **Tabs come back.** The agent tabs you had open are kept per host, project and workspace. Opening the
   project again, or picking the workspace again, attaches them to their agents; an agent that stopped
