@@ -117,10 +117,16 @@ there.
 
 The window of a remote project shows:
 
+- The host before the project name in the title bar, its server icon wearing a dot for the connection:
+  green connected, yellow reconnecting, red disconnected. Click it to pick another project on that host.
 - The host's workspaces in the WORKSPACES list, with how many services each runs. Pick one to look at it.
-- A line with the connection: connected (and when it last answered), connecting, reconnecting, or
-  disconnected with SSH's reason and a **Reconnect** button. What was read before stays on screen while the
-  host is away. See [When the connection drops](#when-the-connection-drops).
+- A page in place of the editor. Under the project name, one line says how the connection is: connected
+  (and when it last answered), connecting, reconnecting, or disconnected with SSH's reason and a
+  **Reconnect** button. What was read before stays on screen while the host is away. See
+  [When the connection drops](#when-the-connection-drops).
+- A card with the host and its address, the workspace and its folder there, what runs here (terminals,
+  services and agents) and what stays on the host (the editor, files and Git, which **Open in Editor**
+  reaches over SSH).
 - The workspace's services by repo, with **Start**, **Stop**, **Restart** and their recent output, the
   shared services, and the workspace's agents with their state; click an agent to read its last turn (or, with
   terminals, to open it).
@@ -139,13 +145,13 @@ lines stay on screen). When the service restarts, the output goes on from the ne
 once it starts. Reading output never stops or slows the service: a reader that falls far behind skips ahead
 to the last 1 MiB, as a terminal does.
 
-All of it goes over one SSH session; the connection line ends in **via server**. Updates stop while the
+All of it goes over one SSH session; the page says **Connected via pom server**. Updates stop while the
 window is minimized, covered or on another Space, and start again with a full read when it shows.
 
 A host whose `pom` has an older server without live updates is asked again every 2.5 seconds instead, and a
 server without live output is asked for the service's recent output every 2.5 seconds while you read it. When
 the host's `pom` has no server at all, every look is a short `pom ... --json` over the shared connection, the
-line says **via ssh**, and the page says why (for example "update pom on the VM to get terminals"). If the
+page says **Connected over ssh** and why (for example "update pom on the VM to get terminals"). If the
 host's `pom` is on another minor version than the app, the page says so too, with a button to update it: see
 [Updating pom on the host](#updating-pom-on-the-host).
 
@@ -218,8 +224,8 @@ The app notices a dropped connection at once when SSH or the network says so, an
 host just stops answering (a laptop lid closed, Wi-Fi gone). It then reconnects on its own, as the same app,
 and nothing on the host stops meanwhile:
 
-- **Reconnecting.** The connection line, and a yellow strip over each remote terminal, say "Lost connection
-  to dev. Reconnecting..." with the next attempt. Attempts come after 0.5, 1, 2, 4, 8 and 15 seconds (give or
+- **Reconnecting.** The page's connection line says "Lost connection. Reconnecting..." with the next attempt,
+  and the host's dot in the title bar turns yellow. Terminals keep their screen as it was. Attempts come after 0.5, 1, 2, 4, 8 and 15 seconds (give or
   take a fifth), and at once when the window comes to the front or the laptop wakes from sleep. What you type
   while it reconnects is not sent later: the terminal refuses it, so nothing lands in a shell by surprise.
 - **Back.** Each terminal carries on from the last byte it showed: no output is lost and none comes twice. A
@@ -227,8 +233,8 @@ and nothing on the host stops meanwhile:
   goes on where it stopped (with a `--- api/web restarted ---` line if the service restarted meanwhile), the
   live updates send every value again, and a workspace job's card picks up at its last step. A terminal that
   was gone longer than its 1 MiB of recent output clears and shows the last 1 MiB.
-- **Disconnected.** After the last attempt the line and the strips turn red with **Reconnect** (on the page)
-  and **Retry** (on a terminal). The screen stays as it was until you retry.
+- **Disconnected.** After the last attempt the line and the host's dot turn red, and the page offers
+  **Reconnect**, which reconnects the page and every terminal. The screens stay as they were until then.
 
 The server keeps what it needs to carry a client's terminals and streams on for 10 minutes after the client
 went (`retained` in `pom server status --json`). A shell whose command ended while you were away shows as
