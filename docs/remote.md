@@ -304,6 +304,57 @@ agents on the laptop:
 Closing an agent's tab leaves the agent running on the host, unless `agent_tab_close` is `"stop"` in your
 settings: then it stops the agent there, as it does on the laptop.
 
+## Ports
+
+A remote project's services listen on the host, not on the laptop. The app opens them on the laptop for you,
+on `127.0.0.1` only, through the SSH connection it already has to the host (an `ssh -L` forward). Nothing
+opens a port on the host, and nothing listens on the laptop's network.
+
+**Workspace addresses.** The dev proxy in the app (`*.localhost:8767`) stays the one address for every
+project, local and remote. The app forwards the host's dev proxy to a private port on the laptop, and the
+laptop's dev proxy sends each request for a remote project's workspace there, with its `Host` header as it
+came. So `http://web.web.feat-login.localhost:8767` opens a remote workspace's service exactly as it would a
+local one, and the remote project's own service URLs, cookies and `/_pom_dev/` paths work unchanged. The
+host's dev proxy must be running there; `pom start` on the host starts it.
+
+When a local project and a remote project both have a workspace with the same address (both have `main`, say),
+the local one wins. Put the host's name after the workspace to reach the remote one:
+`http://web.web.main.dev.localhost:8767` goes to `dev`, which gets `web.web.main.localhost:8767`.
+
+**Shared services.** The shared services of the shown workspace (Postgres, Redis, MinIO and any other shared
+service with a port) are forwarded as soon as they run, on the same port number when it is free on the laptop.
+When it is taken (a local Postgres on 5432, say), the forward takes the next free port and says so: "port 5432
+is in use on this machine, so it is on 5433". Connect from the laptop to `127.0.0.1:<port>` with the
+credentials the host's env files give. When a forwarded shared service starts answering, the app says once
+"postgres on dev is reachable here at 127.0.0.1:5432".
+
+**The Ports tab.** **Ports** in the command palette opens the window's Ports tab: each forward with its port on
+the host, its address here, what it is and its state, with **Open in browser**, **Copy** (the address) and
+**Stop**. The field at the top forwards any other port of the host: `9229` takes the same number here when
+free, `8080:18080` takes exactly `18080` and fails when that is in use. The line on the right says where the
+workspace addresses go.
+
+**Reconnects.** When the connection drops, forwards wait ("Reconnecting") and are opened again on the same
+ports once the app is back on the host.
+
+**Only while the app runs.** Forwards belong to the window: closing the window or quitting the app stops them.
+There is no background process on the laptop.
+
+From a terminal:
+
+```sh
+pom -H dev forward 5432          # 127.0.0.1:5432 here (or the next free port) until Ctrl-C
+pom -H dev forward 8080:18080    # exactly 127.0.0.1:18080
+pom host ports dev               # what the app and pom -H dev forward forward now
+pom host ports dev --json
+```
+
+`pom -H <host> forward` uses the app's SSH connection to the host when one is open, else a connection of its
+own, and stops the forward on Ctrl-C. `pom host ports <host> --json` prints `{"schema": "pom.ports/v1",
+"host": ..., "records": [...]}`: one record per app window (its `project`) or `pom -H <host> forward`, each with
+its `forwards` (`remote_port`, `local_port`, `wanted_port`, `label`, `kind` `gateway`, `shared` or `manual`,
+`state` `forwarded`, `starting`, `lost` or `failed`, and `message`).
+
 ## pom server
 
 `pom server` is a long-lived `pom` process on the host that answers the app. The app starts it on demand:
@@ -428,5 +479,8 @@ port, add a `Host` entry with its `Port` to `~/.ssh/config` and use that alias i
 - `pom is not installed on dev`: install it in `~/.local/bin`, or set `--pom-path` with `pom host add`.
 - A version warning: **Update pom on dev** on the project's page installs the app's version there, or update
   `pom` on the older side by hand; both should be on the same minor version.
+- A remote workspace address answers with "backend not reachable": the host's dev proxy does not run there.
+  `pom start` in a workspace on the host starts it with the services; `pom host ports dev` shows the forward
+  to it.
 - The page says it reads over SSH: update `pom` on the host (`pom host test dev` shows its version). On the
   host, `pom server status`, `pom doctor` and the server log say whether a server runs and what it served.
