@@ -158,7 +158,7 @@ host's `pom` is on another minor version than the app, the page says so too, wit
 
 ### Git on a remote project
 
-When the host runs `pom server`, a workspace other than main has the [Git panel](/git#the-git-panel). It is
+When the host runs `pom server`, a workspace other than main has the [Git panel](./git#the-git-panel). It is
 the same panel as for a local project, and git runs on the host:
 
 - The panel shows each repo's changes, the Remote tab and History. It updates within a few seconds of a
