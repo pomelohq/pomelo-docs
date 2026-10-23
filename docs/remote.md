@@ -122,9 +122,10 @@ The window of a remote project shows:
 - The host before the project name in the title bar, its server icon wearing a dot for the connection:
   green connected, yellow reconnecting, red disconnected. Click it to pick another project on that host.
 - The host's workspaces in the WORKSPACES list, with how many services each runs. Pick one to look at it.
-- The Files and Services panels in the left dock and the tabs in the middle, as for a local project: see
-  [Files on a remote project](#files-on-a-remote-project) and
-  [Services on a remote project](#services-on-a-remote-project). Agents are in the agent dock.
+- The Files, Services and Git panels in the left dock and the tabs in the middle, as for a local project: see
+  [Files on a remote project](#files-on-a-remote-project),
+  [Services on a remote project](#services-on-a-remote-project) and
+  [Git on a remote project](#git-on-a-remote-project). Agents are in the agent dock.
 - While no tab is open, the middle says where the host stands. Under the project name, one line says how the
   connection is: connected (and when it last answered), connecting, reconnecting, or disconnected with SSH's
   reason and a **Reconnect** button; a banner says when the host's `pom` needs updating. A card gives the host
@@ -155,8 +156,31 @@ page says **Connected over ssh** and why (for example "update pom on the VM to g
 host's `pom` is on another minor version than the app, the page says so too, with a button to update it: see
 [Updating pom on the host](#updating-pom-on-the-host).
 
-Git still needs the project's files on the laptop, so a remote project does not offer it yet: open the
-worktree in an editor that works over SSH.
+### Git on a remote project
+
+When the host runs `pom server`, a workspace other than main has the [Git panel](./git#the-git-panel). It is
+the same panel as for a local project, and git runs on the host:
+
+- The panel shows each repo's changes, the Remote tab and History. It updates within a few seconds of a
+  change on the host, while the panel is open.
+- Stage, unstage, discard, stash and commit work as they do locally. So do the branch menu (keep, switch,
+  use another branch, fetch) and the branch diff.
+- **Fetch**, **Pull** and **Push** run on the host as jobs, and the panel's footer shows git's progress
+  while they run.
+- Pull requests show in the panel and on the workspace rows. The app asks GitHub from the laptop with the
+  token kept on the laptop: the `github` secret of the project on that host (`myproject@dev`), or else that
+  of the local project of the same name.
+
+Git on the host signs in with the host's own credentials: its SSH keys, its ssh-agent and its git
+credential helper. The laptop's keys and tokens are never passed to it. When a push or a fetch cannot sign
+in, the panel says so. Run `pom doctor` on the host to see which repos it cannot sign in to and how to
+give the host a key or a token (see [Checking it with pom doctor](#checking-it-with-pom-doctor)).
+
+Staging part of a file and resolving conflicts in the editor are not available on a remote project yet;
+use a terminal on the host for those. When the host's `pom` predates the remote Git panel, the panel says
+"pom 0.9.6 on dev cannot show its repos here. Update pom there to use Git in this window." See
+[Updating pom on the host](#updating-pom-on-the-host). When the host has no `pom server`, the panel says
+that Git needs it there.
 
 ### Files on a remote project
 
@@ -566,6 +590,16 @@ On a host that runs or ran `pom server`, `pom doctor` adds:
 - a warning, with the `kill` to stop it, for a server of an older `pom` version that still runs, and one for a
   newer server than the `pom` you ran;
 - a warning when lingering is off while the server or its unit is in use (Linux only).
+
+On any machine with a project, `pom doctor` also asks each repo's `origin` for its HEAD, the way a fetch
+signs in, without prompting. It reports an error for each repo whose origin refuses the machine's
+credentials, with what to set up:
+
+- for an SSH remote, a key the git host accepts (add `~/.ssh/id_ed25519.pub` to your account or as a
+  deploy key, or load it in ssh-agent);
+- for an HTTPS remote, a credential helper (`gh auth login` then `gh auth setup-git`).
+
+It warns about an origin it cannot reach. `pom doctor --quick` skips this check.
 
 ## Updating pom on the host
 
