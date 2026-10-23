@@ -167,6 +167,10 @@ and Services panels with their buttons at the left of the status bar. The files 
 - **The tree** fills in as the host walks the workspace, and then follows it: a file an agent or a shell
   creates, changes or deletes on the host shows within about a second. Like on the laptop, `.git`,
   `node_modules`, `target`, `.pom` and `.ddata` folders are left out.
+- **Gitignored folders** (build output such as `.next`, `dist` or `coverage`) are listed in the tree, but the
+  host reads what is inside one only when you open it, one level at a time, so a large build folder does not
+  slow the tree down. Once open, it follows changes like the rest of the tree. A host whose `pom` is older
+  sends every folder's contents up front.
 - **Opening a file** reads it from the host. Text opens with its highlighting and edits like a local file.
   Images open as on the laptop. A file larger than 64 MiB does not open: its tab says why and offers
   **Open in terminal**, which opens a terminal tab on the host paging through it with `less`.
