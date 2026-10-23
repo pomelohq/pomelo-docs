@@ -8,7 +8,7 @@ import HeroWindow from './app/HeroWindow.vue'
     <div class="og-text">
       <div class="og-brand"><img src="/logo.png" alt="" />Pomelo</div>
       <h1>Every branch gets<br>its own running stack.</h1>
-      <p>Worktrees, services and databases per branch, with your AI agents next to them. Free and open source for macOS.</p>
+      <p>Worktrees, services and databases per branch, with your AI agents next to them. Free and open source for macOS and Linux.</p>
     </div>
     <div class="og-shot"><HeroWindow /></div>
   </div>

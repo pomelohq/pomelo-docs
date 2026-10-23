@@ -253,15 +253,17 @@ Without `--id` it answers whatever waits now; with it, an id that no longer wait
 | `answer_by` | When | How |
 |---|---|---|
 | `hook` | An orchestrator or an agent holds the lease: nobody is at the terminal. | Pomelo holds the prompt in the agent's permission hook and hands it the answer. A deny `--reason` is told to the agent, which carries on. The holder of the lease answers. |
-| `terminal` | A person drives, or the hook stopped holding the prompt. | The agent's dialog is on screen and Pomelo types the answer into it. A client of that person passes `--as-person`. |
+| `terminal` | A person drives, or the hook stopped holding the prompt. | The agent's dialog is on screen. Pomelo can only deny it from there; an allow is given at the terminal. A client of that person passes `--as-person`. |
 | `policy` | The workspace policy answered ask. | As `approve` (once) or a policy deny. |
 
 - **Held prompts.** Pomelo holds a prompt for up to 30 minutes. If a person takes the session over (in the
   app or with `takeover`) it lets go at once, and the dialog shows in the terminal as usual.
-- **Typing into the dialog.** Pomelo checks the screen first. It presses Enter only while the plain
-  **1. Yes** is highlighted, never a "don't ask again" choice; if someone moved the highlight, answer in the
-  terminal. A deny is the dialog's own Esc, which also stops the turn: the session goes `idle` with reason
-  `interrupted`, and `--reason` is not passed on. Pomelo then checks the dialog closed.
+- **Typing into the dialog.** Pomelo never types an allow: an allow for a dialog on screen is refused
+  with error `allow_needs_hook`, so allow it at the terminal (in Pomelo, or after `takeover`). A deny is the
+  dialog's own Esc, sent only while no person drives the session and a fresh read right before the key
+  still shows that prompt. It also stops the turn: the session goes `idle` with reason `interrupted`, and
+  `--reason` is not passed on. Pomelo then checks the dialog closed. Each key sent or held back is written
+  to the workspace log as a `screen_fallback` event.
 - **At the terminal** nothing changes: a person answers the dialog with the keyboard, and the prompt clears
   once the tool runs or the turn moves on.
 - **`approve`** keeps its meaning (a policy ask, with `--always` for a person). `deny <handle> <request>`
