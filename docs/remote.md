@@ -67,7 +67,9 @@ pom -H dev -c pom/myproject/pom.yml agent ls feat-login --json
 - **Which project.** On the host, `pom` starts in your home folder, so name the project's `pom.yml` with
   `-c`: relative to that home folder (`pom/myproject/pom.yml`) or in full. Do not use `~` there: your own
   shell would turn it into the laptop's home. `pom -H dev project ls --json` lists the projects the host
-  knows, each with its `config` path.
+  knows, each with its `config` path. A project made on the host with the CLI (`pom init`, `pom onboard
+  --new`, `pom project import`) is listed as soon as it exists, and one whose `pom.yml` you wrote by hand is
+  listed the first time any `pom` command runs in it (`pom ws create`, `pom start`, ...).
 - **Output and exit code pass through.** stdout and stdin are the remote command's, stderr is relayed, and
   the exit code is the one `pom` returned there. With `--json`, the JSON is exactly what the host printed,
   so a script or an orchestrator can call `pom -H dev ... --json` as it calls `pom ... --json` locally.
