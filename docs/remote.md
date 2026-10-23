@@ -301,6 +301,29 @@ Renaming or deleting a workspace, and the other items of a local workspace's men
 now: `pom -H dev -c ... ws rename <branch> <name>` or `ws delete <branch>`. With a `pom` on the host that
 predates jobs, the app says to update it, and `pom -H dev -c ... ws create <branch>` works as before.
 
+### Jira on a remote project
+
+A remote project reads Jira the way a local one does: the ticket status on each workspace row, **Open Ticket**
+in a workspace's right-click menu, and the ticket picker of the new-workspace form. Whose settings it uses:
+
+1. **The host's.** When the project has Jira set up on the host (its site, email and API token, kept there per
+   project), the host asks Jira and the app only gets the answers: the token never leaves the host.
+2. **This laptop's for that remote project.** Otherwise, the settings this laptop keeps for the project on
+   that host (`myproject@dev`), asked from the laptop.
+3. **This laptop's for the local project of the same name.** Otherwise those, asked from the laptop.
+
+The app looks again each minute, so Jira set up on the host while the window is open takes over within a
+minute.
+
+**Settings > Integrations**, opened from the window of a remote project, edits that project's Jira settings
+on the host; a **Kept On** row names the host. With a `pom` on the host from before this, they are kept on
+the laptop for the project on that host, and the row says to update `pom` there to keep them on the host.
+**Keep Main Fresh** is not shown there: main is refreshed on the host.
+
+**Settings > Project** lists the repositories main has on the host and how many workspaces have each. Its
+repositories and `pom.yml` are changed on the host: edit `pom.yml` from main in the Files panel, then
+`pom -H dev apply <workspace>` checks out the repos it adds.
+
 ## Terminals on a remote project
 
 When the host runs `pom server` (the connection line says **via server**), the window of a remote project
@@ -384,6 +407,11 @@ agents on the laptop:
 - **Tabs come back.** The agent tabs you had open are kept per host, project and workspace. Opening the
   project again, or picking the workspace again, attaches them to their agents; an agent that stopped
   meanwhile gets no tab.
+
+The Claude chip in the title bar and today's cost in the status bar are the host's: the Claude account the
+agents there run under, its 5-hour and weekly limits, and what the project's agents cost since midnight on
+the laptop. The host reads them and keeps its credentials; its card's note starts with the host's name. With
+a `pom` on the host from before this, the window shows no chip and no cost rather than the laptop's.
 
 Closing an agent's tab leaves the agent running on the host, unless `agent_tab_close` is `"stop"` in your
 settings: then it stops the agent there, as it does on the laptop.
