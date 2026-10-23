@@ -120,6 +120,9 @@ The window of a remote project shows:
 - The host before the project name in the title bar, its server icon wearing a dot for the connection:
   green connected, yellow reconnecting, red disconnected. Click it to pick another project on that host.
 - The host's workspaces in the WORKSPACES list, with how many services each runs. Pick one to look at it.
+- The workspace's files in the file tree and the editor, read only, when the host's `pom server` reads
+  files: see [Files on a remote project](#files-on-a-remote-project). With an older server, a page takes the
+  editor's place instead:
 - A page in place of the editor. Under the project name, one line says how the connection is: connected
   (and when it last answered), connecting, reconnecting, or disconnected with SSH's reason and a
   **Reconnect** button. What was read before stays on screen while the host is away. See
@@ -155,8 +158,36 @@ page says **Connected over ssh** and why (for example "update pom on the VM to g
 host's `pom` is on another minor version than the app, the page says so too, with a button to update it: see
 [Updating pom on the host](#updating-pom-on-the-host).
 
-The editor, the file tree and Git need the project's files on the laptop, so a remote project does not
-offer them: open the worktree in an editor that works over SSH.
+Git still needs the project's files on the laptop, so a remote project does not offer it yet: open the
+worktree in an editor that works over SSH.
+
+### Files on a remote project
+
+When the host's `pom server` reads files, the window shows the shown workspace's files as it shows a local
+project's: the file tree on the left (the Files panel) and the editor in the middle. The Services panel
+moves off the page to the same place: switch between the two with their buttons at the left of the status
+bar. The files stay on the host; the app reads them through the same SSH session.
+
+- **The tree** fills in as the host walks the workspace, and then follows it: a file an agent or a shell
+  creates, changes or deletes on the host shows within about a second. Like on the laptop, `.git`,
+  `node_modules`, `target`, `.pom` and `.ddata` folders are left out.
+- **Opening a file** reads it from the host. Text opens with its highlighting, read only: its tab wears a
+  lock and the status bar says **Read only**. Images open as on the laptop. A file larger than 64 MiB does
+  not open; read it in a terminal tab instead (`less`).
+- **Changes on the host.** When a file you have open changes on the host, for example because an agent
+  edited it, its tab shows the new text.
+- **Go to File** (`cmd-p`) lists the workspace's files from the host, gitignored ones on request.
+
+Read only for now: saving, the file tree's New, Rename, Delete and the other changes, Find in Files and
+language servers are not available on a remote project yet. Edit on the host from a terminal tab, or with
+**Open in Editor**.
+
+The server reads only inside the workspace: a path with `..`, an absolute path, and a symlink that
+leads out of the workspace are refused, and so is anything that is not a regular file or folder. The server
+log keeps the method and the size of each read, never a path or a file's contents.
+
+A host whose `pom` predates reading files keeps the page, with a banner that says so and
+**Update pom on dev** (see [Updating pom on the host](#updating-pom-on-the-host)).
 
 ### Creating, sleeping and waking workspaces
 
@@ -297,7 +328,7 @@ pom server run             # start one in the background yourself
   exit, stops none of them.
 - **Log.** `$XDG_STATE_HOME/pom/server/<version>.log` (else `~/.local/state/pom/server/`), rotated at 5 MiB
   with one `.log.1` kept. It records connections and each request's method, size, duration and result,
-  never what a request or an answer carried: no service output and no job steps.
+  never what a request or an answer carried: no service output, no job steps, no file paths or contents.
 - **Settings.** Three keys under `server` in `~/.config/pomelo/settings.json` tune it, each read on the
   machine it names:
 
