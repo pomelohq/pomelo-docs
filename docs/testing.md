@@ -187,13 +187,52 @@ A worker service can name the queue it drains:
 ```yaml
       worker:
         cmd: bundle exec sidekiq
-        queue: { kind: sidekiq }               # or { kind: bullmq, prefix: bull, queues: [emails] }
+        queue: { kind: sidekiq }               # or { kind: bullmq, prefix: bull, queues: [emails], redis: redis }
 ```
 
+`kind: bullmq` (or `bull`) covers BullMQ and Bull v3/v4. Without `queues`, every queue under the prefix is
+found from any of its keys (`<prefix>:<queue>:wait`, `:active`, `:delayed`, `:id`, `:meta`, `:repeat`, ...), so a
+Bull v4 queue with no `meta` key is found too. Keys are read with `SCAN`, never `KEYS`.
+
 `pom queue wait-idle api/worker [--timeout 60s]` waits until the queue holds no work, in the workspace's own Redis
-slot. No work means nothing waiting, nothing running, and no scheduled or retried job already due; for BullMQ, no
-delayed or prioritized job either. It checks twice, 200 ms apart, before it calls the queue idle. It exits 0
-when idle, or 2 when still busy, with the counts. `pom queue counts api/worker` prints them once.
+slot. Work means a job waiting, running, prioritized, or delayed (scheduled, retried) whose time has come. A job
+delayed until later and the next run of a repeatable (cron) job do not count, so a worker with a cron still goes
+idle. It checks twice, 200 ms apart, before it calls the queue idle. It exits 0 when idle, or 2 when still busy,
+with the counts. `pom queue counts api/worker` prints them once.
+
+**Which Redis.** You do not need `queue.redis`: the queue uses the shared Redis that the service's or repo's env
+points at (`{{shared.<name>.url}}`, `.host`, `.port`, `.slot`), else the repo's only shared Redis. The database is
+the one the env names: `{{shared.<name>.slot}}`, the number at the end of a `redis://.../2` URL, or a `REDIS_DB`
+next to it; a `redis://` URL without one is database 0. When the env points at several Redis, the one named by the
+service's own env, or by a variable whose name has SIDEKIQ, BULL, QUEUE, JOB or WORKER in it, or by `REDIS_URL`
+wins; if that still leaves more than one, the command lists them and asks for `--redis <name>`. `queue.redis` and
+`--redis` always win.
+
+With `-o json` both commands print:
+
+```json
+{
+  "schema": "pom.queue/v2",
+  "service": "api/worker",
+  "idle": true,
+  "total": 0,
+  "counts": {
+    "waiting": { "emails": 0 },
+    "active": 0,
+    "delayed_due": 0,
+    "delayed_future": 2,
+    "prioritized": 0,
+    "repeat_scheduled": 1,
+    "repeatable": 1,
+    "paused": 0,
+    "waiting_children": 0
+  },
+  "redis": { "name": "redis", "port": 6379, "database": 3, "reason": "env REDIS_URL" }
+}
+```
+
+`total` is what `wait-idle` waits on: `waiting`, `active`, `delayed_due` and `prioritized`. The others are shown
+but never keep the queue busy.
 
 ## Failing a backend on purpose
 
