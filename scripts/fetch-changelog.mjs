@@ -15,6 +15,11 @@ try {
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   let md = await res.text()
   md = md.replace(/\(#(\d+)\)/g, `([#$1](${REPO}/pull/$1))`)
+  // Vue compiles the page, so a bare <host> outside code would read as an unclosed tag.
+  md = md
+    .split('\n')
+    .map((line) => line.split('`').map((part, index) => (index % 2 ? part : part.replace(/</g, '&lt;'))).join('`'))
+    .join('\n')
   md = md.replace(/\n## \[/, `\n${NOTE}## [`)
   await writeFile(OUT, md)
   console.log('changelog synced from', RAW)
