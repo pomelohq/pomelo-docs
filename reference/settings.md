@@ -12,6 +12,9 @@ survives.
 Nested keys are written with dots here: `completions.lsp` is
 `{"completions": {"lsp": true}}` in the file.
 
+The keys under [Remote hosts](#remote-hosts) are on no page: set them in
+settings.json, on the machine each one says.
+
 The keys under [Kept by the app](#kept-by-the-app) record how you left the
 window; they change as you use it and rarely need editing by hand.
 
@@ -78,6 +81,7 @@ window; they change as you use it and rarely need editing by hand.
 | `soft_wrap` | `false` | Newly opened files wrap long lines at the editor's width. |
 | `split_diff` | `true` | Diffs open side by side when the pane is wide enough, else in one column. |
 | `external_editor` | `""` | The app "Open in External Editor" uses; empty picks the first one installed. |
+| `remote_editor` | `""` | The command "Open in Editor" runs for a project on another machine, with `{host}` (user@host[:port] from hosts.json), `{path}` (the worktree there) and `{url}` (`ssh://{host}/{path}`) filled in; empty runs `zed {url}` if `zed` is installed, else `code --remote ssh-remote+{host} {path}`. |
 
 ## Languages & Tools
 
@@ -132,9 +136,14 @@ window; they change as you use it and rarely need editing by hand.
 | Key | Default | Description |
 | --- | --- | --- |
 | `dev_proxy_enabled` | `true` | Run the dev proxy while a project is open. |
-| `dev_proxy_port` | `8767` | The dev proxy's port: a service opens at `<service>.<repo>.<ticket or branch>.localhost:<port>`. Restart running services after changing it. |
+| `dev_proxy_port` | `8767` | The dev proxy's port: a service opens at `<service>.<repo>.<ticket or branch>.localhost:<port>` (see `proxy.domain`). Restart running services after changing it. |
 | `webhook_enabled` | `true` | Run the webhook relay while a project is open. |
 | `webhook_port` | `8766` | The webhook relay's port: point an external webhook at `localhost:<port>/<repo>/<service>`. |
+| `proxy.bind` | `"127.0.0.1"` | The address the dev proxy and webhook relay listen on besides loopback (`127.0.0.1` by default). Any other address lets other machines in, and the proxy has no authentication: use a private network (Tailscale, a LAN) or a reverse proxy. |
+| `proxy.domain` | `"localhost"` | Service hosts end in it: `<service>.<repo>.<ticket or branch>.<domain>`; `localhost` hosts keep working. Changing it rewrites the env files; restart running services. |
+| `proxy.public_scheme` | `"http"` | `"http"` or `"https"` (a reverse proxy in front terminates TLS): service URLs use it and cookies keep `Secure` under https. |
+| `proxy.public_port` | `0` | The port in service URLs; 0 uses `dev_proxy_port`. 443 with https, or 80 with http, leaves the port out. |
+| `proxy.trusted_proxies` | `[]` | Addresses or CIDR ranges (`["127.0.0.1", "100.64.0.0/10"]`) whose `X-Forwarded-Proto` and `X-Forwarded-Host` are believed; anyone else's are replaced. |
 | `modules_store_enabled` | `true` | A new workspace whose lockfile matches a stored one takes its node_modules instead of installing. |
 | `modules_fallback` | `"hardlink"` | Where a copy-on-write clone is impossible: `"hardlink"`, `"copy"` or `"install"` (skip the store). |
 | `modules_size_limit_gb` | `20` | GB the node_modules store keeps at most; the least recently used copies go first. |
@@ -144,8 +153,19 @@ window; they change as you use it and rarely need editing by hand.
 
 | Key | Default | Description |
 | --- | --- | --- |
+| `workspaces.auto_cleanup` | `"off"` | Workspaces whose pull requests all merged: `"off"` leaves them, `"ask"` offers to delete them, `"auto"` deletes them (not the one on screen). One with uncommitted or unpushed work is always kept. |
+| `workspaces.idle_sleep_minutes` | `0` | Minutes a workspace may go without a dev proxy request or a working agent before it is put to sleep (`pom ws sleep`); 0 never. Checked once a minute by `pom proxy` and the app. |
+| `workspaces.max_running` | `0` | How many workspaces may run at once on this machine; 0 any number. Starting or waking one more first puts the least recently used idle one to sleep; when none is idle it waits as `queued` and starts once one sleeps. |
 | `jira_only_mine` | `false` | The new-workspace ticket picker lists only Jira tickets assigned to you. |
 | `group_workspaces` | `false` | The WORKSPACES list is grouped under its tickets' statuses. |
+
+## Remote hosts
+
+| Key | Default | Description |
+| --- | --- | --- |
+| `server.idle_exit_minutes` | `30` | Minutes `pom server` keeps running on a remote host with no app connected before it exits; 0 never. Read from the host's own settings.json when the server starts. |
+| `server.reconnect_retention_minutes` | `10` | Minutes `pom server` remembers the terminals of an app whose connection dropped, so a reconnect carries them on where they stopped. Read on the host when the server starts. |
+| `server.unconfirmed_input_kib` | `64` | KiB of typed input the app keeps until the server has surely written it, and sends again after a dropped connection (the server drops what it already wrote). Read on this Mac when a remote project opens. |
 
 ## Kept by the app
 

@@ -9,7 +9,7 @@ way round. It ships inside the app at
 to run it in a terminal. `pom help` prints this list.
 
 ```
-pom [-w <workspace>] [-c <pom.yml>] <command> [args]
+pom [-H <host>] [-w <workspace>] [-c <pom.yml>] <command> [args]
 ```
 
 The workspace is the one the current directory is in, else the main one; -w picks another.
@@ -19,23 +19,25 @@ A service is `name` or `repo/name`.
 
 | Command | What it does |
 | --- | --- |
-| `pom start <target> [--wait [--timeout 120s]]` | Start a service, a repo's services, or a `workspaces:` group; --wait blocks until each is ready (its healthcheck, else its port): exit 0 ready, 2 timeout, 3 stopped |
+| `pom start <target> [--wait [--timeout 120s]]` | Start a service, a repo's services, or a `workspaces:` group; --wait blocks until each is ready (its healthcheck, else its port) and the shared services answer on their host port: exit 0 ready, 2 timeout, 3 stopped |
 | `pom stop [target]` | Stop them; with no target, every service of the workspace |
 | `pom restart <target>` | Stop, then start |
-| `pom status [-o json]` | Services of the workspace and whether they run (json: up, ready, healthy) |
+| `pom status [-o json]` | Services of the workspace and whether they run (json: up, ready, healthy; shared: up, ready) |
 | `pom logs <service> [--since <mark>] [--raw] [-o json]` | Recent output of a service, or only what it printed since a mark |
 | `pom logs --mark <name> record where every service's output has got to` | - |
 | `pom mark <name> [-w b] one mark for a test step: log offsets and query counters` | - |
-| `pom queue wait-idle <service> [--timeout 60s] [-o json]` | Wait until the service's Sidekiq/BullMQ queue (pom.yml `queue:`) has no work: exit 0 idle, 2 still busy |
-| `pom queue counts <service> [-o json]` | The queue's waiting, active, due and delayed jobs |
+| `pom queue wait-idle <service> [--timeout 60s] [--redis <name>] [-o json]` | Wait until the service's Sidekiq/Bull/BullMQ queue (pom.yml `queue:`) has no waiting, active, due or prioritized job (crons and later delays do not count): exit 0 idle, 2 still busy |
+| `pom queue counts <service> [--redis <name>] [-o json]` | The queue's jobs by kind, and the shared Redis it was read from |
 | `pom attach <service>` | Attach this terminal to a running service (detach: close the terminal) |
 | `pom ports` | Every leased port |
 | `pom url <service>` | Where a service with a port listens, directly and through the dev proxy |
-| `pom proxy fault add <service> [--path /x] [--status 503] [--delay 2s] [--rate 0.3] [--ttl 10m]` | Make the dev proxy fail or slow down this workspace's requests to a service |
-| `pom proxy fault ls [--all] [-o json] \| rm <id> \| clear` | The fault rules in force; remove one, or every one of the workspace |
+| `pom proxy fault add <service> [--path /x] [--status 503] [--delay 2s] [--rate 0.3] [--ttl 10m] [--json]` | Make the dev proxy fail or slow down this workspace's requests to a service |
+| `pom proxy fault ls [--all] [--json] \| rm <id> [--json] \| clear [--json]` | The fault rules in force; remove one, or every one of the workspace (add, rm and clear return once the running proxy applies the change) |
 | `pom proxy` | Serve the dev proxy and webhook relay for every project (`pom start` runs one in the background when neither the app nor another proxy does) |
-| `pom run <name\|"cmd"> [repo]` | A command from the config (or any shell command) in the repo's worktree, with the workspace's env |
-| `pom commands` | The commands the config defines, per repo |
+| `pom proxy config [-o json] \| set <key> <value> \| reset <key>` | How other machines reach the proxy: bind, domain, public_scheme, public_port, trusted_proxies (settings.json `proxy`); a new domain, scheme or port rewrites every workspace's env files |
+| `pom run [--profile test\|dev] <name\|"cmd"> [repo]` | A command from the config (or any shell command) in the repo's worktree, with the workspace's env; the test profile layers the repo's .env.test on top (connection values keep the workspace's), and `run test` uses it when the repo has a `test:` block |
+| `pom run --explain-env [--profile test] [--json] <name\|"cmd"> [repo]` | Where each variable the command would get comes from, secrets masked |
+| `pom commands [-o json] the named commands of every repo (lifecycle.commands, keyed tasks, the test` | Block, service tasks); json: pom.commands/v1 with name, repo, command, source |
 | `pom refresh` | Stop every running service of the project (frees their ports) |
 | `pom release [--disk] [--worktrees] [--yes]` | Stop services and remove the shared containers; --disk also drops their volumes (database data), --worktrees deletes the branch workspaces |
 
@@ -44,9 +46,14 @@ A service is `name` or `repo/name`.
 | Command | What it does |
 | --- | --- |
 | `pom ws create <branch> [--repos a,b] [--env name] [--no-seed] [--fresh-db] [--from-stage n]` | New workspace: worktrees, databases, env files, setup and seed; --fresh-db starts every database empty instead of copying main's |
-| `pom ws delete <branch> [--from-stage n]` | Stop it and remove its worktrees, databases and folder; the local branch goes too only when it is pushed or merged |
+| `pom ws delete <branch> [--from-stage n]` | Stop every service, agent and terminal of it, then remove its worktrees, databases and folder; the local branch goes too only when it is pushed or merged |
 | `pom ws rename <branch> [name]` | Set or clear the workspace's display name |
-| `pom ws list` | Workspaces, their repos and running services |
+| `pom ws export <branch> [-o file.pomws \| --to <host>] [--no-db] [--json]` | The workspace as one archive another machine can open as it was: commits origin lacks, uncommitted and untracked files (not gitignored ones), its databases (pg_dump) and the secrets its config uses, sealed with a passphrase ($POM_BUNDLE_PASSPHRASE, else asked); -o - writes to stdout; --to streams it over ssh into `pom ws import -` on a host of `pom host` (secrets sealed with a one-time passphrase sent ahead of it) |
+| `pom ws import <file.pomws \| -> [--project name] [--branch new] [--json]` | Open an exported workspace here: worktrees at the same commits with the same changes, databases restored, fresh ports, env files rewritten, setup run; a stopped import resumes when run again with --json (or -o json) stdout is one document, an error with its code on failure, and stderr carries progress as one JSON event per line; the same goes for project export and import |
+| `pom ws gc [--merged] [--closed] [--dry-run] [--yes] [--force] [--json]` | Delete the workspaces whose pull requests (in every repo that has one) are merged, or closed with --closed; asks for each on a terminal, else needs --yes; a workspace with uncommitted or unpushed work is kept unless --force |
+| `pom ws ls [--json]` | Workspaces, their repos, running services, and whether each is sleeping or queued (ws list works too) |
+| `pom ws sleep <branch> [--force] [--json]` | Stop its services and agent sessions, keeping its databases, worktrees and ports; refused while an agent is working or waits for an approval, unless --force |
+| `pom ws wake <branch> [--json]` | Start what ran when it went to sleep (the dev proxy also wakes a sleeping workspace on a request); with settings.json workspaces.max_running, starting or waking one more first sleeps the least recently used idle workspace, or queues it until one sleeps when the others' agents are at work |
 | `pom get workspaces [-o json]` | Each workspace's readiness and phase |
 | `pom describe workspace <branch> [-o json]` | Its services, ports and repos missing from it |
 | `pom apply [branch] [--yes]` | Check out repos the config added but a workspace lacks |
@@ -76,16 +83,21 @@ A service is `name` or `repo/name`.
 | `pom env get <repo[/service]> <KEY>` | - |
 | `pom env set <repo> KEY=VALUE...` | - |
 | `pom env unset <repo> KEY...` | - |
-| `pom doctor` | What keeps the project from running, and how to fix it |
+| `pom doctor [--quick] [--json]` | What keeps the project from running, and how to fix it; on a machine that runs `pom server`, how the server stands; checks run side by side, each with a timeout, and --json reports how long each took; --quick runs only the cheap local ones (config, tools on the PATH, the pom on the PATH, orphan holders) in under 2 s |
+| `pom github webhook setup [--rotate] [--json]` | The payload URL for a GitHub webhook on the relay's /_pom/github, and the project's webhook secret (made once and shown once; --rotate replaces it) |
+| `pom sync status [--limit n] [--json]` | Recent GitHub push deliveries and what each did to the workspaces (pulled, notified, left alone because of local changes); see sync.on_push |
 
 ## Projects and machine
 
 | Command | What it does |
 | --- | --- |
+| `pom project ls [--json]` | The projects this machine knows: name, folder, whether its pom.yml is there |
+| `pom project export [-o file.pomproj \| --to <host>] [--json]` | Pom.yml, every secret of the project (sealed with a passphrase) and each repo's origin, for setting the project up on another machine |
+| `pom project import <file.pomproj \| -> [--dir path] [--json]` | Write pom.yml (into ~/pom/&lt;project&gt; unless --dir), store the secrets under this machine's key and clone the repos on main |
 | `pom init [name] [--ai]` | A new project from the git repo you are in (--ai: Claude finishes pom.yml) |
 | `pom onboard [session] [--new name --repo path... [--branch b]] [--no-ai]` | Claude writes a runnable pom.yml with you, in this terminal |
-| `pom ps [--watch]` | CPU and memory of every holder Pomelo started |
-| `pom disk` | Disk used by the registered projects |
+| `pom ps [--watch \| --json] [--orphans [--kill]]` | CPU and memory of every holder Pomelo started, and of each workspace together (from its cgroup when it has limits on Linux, with its caps); a holder whose workspace or project is gone is marked orphan; --orphans lists only those, --kill stops them |
+| `pom disk [--json]` | Free space where Pomelo writes (home, its state, Docker's data, LVM thin pools; warns past 80% with what to run) and the projects' node_modules |
 | `pom modules [list\|prune\|clear]` | The shared node_modules store: its copies, drop unused ones, or empty it |
 | `pom mcp [--branch b]` | MCP server on stdio for a coding agent working in this workspace |
 
@@ -93,17 +105,36 @@ A service is `name` or `repo/name`.
 
 | Command | What it does |
 | --- | --- |
-| `pom agent ls [workspace] [--all-workspaces]` | The workspace's agent sessions: role, state, turn, holder |
+| `pom agent ls [workspace] [--all-workspaces]` | The workspace's agent sessions: role, state, reason, running, phase, turn, holder (states and reasons: see driving agents in the docs) |
 | `pom agent start [workspace] [--role r] [--fresh] [--trust] [--prompt text \| --prompt-file f]` | [--system-prompt-file f] [--tools t] [--allowed-tools t] [--disallowed-tools t] [--permission-mode m] [--model m] [--extra-mcp-config f] start (or reuse) a session; --fresh starts role r on a new conversation; --trust says yes to the agent's prompt to trust the folder (else exit 7) |
-| `pom agent read <workspace/role> [--turn n \| --since n] [--full]` | What the agent did in a turn (the last by default), from its transcript |
-| `pom agent watch [workspace] [--from-start] [--timeout d]` | Stream the workspace's agent events as NDJSON |
+| `pom agent read <workspace/role> [--turn n \| --since n] [--full] [--live]` | What the agent did in a turn (the last by default), from its transcript; --live adds the reply it is still writing |
+| `pom agent watch [workspace] [--role r] [--live] [--until turn-end] [--from-start] [--timeout d]` | Stream the workspace's agent events as NDJSON; --role keeps one session's, --live adds live_text lines as its reply is written, --until turn-end stops once that session's turn ends (picked as wait does) |
 | `pom agent stop <workspace/role>` | End a session |
-| `pom agent send <workspace/role> <text \| --file f> [--queue] [--take]` | Submit one turn (refused unless idle; --queue waits, --take takes the session over) |
-| `pom agent wait <workspace/role> [--until idle\|awaiting_input\|turn-end] [--turn n] [--timeout d]` | Exit 0 reached, 2 timeout, 3 awaiting input, 4 died |
-| `pom agent ask <workspace/role> <text \| --file f> [--take] [--timeout d]` | Send, wait for the turn to end, and read it |
-| `pom agent interrupt <workspace/role>` | Stop the current turn |
-| `pom agent approve\|deny <workspace/role> <request> [--always]` | Answer a pending approval of the workspace policy |
+| `pom agent send <workspace/role> <text \| --file f> [--queue] [--take \| --as-person] [--timeout d]` | Submit one turn (refused while working or pending approval; --queue waits until idle, 30 min unless --timeout; --take takes the session over; --as-person types as the person who drives it, from another client, and leaves the lease theirs) |
+| `pom agent wait <workspace/role> [--until idle\|awaiting_input\|turn-end] [--turn n] [--timeout d]` | Exit 0 reached, 2 timeout, 3 awaiting input, 4 died; turn-end waits for exactly turn n, else the running turn, else the one the last send started, else the next |
+| `pom agent ask <workspace/role> <text \| --file f> [--take \| --as-person] [--timeout d]` | Send, wait for the turn to end, and read it |
+| `pom agent interrupt <workspace/role> [--as-person]` | Stop the current turn |
+| `pom agent allow\|deny <workspace/role> [<id> \| --id id] [--reason r] [--as-person]` | Answer the permission prompt the session waits on (pending_permission in agent ls --json), the agent's own or its workspace policy's; an id that no longer waits is refused (stale) |
+| `pom agent approve <workspace/role> <request> [--always]` | Approve a pending approval of the workspace policy |
 | `pom agent takeover [workspace] --session-id <id> [--settings f] [--mcp-config f]` | - |
 | `pom agent release <workspace/role>` | A person takes a session over, and hands it back |
 | `pom completion bash\|zsh\|fish` | - |
-| `pom version` | - |
+| `pom version, --version` | - |
+
+## Remote machines
+
+| Command | What it does |
+| --- | --- |
+| `pom host add <name> ssh://user@host[:port] [--pom-path p] [--transport server\|ssh] [--json]` | Name a machine pom runs on; ssh uses your own config and keys; the app reads it through `pom server` there unless --transport ssh |
+| `pom host ls [--json]` | The named machines (~/.config/pomelo/hosts.json) |
+| `pom host rm <name> [--json]` | Forget one |
+| `pom host test <name> [--json]` | Connect and compare the remote pom's version with this one |
+| `pom host ports <name> [--json]` | The ports the app (and pom -H &lt;name&gt; forward) forwards from that machine |
+| `pom -H <host> <command>` | Run the command on that machine over ssh (--host works too, anywhere on the line): output, input and exit code pass through; exit 69 when ssh cannot connect (with a JSON error object when the command asked for JSON) |
+| `pom -H <host> forward <port>[:<local>] [--json]` | Open the machine's port &lt;port&gt; on 127.0.0.1 here (the same number when free, else the next free one; exactly &lt;local&gt; when given) until Ctrl-C |
+| `pom server run [--foreground]` | Start this machine's pom server in the background (the app starts it on demand over ssh; it listens on a private Unix socket, never the network, and exits after server.idle_exit_minutes without a client, 30 by default) |
+| `pom server status [--json]` | The running server's pid, version, uptime and connections: exit 3 when none runs |
+| `pom server stop` | Stop it |
+| `pom server proxy [--reconnect]` | What the app runs over ssh: pass bytes between stdin/stdout and the server, starting it when it is not running; --reconnect never starts one and exits 70 when it is gone |
+| `pom server install-unit [--json]` | Linux: write ~/.config/systemd/user/pom-server.service (restarted on failure) and enable it, so the server starts with your user manager |
+| `pom server uninstall-unit [--json]` | Disable and remove that unit |

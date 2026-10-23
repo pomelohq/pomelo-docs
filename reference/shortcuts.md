@@ -53,6 +53,7 @@ section binds a context with `"context": "ProjectPanel"`.
 | Clone Missing Repos into Main | `pomelo::CloneMissingRepos` | `Workspace` | - | - |
 | Agent Usage | `pomelo::OpenAgentUsage` | `Workspace` | <Keys k="cmd-shift-u"/> | <Keys pc k="ctrl-shift-u"/> |
 | Dev Requests | `pomelo::OpenDevRequests` | `Workspace` | - | - |
+| Ports | `pomelo::OpenPorts` | `Workspace` | - | - |
 | node_modules Store | `pomelo::OpenModuleStore` | `Workspace` | - | - |
 | Select Language | `language_selector::Toggle` | `Workspace` | <Keys k="cmd-k m"/> | <Keys pc k="ctrl-k m"/> |
 | Go to Tab 1 | `["pane::ActivateItem", 0]` | `Workspace` | <Keys k="cmd-1"/> | <Keys pc k="ctrl-1"/> |

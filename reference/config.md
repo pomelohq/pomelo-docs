@@ -74,7 +74,7 @@ Each entry of `repos:` is one repository, keyed by its clone folder name.
 | `repos.<repo>.seed` | list of commands | - | Same as `lifecycle.seed`. |
 | `repos.<repo>.pre_delete` | list of commands | - | Same as `lifecycle.pre_delete`. |
 | `repos.<repo>.copy` | list of globs | - | Same as `lifecycle.copy`. |
-| `repos.<repo>.modules_private` | list of folder names | [.prisma, @prisma, prisma] | Entries at the top of `node_modules` each workspace keeps to itself instead of sharing through the node_modules store. A name starting with `.` is a folder a tool generates (no package name starts with `.`): the store never keeps it, and each workspace's setup generates its own. Any other name is an installed package (scoped ones like `@prisma` included; quote a name starting with `@` in YAML): the store keeps it, but every workspace gets a writable copy rather than a hard link, for tools that write into it or copy files out of it with their mode. `.prisma`, `@prisma` and `prisma` are always private; list more here, merged with the presets' lists. |
+| `repos.<repo>.modules_private` | list of folder names | `[.prisma]` | Folders at the top of `node_modules` that a tool generates for each workspace. The shared node_modules store never keeps them and never links them into a workspace, so each workspace's setup generates its own writable copy. `.prisma` (written by `prisma generate`) is always private; list more here. |
 | `repos.<repo>.tasks` | list | - | Same as `lifecycle.tasks`. |
 | `repos.<repo>.shortcuts` | list | - | Older name of `tasks`. |
 | `repos.<repo>.plugins` | map | - | Ignored. Plugin settings; `config_normalize` deletes them. |
@@ -112,7 +112,7 @@ env:
 test:
   command: bin/rspec
 
-modules_private: [.generated-client, "@myorg"]
+modules_private: [.generated-client]
 ```
 
 ## Repo lifecycle
@@ -382,7 +382,6 @@ Each entry of `presets:` is a reusable repo fragment. A repo (or the workspace, 
 | `presets.<preset>.seed` | list of commands | - | As on a repo. |
 | `presets.<preset>.pre_delete` | list of commands | - | As on a repo. |
 | `presets.<preset>.copy` | list of globs | - | As on a repo. |
-| `presets.<preset>.modules_private` | list of folder names | - | As on a repo, added to the repo's own list. |
 | `presets.<preset>.seed_from_main` | bool | `false` | As on a repo. |
 | `presets.<preset>.tasks` | list | - | As on a repo. |
 | `presets.<preset>.shortcuts` | list | - | Older name of `tasks`. |

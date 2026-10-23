@@ -294,7 +294,7 @@ Not read-only.
 
 ## agent_list
 
-The coding-agent sessions of THIS workspace: role, state (idle, thinking, tool_use, awaiting_input, died), turn, and whether you may drive it. Only this workspace's sessions exist for you.
+The coding-agent sessions of THIS workspace: role, state (starting, needs_trust, idle, thinking, tool_use, compacting, awaiting_input, died, ended, unknown), reason (pending_approval, idle_notification, stop, interrupted, stale, submitted or null), running (a turn is in progress), phase (working, waiting, idle, gone), turn, pending_permission (the tool prompt it waits on: id, kind, tool_name, tool_input, answer_by) and whether you may drive it. Only this workspace's sessions exist for you.
 
 Read-only.
 
@@ -316,7 +316,7 @@ Not read-only.
 
 ## agent_send
 
-Send one turn to another agent session of THIS workspace and return its turn number. Refused if it is busy, if a person drives it, if you are sending too fast (once per 5 s, 20 per hour), or if agents are already two deep. Use agent_wait and agent_read for the result, or agent_ask for all three.
+Send one turn to another agent session of THIS workspace and return its turn number. Refused while it is working or waits on a permission (reason pending_approval), if a person drives it, if you are sending too fast (once per 5 s, 20 per hour), or if agents are already two deep. Use agent_wait and agent_read for the result, or agent_ask for all three.
 
 Not read-only.
 
@@ -327,7 +327,7 @@ Not read-only.
 
 ## agent_wait
 
-Wait for another agent session of THIS workspace: until its turn ends (default), it is idle, or it asks for a permission. Returns reached (turn-end, idle, awaiting_input, timeout, died) and the stop reason.
+Wait for another agent session of THIS workspace: until its turn ends (default), it is idle, or it asks for a permission. A turn-end wait waits for exactly `turn` if given, else the running turn, else the turn the last send started, else the next one; never an older turn. Returns reached (turn-end, idle, awaiting_input, timeout, died), for_turn and the stop reason.
 
 Read-only.
 
@@ -365,12 +365,13 @@ Not read-only.
 
 ## agent_approve
 
-Answer a pending approval of another agent session of THIS workspace, once (approve or deny). Use it only for a call you would make yourself.
+Answer the permission prompt another agent session of THIS workspace waits on, once (allow, or deny with deny: true): its own tool prompt, if you drive that session, or its workspace policy's ask. A request id that no longer waits is refused (stale). Use it only for a call you would make yourself.
 
 Not read-only.
 
 | Argument | Type | Required | Description |
 | --- | --- | --- | --- |
 | `deny` | boolean | no | - |
-| `request` | string | yes | The id from its permission_request (pending approval &lt;id&gt;). |
+| `reason` | string | no | Told to the agent when you deny. |
+| `request` | string | no | The prompt's id: pending_permission.id from agent_list, or the id in a policy's "pending approval &lt;id&gt;". Without it, the prompt the session waits on now. |
 | `role` | string | yes | The session's role in this workspace, from agent_list (claude, reviewer, fixer...). |
