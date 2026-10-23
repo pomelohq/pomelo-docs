@@ -167,22 +167,58 @@ and Services panels with their buttons at the left of the status bar. The files 
 - **The tree** fills in as the host walks the workspace, and then follows it: a file an agent or a shell
   creates, changes or deletes on the host shows within about a second. Like on the laptop, `.git`,
   `node_modules`, `target`, `.pom` and `.ddata` folders are left out.
-- **Opening a file** reads it from the host. Text opens with its highlighting, read only: its tab wears a
-  lock and the status bar says **Read only**. Images open as on the laptop. A file larger than 64 MiB does
-  not open; read it in a terminal tab instead (`less`).
+- **Opening a file** reads it from the host. Text opens with its highlighting and edits like a local file.
+  Images open as on the laptop. A file larger than 64 MiB does not open: its tab says why and offers
+  **Open in terminal**, which opens a terminal tab on the host paging through it with `less`.
 - **Changes on the host.** When a file you have open changes on the host, for example because an agent
-  edited it, its tab shows the new text.
+  edited it, its tab shows the new text. If you had edited it too, the tab's dot turns yellow: your text stays
+  and nothing is overwritten until you save and choose (see below).
 - **Go to File** (`cmd-p`) lists the workspace's files from the host, gitignored ones on request.
+- **The main workspace** is read only, as on the laptop (its tabs wear a lock and the status bar says
+  **Read only**); only its `pom.yml` can be edited there, and the host refuses a `pom.yml` that does not load.
+  Work in a branch workspace instead.
 
-Read only for now: saving, the file tree's New, Rename, Delete and the other changes, Find in Files and
-language servers are not available on a remote project yet. Edit on the host from a terminal tab, or with
-**Open in Editor**.
+Find in Files and language servers are not available on a remote project yet.
 
-The server reads only inside the workspace: a path with `..`, an absolute path, and a symlink that
-leads out of the workspace are refused, and so is anything that is not a regular file or folder. The server
-log keeps the method and the size of each read, never a path or a file's contents.
+#### Saving
 
-On a host whose `pom` predates reading files the Files panel stays empty, and the middle says so with
+**Save** (`cmd-s`) sends the file to the host and does not hold up typing: the tab says **Saving...** until
+the host answers, and stays unsaved meanwhile. What you type while a save is on its way stays unsaved after
+it lands, so the next save sends it.
+
+Each save carries what the file was when you opened it (or last saved it). If the file changed on the host
+since, the host keeps its version and the app asks:
+
+- **Overwrite** saves your text over the host's version as it is now.
+- **Discard Edits** drops your edits and shows the host's version.
+- **Cancel** keeps both: the tab stays unsaved with a yellow dot, and the next save asks again.
+
+The file tree's **New File**, **New Folder**, **Rename**, **Paste** (cut and copy), **Duplicate**, **Trash**,
+**Delete** and **Add to .gitignore** run on the host. The tree shows the change at once; if the host refuses
+it, the tree goes back and a toast says why. Trash uses the host's trash folder (the freedesktop trash on
+Linux).
+
+#### Saving while the host is away
+
+When the connection drops, the files you have open stay, and you can keep editing. A note over the file tree
+says **Reconnecting to dev...**. A save made meanwhile waits: its tab says **Waiting for dev** and the status
+bar **Will save when reconnected**. Once the connection is back the save goes out on its own, still checked
+against the file you opened, so a file that changed on the host meanwhile asks first instead of being
+overwritten. A save that lost its connection halfway is sent again and written once.
+
+Unsaved edits to a host's files survive quitting the app: the tabs come back with your text, kept under the
+host's name so they never mix with files on the laptop. If the file changed on the host meanwhile, the tab
+comes back in conflict.
+
+#### What the host allows
+
+The server works only inside the workspace: a path with `..`, an absolute path, and a symlink that leads
+out of the workspace are refused, and so is anything that is not a regular file or folder. Nothing under a
+`.git` folder can be written. New folders on the way to a new file are made one at a time, each checked
+again. The server log keeps the method and the size of each request, never a path or a file's contents.
+
+A host whose `pom` reads files but predates saving them opens them read only. On a host whose `pom`
+predates reading files the Files panel stays empty, and the middle says so with
 **Update pom on dev** (see [Updating pom on the host](#updating-pom-on-the-host)).
 
 ### Services on a remote project
