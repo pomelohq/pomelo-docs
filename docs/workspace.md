@@ -180,6 +180,13 @@ and a sleeping row says **Asleep**. `pom ws ls` marks it `sleeping`, and
 `pom ws ls --json` gives each workspace a `state` (`running`, `sleeping` or
 `queued`). The state lives in the workspace's `.pom-workspace.json`.
 
+`pom ws ls --json` also gives `last_activity_at` (RFC 3339, `null` when
+nothing has happened yet) and `last_activity_source`: `agent` (an agent
+session's last recorded event), `proxy` (its last dev proxy request),
+`service` (the start of a running service) or `git` (the newest HEAD, index
+or HEAD log change of its repos, read from file times). It is the same value
+idle sleep goes by.
+
 Opening a sleeping workspace's service through the dev proxy wakes it: the
 browser gets the waiting page, titled **Waking feat-login**, which reloads
 itself once the service answers. A burst of requests wakes it once.
@@ -194,8 +201,9 @@ running them all:
 ```
 
 - **`idle_sleep_minutes`** (default `0`, never) - a workspace that has had no
-  dev proxy request, no agent activity and no service start for that long is
-  put to sleep. One whose agent is working never is.
+  dev proxy request, no agent event, no service start and no git change (a
+  checkout, a commit or staging in any of its repos) for that long is put to
+  sleep. One whose agent is working never is.
 - **`max_running`** (default `0`, any number) - how many workspaces may run
   at once, across every project on the machine. Starting or waking one more
   (`pom start`, `pom ws wake`, the app's Wake, a proxy request) first puts the
@@ -229,6 +237,31 @@ and they go with it. Shared services' volumes never carry it.
 ```sh
 pom ws delete feat-login
 ```
+
+The first stage stops every process Pomelo started for the workspace: its
+services, every agent session (the main agent and its extra tabs, side agents,
+roles started with `pom agent start --role`, other agent CLIs, sessions started
+from another machine) and its terminals. A holder that recorded its workspace
+is matched by that; an older one by its name. If one is still running after
+the stop, the stage fails before anything is removed; run the delete again to
+resume. `pom ws gc` deletes through the same pipeline.
+
+### Orphan holders
+
+A holder whose workspace or project no longer exists (left by an older
+version, or a folder removed by hand) is an **orphan**: nothing in Pomelo
+reaches it any more, and `pom agent ls` cannot see it. `pom ps` marks it
+`(orphan)` (`--json`: `orphan` and `orphan_reason` on each holder), and
+`pom doctor` reports how many there are and the memory they hold.
+
+```sh
+pom ps --orphans                 # list them, with why each is an orphan
+pom ps --orphans --kill          # stop them
+pom ps --orphans --kill --json   # {schema: "pom.orphans/v1", orphans: [{name, pid, project, workspace, reason, memory_bytes, killed}], errors}
+```
+
+Only holders of projects this machine knows are judged; a holder of a
+project Pomelo never opened here is left alone.
 
 ## Clean up merged workspaces
 

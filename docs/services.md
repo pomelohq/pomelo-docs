@@ -227,6 +227,32 @@ The menu shows `desc` (else `key`, else `cmd`). A repo's `commands:`
 (`install`, `migrate`, `test`, `lint`, ...) show up as tasks too. Configs
 written before still work with the old name, `shortcuts:`.
 
+### Running commands by name
+
+Every named command of a repo runs with `pom run <name>`: each entry of
+`lifecycle.commands` (or `commands:`), any name you make up included, a task
+with a `key`, the `test:` block (as `test`) and a service's task with a `key`.
+
+```yaml
+repos:
+  api:
+    lifecycle:
+      commands:
+        migrate: bin/rails db:migrate
+        test-db: bin/rails db:test:prepare
+```
+
+```sh
+pom run test-db           # in the one repo that declares test-db
+pom run test-db api       # name the repo when several declare it
+pom commands              # every named command, per repo
+pom commands -o json      # {schema: "pom.commands/v1", commands: [{name, repo, command, description, source}]}
+```
+
+`source` says where the command is declared: `commands`, `tasks`, `test` or
+`services.<service>.tasks`. Anything that is not a name runs as a shell
+command in the repo (the first repo when none is given).
+
 ## Modes (dev vs build)
 
 For services that have a fast dev command and a slower production-like

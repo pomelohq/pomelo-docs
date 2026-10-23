@@ -139,6 +139,23 @@ tool.
 - **Linux safety** - see [Linux](./install#linux): Docker nested in an LXC
   container, a load far past the CPUs, and processes stuck in uninterruptible
   sleep.
+- **Another pom on the PATH** - a warning when the `pom` your terminal finds
+  first is not the one running (in the app: not the one the app ships) and
+  reports another version, with both paths and versions and how to fix it
+  (remove it, link it to this one, or reorder the PATH). A build made from
+  source reports `<version>-dev+<commit>` in `pom --version`, so it never
+  looks newer than the release it came from.
+- **Orphan holders** - processes left running for a workspace or project
+  that is gone; see [Orphan holders](./workspace#orphan-holders).
+
+The checks run side by side, each given at most 10 seconds; one that does
+not answer in time (a hung Docker, a stuck disk) is reported as timed out
+instead of holding up the rest. `pom doctor --json` adds `checks` (each
+check's `name`, `duration_ms` and `timed_out`), `duration_ms` for the whole
+run, `quick` and `version`. `pom doctor --quick` runs only the cheap local
+checks (the config, the tools on the PATH without asking Docker, the dev
+proxy, limits, the pom on the PATH and orphan holders) and finishes in under
+two seconds.
 
 ## Onboarding agent
 
