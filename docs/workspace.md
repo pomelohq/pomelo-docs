@@ -104,6 +104,25 @@ second name, so they are made **read-only**: a tool that edits one in place
 (hand edits, a patch that is not in the stored copy) fails instead of changing
 it for every workspace. Reinstalling and upgrading packages work as usual.
 
+Some tools generate per-workspace output inside `node_modules`. The store
+never keeps or links these **private folders**, so each workspace's setup
+generates its own writable copy. `.prisma` (written by `prisma generate`) is
+private by default; list more with `modules_private` on the repo in `pom.yml`.
+Each entry is a folder name at the top of `node_modules`:
+
+```yaml
+repos:
+  api:
+    setup: [npm install, npx prisma generate]
+    modules_private: [.generated-client]
+```
+
+A workspace that gets `node_modules` from the store has no `.prisma` until its
+setup runs `prisma generate`, so keep that step in `setup`. Copies stored
+before a folder was private are restored without it, and **Use Shared Copy**
+keeps the workspace's own private folders. Build caches such as `.cache` and
+`.vite` need nothing: each workspace creates its own.
+
 pnpm and Yarn's hard-link and Plug'n'Play modes share packages themselves and
 are left alone.
 
