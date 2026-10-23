@@ -82,6 +82,11 @@ In a browser that answer is a page: it says whether the service is starting, sto
 shows the `pom start` command for a stopped one, and checks again in the background, so it opens the app by itself
 as soon as the service is up. Scripts, `fetch` and curl still get the one-line text.
 
+A workspace on a remote host opens at the same address, or at
+`<service>.<repo>.<workspace>.<host>.localhost:8767` to name the host; when the
+laptop and the host both have it, a service stopped on the laptop is served by
+the host. See [Remote machine > Ports](/docs/remote#ports).
+
 **Settings > Dev Services** turns the proxy and the relay on or off and sets
 their ports (8767 and 8766 by default). Service URLs in env files use the
 proxy port too, so restart running services after changing it. `POM_WEB_PORT`
