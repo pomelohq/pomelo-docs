@@ -182,7 +182,14 @@ and Services panels with their buttons at the left of the status bar. The files 
   **Read only**); only its `pom.yml` can be edited there, and the host refuses a `pom.yml` that does not load.
   Work in a branch workspace instead.
 
-Find in Files and language servers are not available on a remote project yet.
+- **Project search** (`cmd-shift-f`) searches the workspace on the host, with the same options, include and
+  exclude filters and gitignore rules as on the laptop; files show as the host finds them, and typing a new
+  query stops the search before it. A line longer than 4 KiB shows only the part around its first match.
+  **Replace All** rewrites files you have open in their tabs, as on the laptop, and the others on the host;
+  a file that changed on the host meanwhile is left as it is and named in a message. A host whose `pom` is
+  older says to update it.
+
+Language servers are not available on a remote project yet.
 
 #### Saving
 
