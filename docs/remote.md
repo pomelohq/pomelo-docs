@@ -259,6 +259,11 @@ local one:
 - **Ports.** The arrow button at the top of the panel opens the [Ports](#ports) tab.
 - **Changes on the host** (a service started by `pom` there, an agent restarting one) show within about a
   second, pushed by the server.
+- **The node_modules Store.** **Open Store** shows the host's store and the workspaces there, with the same
+  actions as locally ([Shared node_modules](/docs/workspace#shared-node-modules)): **Use Shared Copy**,
+  **Save to Store**, **Free**, **Optimize** and **Refresh** run on the host, with the same progress. The
+  footnote names the store's folder on the host. A host whose `pom` predates this says **pom X on dev cannot
+  show its node_modules store here. Update pom there to see it in this window.**
 
 What differs from a local project:
 
@@ -266,7 +271,7 @@ What differs from a local project:
   one in the agent dock.
 - The **Secrets** and **Environment** tabs are not in the panel; read a repo's env with `pom -H dev env ls api`
   instead.
-- **Dev Requests** and the node_modules **Store** show this machine.
+- **Dev Requests** show this machine.
 - A mode picked for a service lasts while the host's `pom server` runs, as one picked locally lasts while
   the app runs.
 - A host whose `pom` predates this panel shows **Services need a newer pom on dev; update it there**, and a

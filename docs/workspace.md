@@ -166,6 +166,9 @@ shows each repo of the open project by lockfile version:
 - **Old versions** - copies no workspace's lockfile matches any more, with
   **Free**. **Free ... Unused** at the top removes all of them.
 
+In a window on a [remote project](/docs/remote#services-on-a-remote-project) the
+tab shows the host's store and workspaces, and its buttons act there.
+
 <AppShot :width="1060" :height="770" text="The node_modules Store tab. Try Use Shared Copy, Save to Store, Free (hover the old versions), +2 more or Optimize."><ModuleStore /></AppShot>
 
 **Optimize** does all of it in one go: it keeps an install for each lockfile
