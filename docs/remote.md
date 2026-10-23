@@ -394,9 +394,15 @@ came. So `http://web.web.feat-login.localhost:8767` opens a remote workspace's s
 local one, and the remote project's own service URLs, cookies and `/_pom_dev/` paths work unchanged. The
 host's dev proxy must be running there; `pom start` on the host starts it.
 
-When a local project and a remote project both have a workspace with the same address (both have `main`, say),
-the local one wins. Put the host's name after the workspace to reach the remote one:
-`http://web.web.main.dev.localhost:8767` goes to `dev`, which gets `web.web.main.localhost:8767`.
+**The `<host>` address.** Put the host's name after the workspace to reach a remote workspace by name:
+`http://<service>.<repo>.<workspace>.<host>.localhost:8767`. So `http://web.web.main.dev.localhost:8767` always
+goes to `dev`, which gets `web.web.main.localhost:8767`.
+
+When a local project and a remote project both have a workspace with the same address (both have `main`, or
+`feat-login` after `pom ws export feat-login --to dev`), the plain address goes to the local one while its
+service runs on the laptop. While it is stopped or asleep there, the request goes to the host instead, and
+the local workspace is not woken for it. When neither answers, the error names the `<host>` address, and in a
+browser the page links to it.
 
 **Shared services.** The shared services of the shown workspace (Postgres, Redis, MinIO and any other shared
 service with a port) are forwarded as soon as they run, on the same port number when it is free on the laptop.
