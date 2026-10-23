@@ -340,6 +340,10 @@ agents:
   - it cannot run, or the project's config cannot be read.
 
   A hook that merely errored would let the tool run.
+- **Only you change it.** The MCP `config_set` tool refuses any edit that adds, changes or removes the
+  `agents` section, and refuses to overwrite a `pom.yml` it cannot read; the agent is told to ask you to
+  edit it. An agent with a shell can still edit `pom.yml` or the policy script directly, so a policy
+  should deny those edits too.
 
 ## For agents: the MCP tools
 

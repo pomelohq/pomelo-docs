@@ -109,11 +109,12 @@ service, when it arrived, the profile and the target URL, then:
   answered and how long it took, or why it could not be reached.
 - **Response** - the headers and body sent back.
 
-<AppShot :width="1002" :height="602" text="Dev Requests. Click a row, the tabs, the filters or Show Hidden; the 15:39:02 webhook shows a fan-out that one of two branches failed."><DevRequests /></AppShot>
+<AppShot :width="1002" :height="602" text="Dev Requests. Click a row, the tabs or the filters; the 15:39:02 webhook shows a fan-out that one of two branches failed."><DevRequests /></AppShot>
 
 Bodies are kept in memory for the session only: the first 256 KB of each, and
-64 MB for the whole log (the oldest are dropped first). Authorization, cookie
-and token headers stay hidden until you click **Show Hidden**.
+64 MB for the whole log (the oldest are dropped first). The values of
+Authorization, cookie, token, secret, password, API-key and session headers are
+never kept: the log shows `[redacted]`, while your app still receives them.
 
 <figure class="diagram">
 <svg viewBox="0 0 760 350" role="img" aria-label="Same-origin dev-proxy: the browser loads one origin; the dev-proxy routes / to the frontend and /_pom_dev/api/server to the backend." xmlns="http://www.w3.org/2000/svg">

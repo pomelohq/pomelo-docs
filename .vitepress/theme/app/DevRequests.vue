@@ -29,7 +29,6 @@ const errorsOnly = ref(false)
 const query = ref('')
 const selected = ref(1)
 const tab = ref('request')
-const reveal = ref(false)
 
 const shown = computed(() => requests.map((r, i) => ({ ...r, index: i })).filter(r =>
   (kind.value === 'all' || r.kind === kind.value)
@@ -38,7 +37,7 @@ const shown = computed(() => requests.map((r, i) => ({ ...r, index: i })).filter
 const current = computed(() => requests[selected.value])
 const failed = computed(() => (current.value.fanout || []).filter(([, status]) => !status || status >= 400).length)
 const statusClass = s => s >= 500 ? 'err' : s >= 400 ? 'warn' : 'ok'
-const pick = i => { selected.value = i; tab.value = 'request'; reveal.value = false }
+const pick = i => { selected.value = i; tab.value = 'request' }
 const cut = (text, n) => (text.length > n ? text.slice(0, n - 3) + '...' : text)
 const isJson = text => { try { JSON.parse(text); return true } catch { return false } }
 function runs(line) {
@@ -107,12 +106,11 @@ const bytes = text => text ? `${new TextEncoder().encode(JSON.stringify(JSON.par
           <span :class="{ on: tab === 'response' }" @click="tab = 'response'">Response</span>
         </div>
         <template v-if="tab === 'request'">
-          <div class="row pa-dr-sec"><span class="pa-dt-label">Headers</span><span class="grow" />
-            <span class="pa-dr-link" @click="reveal = !reveal">{{ reveal ? 'Hide' : 'Show Hidden' }}</span></div>
+          <div class="row pa-dr-sec"><span class="pa-dt-label">Headers</span></div>
           <div class="pa-dr-headers mono">
             <template v-for="[name, value] in current.headers" :key="name">
               <span class="muted">{{ name }}</span>
-              <span :class="{ placeholder: value === null && !reveal }">{{ value === null ? (reveal ? '_myproject_session=abc123' : '********') : cut(value, 37) }}</span>
+              <span :class="{ placeholder: value === null }">{{ value === null ? '[redacted]' : cut(value, 37) }}</span>
             </template>
           </div>
           <template v-if="current.body">
