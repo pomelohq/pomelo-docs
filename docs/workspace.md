@@ -463,14 +463,44 @@ one-time passphrase itself and sends it to the host ahead of the archive, over t
 
 | Command | What it does |
 | --- | --- |
-| `pom ws export <branch> [-o file.pomws] [--no-db] [--json]` | Writes the archive (`-o -` writes it to stdout). `--no-db` leaves the databases and volumes out. |
+| `pom ws export <branch> [-o file.pomws] [--no-db] [--json]` | Writes the archive (`-o -` writes it to stdout; `-o json` and `-o table` choose the report format, as for every command). `--no-db` leaves the databases and volumes out. |
 | `pom ws export <branch> --to <host> [--no-db] [--json]` | Streams it over SSH into `pom ws import -` on a host of [`pom host`](/docs/remote); no archive file is written on either side. |
 | `pom ws import <file.pomws \| -> [--project name] [--branch new] [--json]` | Opens it here. The project is found by name (or `--project`, or `-c`); `--branch` imports it under another branch name. |
 
 Each step of the import is a stage, as in [Create](#create). If one fails, the error says which; run the same
 import again to resume from that stage, or `pom ws delete <branch>` to remove what it made. An archive made by
 a newer pom (a newer major version of its format, `pom.wsbundle/v1` today) is refused before anything
-changes. Progress goes to stderr; with `--json` both commands print one `pom.ws-transfer/v1` object on stdout.
+changes. Progress goes to stderr.
+
+**JSON output.** With `--json` (or `-o json`), `ws export`, `ws import`, `project export` and
+`project import` print exactly one `pom.ws-transfer/v1` document on stdout, also when they fail. A failure
+exits non-zero with:
+
+```json
+{"schema": "pom.ws-transfer/v1", "error": {"code": "passphrase_required", "message": "..."}}
+```
+
+| Code | When |
+| --- | --- |
+| `passphrase_required` | The secrets need a passphrase: `POM_BUNDLE_PASSPHRASE` is not set and there is no terminal to ask on. |
+| `passphrase_mismatch` | The two passphrases typed on the terminal differ. |
+| `wrong_passphrase` | The archive does not open with that passphrase (or it is damaged). |
+| `host_unreachable` | `--to`: SSH could not reach the host (exit 69). |
+| `remote_failed` | `--to`: the import on the host failed; its own error is under `error.remote`. |
+| `usage` | The command line is wrong (exit 2). |
+| `failed` | Anything else; `message` says what. |
+
+stderr then carries only JSON, one event per line, so a script can follow progress or ignore it:
+
+```json
+{"event": "progress", "stage": "repo", "message": "api: commits and changes"}
+{"event": "stage", "index": 8, "of": 11, "stage": "Restoring databases and volumes"}
+{"event": "warning", "message": "..."}
+```
+
+Export stages are `repo`, `database`, `volume` and `archive`, and a project import adds `clone`. An import also
+reports its stages (`stage`, `progress`, `warning`, `stage_done`, `stage_skipped`). With `--to`, the host's own
+events are passed on with `host` added.
 
 ### Move a project
 

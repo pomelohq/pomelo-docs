@@ -47,7 +47,7 @@ All of them take `--json`.
 |---|---|
 | `pom agent ls [ws] [--all-workspaces]` | The workspace's sessions: role, state, reason, running, phase, turn, holder, age, and the permission prompt each waits on. A session whose agent is gone shows `died`. |
 | `pom agent start [ws] [--role r] [--fresh] [options]` | Starts the main agent (or reuses it), or with `--fresh` a new role on a conversation of its own. You hold its lease. |
-| `pom agent send <handle> <text \| --file f> [--queue] [--take \| --as-person] [--timeout d]` | Submits exactly one turn and prints its number. |
+| `pom agent send <handle> <text \| --file f> [--queue] [--take \| --as-person] [--timeout d]` | Submits exactly one turn and prints its number once the agent has taken it. |
 | `pom agent wait <handle> [--until turn-end\|idle\|awaiting_input] [--turn n] [--timeout d]` | Blocks until that happens (see [Waiting for a turn](#waiting-for-a-turn)). |
 | `pom agent ask <handle> <text> [--take \| --as-person] [--timeout d]` | `send`, `wait` and `read` in one. |
 | `pom agent read <handle> [--turn n \| --since n] [--full] [--live]` | What the agent did in a turn (the last by default); `--live` adds the reply it is still writing. |
@@ -63,6 +63,10 @@ All of them take `--json`.
   waits on an approval (`awaiting_input` with reason `pending_approval`). Only a person or an orchestrator
   may `--queue` (the turn is delivered once the session is idle, in order), `--take` (take the session over
   first) or `--as-person` (type as the person who drives it; see [the lease](#who-drives-a-session-the-lease)).
+- **State right after `send`.** `send` returns once the agent has started the turn, and from then on
+  `pom agent ls` and `watch` show it running (`running: true`, `phase` `working`) until the turn ends. If an
+  idle event lands just after the prompt, `send` records a `Submitted` event so the session reads `thinking`
+  with reason `submitted` until the agent's next hook. The turn's Stop still ends it as usual.
 - **`--queue` timeout.** A queued send waits 30 minutes unless `--timeout` says otherwise. It then exits 2
   with error `timeout`, and the message names the state and reason it was still waiting on.
 - **`start` options:**
@@ -136,6 +140,7 @@ Pomelo never edits Claude's own config to skip the question.
   | `stop` | The last turn ended. |
   | `interrupted` | The last turn was interrupted. |
   | `stale` | A working state that no event has refreshed for 15 minutes. |
+  | `submitted` | `send` saw the turn start before the agent reported working on it. The session is `thinking`. |
   | `null` | Nothing more to say (the agent is working, or has just started). |
 
   Sessions recorded by an older version have no stored reason; Pomelo works it out from the last event.

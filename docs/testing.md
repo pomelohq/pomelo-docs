@@ -214,6 +214,21 @@ How a rule works:
 - **Rate.** `--rate` applies the rule to that share of matching requests.
 - **Expiry.** Every rule expires after `--ttl` (10 minutes by default).
 - **In Dev Requests.** A request a rule changed shows the rule's id.
+- **When it applies.** `add`, `rm` and `clear` return once the running dev proxy obeys the change, so the very
+  next request meets it. They ask the proxy to re-read its rules at once and wait up to 3 seconds. With no
+  proxy running they return at once: the rule is saved and applies when a proxy starts.
+
+With `--json` (or `-o json`), `add` prints the rule, `rm` prints `{"removed": "<id>"}` and `clear` prints
+`{"workspace": "<branch>", "cleared": <n>}`, each with `applied`:
+
+```json
+{"id": "f3a91c", "session": "myproject", "branch": "feat-login", "repo": "api", "alias": "api", "service": "server",
+ "path": "/v1/payments", "status": 503, "delay_ms": 0, "rate": 0.5, "expires_ms": 1792730000000, "applied": true}
+{"schema": "pom.proxy/v1", "workspace": "feat-login", "cleared": 1, "applied": false, "reason": "no proxy running"}
+```
+
+`applied` is `false` with a `reason` when no proxy runs, when the proxy on the port reads another state folder,
+or when it did not take the change within 3 seconds.
 
 ## For agents
 

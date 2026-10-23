@@ -151,6 +151,12 @@ Reference another service's same-origin path with `{{<repo>.<service>.path}}`
 (-> `/_pom_dev/<repo>/<service>`), or its full URL with
 `{{<repo>.<service>.url}}`.
 
+To make a service fail or slow down through the proxy on purpose, use
+[`pom proxy fault`](/docs/testing#failing-a-backend-on-purpose). `add`, `rm`
+and `clear` return only once the running proxy obeys the change (or at once,
+with `applied: false`, when no proxy runs), so a test's next request already
+meets it.
+
 ## Switch environment without touching the URL
 
 The frontend always calls the **same-origin path** `/_pom_dev/api/server` — it
