@@ -421,6 +421,23 @@ a `pom` on the host from before this, the window shows no chip and no cost rathe
 Closing an agent's tab leaves the agent running on the host, unless `agent_tab_close` is `"stop"` in your
 settings: then it stops the agent there, as it does on the laptop.
 
+### Pasting a screenshot into an agent
+
+An agent on the host reads the host's clipboard, not the laptop's, so a screenshot you copied on the laptop
+would not reach it. Pomelo carries it over instead: in a terminal or agent tab of a remote project, press
+**Cmd+V** (or **Ctrl+V**, the key Claude Code uses to paste an image) while the clipboard holds an image and
+no text. The app saves the image as a PNG, sends it through `pom server` to a private folder on the host and
+pastes that file's path into the tab, where Claude Code attaches it as an image.
+
+- **Text pastes as before.** With text on the clipboard, both keys do what they always did. A project on the
+  laptop is unchanged too: its agents read the laptop's clipboard themselves.
+- **Where it goes.** The file is `paste-<random>.png` in `~/.local/state/pom/paste` on the host (under
+  `$XDG_STATE_HOME/pom` when that is set), a folder only you can open, and the file is readable only by
+  you. Files there older than a day are removed the next time you paste. An image can be up to 20 MiB.
+- **An older `pom` on the host.** A toast says pasting an image needs a newer `pom` there;
+  [update it](#updating-pom-on-the-host).
+- **Dragging files** onto a tab is not supported yet.
+
 ## Ports
 
 A remote project's services listen on the host, not on the laptop. The app opens them on the laptop for you,
