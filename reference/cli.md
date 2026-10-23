@@ -106,7 +106,7 @@ A service is `name` or `repo/name`.
 | Command | What it does |
 | --- | --- |
 | `pom agent ls [workspace] [--all-workspaces]` | The workspace's agent sessions: role, state, reason, running, phase, turn, holder (states and reasons: see driving agents in the docs) |
-| `pom agent start [workspace] [--role r] [--fresh] [--trust] [--prompt text \| --prompt-file f]` | [--system-prompt-file f] [--tools t] [--allowed-tools t] [--disallowed-tools t] [--permission-mode m] [--model m] [--extra-mcp-config f] start (or reuse) a session; --fresh starts role r on a new conversation; --trust says yes to the agent's prompt to trust the folder (else exit 7) |
+| `pom agent start [workspace] [--role r] [--fresh] [--trust] [--prompt text \| --prompt-file f]` | [--system-prompt-file f] [--tools t] [--allowed-tools t] [--disallowed-tools t] [--permission-mode m] [--model m] [--extra-mcp-config f] start (or reuse) a session; --fresh starts role r on a new conversation; --trust marks the folder trusted in the agent's own config before it starts (else exit 7 at its trust prompt) |
 | `pom agent read <workspace/role> [--turn n \| --since n] [--full] [--live]` | What the agent did in a turn (the last by default), from its transcript; --live adds the reply it is still writing |
 | `pom agent watch [workspace] [--role r] [--live] [--until turn-end] [--from-start] [--timeout d]` | Stream the workspace's agent events as NDJSON; --role keeps one session's, --live adds live_text lines as its reply is written, --until turn-end stops once that session's turn ends (picked as wait does) |
 | `pom agent stop <workspace/role>` | End a session |
@@ -114,7 +114,7 @@ A service is `name` or `repo/name`.
 | `pom agent wait <workspace/role> [--until idle\|awaiting_input\|turn-end] [--turn n] [--timeout d]` | Exit 0 reached, 2 timeout, 3 awaiting input, 4 died; turn-end waits for exactly turn n, else the running turn, else the one the last send started, else the next |
 | `pom agent ask <workspace/role> <text \| --file f> [--take \| --as-person] [--timeout d]` | Send, wait for the turn to end, and read it |
 | `pom agent interrupt <workspace/role> [--as-person]` | Stop the current turn |
-| `pom agent allow\|deny <workspace/role> [<id> \| --id id] [--reason r] [--as-person]` | Answer the permission prompt the session waits on (pending_permission in agent ls --json), the agent's own or its workspace policy's; an id that no longer waits is refused (stale) |
+| `pom agent allow\|deny <workspace/role> [<id> \| --id id] [--reason r] [--as-person]` | Answer the permission prompt the session waits on (pending_permission in agent ls --json), the agent's own or its workspace policy's; an id that no longer waits is refused (stale); a dialog the agent drew (answer_by terminal) is only denied, with Esc, never allowed and never while a person drives it |
 | `pom agent approve <workspace/role> <request> [--always]` | Approve a pending approval of the workspace policy |
 | `pom agent takeover [workspace] --session-id <id> [--settings f] [--mcp-config f]` | - |
 | `pom agent release <workspace/role>` | A person takes a session over, and hands it back |
