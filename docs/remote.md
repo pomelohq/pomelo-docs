@@ -610,8 +610,9 @@ pom server run             # start one in the background yourself
 
   The server reads its two when it starts (`pom server stop` to apply a change); the app reads its key when
   a remote project opens.
-- **Fallback.** A host whose `pom` predates `pom server`, or speaks another protocol version, is read with
-  plain SSH as before, without terminals. A server from before terminals still serves the rest; updating
+- **Fallback.** A host whose `pom` predates `pom server`, or shares no protocol version with the app, is
+  read with plain SSH as before, without terminals; the page says whether `pom` on the host or the app is
+  the older one. A server from before terminals still serves the rest; updating
   `pom` on the host brings them.
 
 ### Starting it with systemd
@@ -658,8 +659,10 @@ It warns about an origin it cannot reach. `pom doctor --quick` skips this check.
 
 ## Updating pom on the host
 
-When the host's `pom server` is on another minor version than the app, the project's page says
-"pom 0.8.2 on dev, the app is 0.9.3." with **Update pom on dev**. The button installs the app's own version
+When the host's `pom server` is on an older minor version than the app, or speaks only an older protocol,
+the project's page says "pom 0.8.2 on dev, the app is 0.9.3." with **Update pom on dev**. When the host is
+the newer one, the page asks you to update the app instead and offers no button: the app never takes `pom`
+on the host back to an older version. The button installs the app's own version
 on the host, or for a nightly app whose build has left the nightly release (it keeps 7 nights), the newest
 nightly:
 
@@ -688,8 +691,10 @@ next connection starts the new one.
 
 Which versions work together: the same version of app and host works fully. With different versions the
 app uses only what the host's `pom server` declares when they connect, so a feature the host lacks is
-hidden rather than broken, and the app offers the update once their major or minor version differs. See
-[Release channels](./channels).
+hidden rather than broken, and the app offers the update once their major or minor version differs and the
+host is older. Underneath, each side names the oldest and newest wire protocol it speaks when they connect,
+and they talk in the newest one both speak; every release is tested against the previous release's `pom` on
+the host. See [Release channels](./channels).
 
 ## Open in Editor
 
