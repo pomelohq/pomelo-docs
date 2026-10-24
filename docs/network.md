@@ -410,13 +410,18 @@ over the kept token. A token is at least 16 characters of letters, digits,
 `-`, `_`, `.` and `~`. Restart the proxy after changing it.
 
 A request needs no token only when it comes from the machine itself (loopback,
-or one of its own addresses), not from an address in `trusted_proxies`, and
-asks for a `localhost` name (`localhost`, `*.localhost`, or a loopback
-address). So `pom` and services calling `*.localhost` work as before, while a
-request for `*.dev.example.net`, or anything a trusted reverse proxy forwards,
-needs the token even when it arrives on loopback. List your reverse proxy in
-`trusted_proxies`: that is how the proxy knows a loopback connection carries
-someone else's request. Everything else:
+or one of its own addresses), not from an address in `trusted_proxies`, asks
+for a `localhost` name (`localhost`, `*.localhost`, or a loopback address) and
+carries no forwarding header (`X-Forwarded-For`, `X-Forwarded-Host`,
+`X-Real-IP` or `Forwarded`). So `pom` and services calling `*.localhost` work
+as before, while a request for `*.dev.example.net`, anything a trusted reverse
+proxy forwards, or anything with a forwarding header needs the token even when
+it arrives on loopback. List your reverse proxy in `trusted_proxies`: that is
+how the proxy knows a loopback connection carries someone else's request, and
+its forwarded headers count only then. When an address outside
+`trusted_proxies` sends forwarding headers, the proxy says so in its log and
+`pom doctor` warns about it for a week, until you trust it or it stops.
+Everything else:
 
 - **A browser** opens a link once with the token added:
   `https://web.web.proj-101.dev.example.net/?pom_token=<token>`. The proxy
