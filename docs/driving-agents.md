@@ -357,3 +357,13 @@ coder can ask a reviewer it started, and a fixer can report back to the agent th
 `pending_permission`. `agent_approve` answers the prompt a session waits on: give `request` (its id) or
 leave it out for the one waiting now, and `deny: true` with an optional `reason`. An agent answers a
 session's own prompt only when it drives that session.
+
+**An agent only denies.** An agent can deny another agent's prompt, but an allow (`pom agent approve`,
+`pom agent allow`, `agent_approve` without `deny`) from inside an agent is refused with
+`allow_needs_person`: a person or an orchestrator outside the agents allows it. A project whose agents
+should approve each other turns that on in `pom.yml`; an agent's `config_set` cannot change it:
+
+```yaml
+agents:
+  peer_approve: true
+```
