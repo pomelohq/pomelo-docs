@@ -637,25 +637,36 @@ It warns about an origin it cannot reach. `pom doctor --quick` skips this check.
 
 When the host's `pom server` is on another minor version than the app, the project's page says
 "pom 0.8.2 on dev, the app is 0.9.3." with **Update pom on dev**. The button installs the app's own version
-on the host:
+on the host, or for a nightly app whose build has left the nightly release (it keeps 7 nights), the newest
+nightly:
 
 1. It asks the host what machine it is (`uname -sm`; Linux on x86_64 or aarch64).
-2. It downloads `pom-<version>-linux-<arch>.tar.gz` from the app's release on GitHub over HTTPS, on the
-   laptop, and checks it against the release's `checksums-linux.txt`. A tarball that does not match is
-   refused and nothing is installed.
+2. It downloads `pom-<version>-linux-<arch>.tar.gz` and its `.sig` over HTTPS, on the laptop, from the
+   app's release on GitHub (the `nightly` release for a nightly app), and checks the signature against the
+   release key built into the app. A tarball whose signature does not verify is refused and nothing is
+   installed.
 3. It streams the tarball through SSH into a temporary folder on the host and runs its
    `install.sh --cli-only`, which puts `pom` in `~/.local/bin`. The host downloads nothing itself.
 4. It stops the old version's server and reconnects, which starts the new one. Terminals, services and
    agents keep running throughout, and every tab carries on.
 
 The page shows each step while it runs, and the reason if one fails (the host unreachable, a download that
-timed out, a checksum that did not match). A development build of the app, which has no release to download,
-and a host whose `pom` lives elsewhere (`--pom-path`) show the commands to run on the host instead:
+timed out, a signature that did not verify). A development build of the app, which has no release to
+download, and a host whose `pom` lives elsewhere (`--pom-path`) show the commands to run on the host instead:
 
 ```sh
 curl -fLO https://github.com/pomelohq/pomelo/releases/download/v0.9.3/pom-0.9.3-linux-$(uname -m).tar.gz
 tar -xzf pom-0.9.3-linux-*.tar.gz && pom server stop && pom-0.9.3/install.sh --cli-only
 ```
+
+A `pom` that `install.sh` installed also updates itself on the host with `pom self-update` (see
+[Install > Linux](./install#linux)); stop the running server afterwards with `pom server stop`, and the
+next connection starts the new one.
+
+Which versions work together: the same version of app and host works fully. With different versions the
+app uses only what the host's `pom server` declares when they connect, so a feature the host lacks is
+hidden rather than broken, and the app offers the update once their major or minor version differs. See
+[Release channels](./channels).
 
 ## Open in Editor
 

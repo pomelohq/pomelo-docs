@@ -41,6 +41,7 @@ const GROUPS = [
     text: 'Getting Started',
     items: [
       { text: 'Install', link: '/docs/install' },
+      { text: 'Release channels', link: '/docs/channels' },
       { text: 'Quick Start', link: '/docs/quickstart' },
     ],
   },

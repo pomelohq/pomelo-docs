@@ -21,7 +21,8 @@ Wayland or X11; the `pom` CLI alone needs no desktop.
 ## Linux
 
 Each [release](https://github.com/pomelohq/pomelo/releases/latest) has two
-tarballs per architecture (`x86_64`, `aarch64`):
+tarballs per architecture (`x86_64`, `aarch64`), each with a `.sig` signature
+made with the same key as the macOS update:
 
 - **`Pomelo-<version>-linux-<arch>.tar.gz`** - the app and the `pom` CLI.
 - **`pom-<version>-linux-<arch>.tar.gz`** - the `pom` CLI alone, for a server
@@ -38,6 +39,31 @@ place) and writes a desktop entry that points at the installed app, so
 Pomelo shows in the app grid and the dock with its icon. Make sure
 `~/.local/bin` is on your `PATH` to run `pom` in a terminal.
 
+`--channel` and `--version` install another build than the tarball's own: the
+tarball's `pom` downloads it, checks its signature and runs its `install.sh`.
+A script that must stay on one release pins it with `--version`:
+
+```bash
+./pomelo-<version>/install.sh --channel nightly       # the newest nightly build
+./pomelo-<version>/install.sh --cli-only --version 0.10.1
+```
+
+To update later, run `pom self-update`, or let the app update itself (see
+[Updates](#updates)):
+
+```bash
+pom self-update                    # the newest build of your channel (update_channel), if newer
+pom self-update --channel nightly  # the newest nightly, this once
+pom self-update --version 0.10.1   # exactly this version
+pom self-update --check            # say what it would install
+```
+
+`pom self-update` installs only a tarball whose signature verifies against
+the key built into pom, and replaces only an install `install.sh` made (it
+leaves a marker in `<prefix>/share/pomelo`). A `pom` a package manager
+installed, or a copy elsewhere, refuses: update it the way it was installed.
+On macOS, `pom` comes with Pomelo.app and updates with it.
+
 Shared services need **Docker Engine** with the **Compose plugin**, and your
 user in the `docker` group:
 
@@ -47,9 +73,8 @@ sudo usermod -aG docker $USER   # then log out and back in
 pom doctor                      # checks git, Docker, Compose and the tools pom.yml uses
 ```
 
-On Linux the keys use **Ctrl** where macOS uses **Cmd**, the window draws its
-own title bar, and Pomelo does not update itself: install a newer tarball
-over the old one.
+On Linux the keys use **Ctrl** where macOS uses **Cmd**, and the window draws
+its own title bar.
 
 On Linux `pom doctor` also warns about a machine that is about to hang. Each
 check reads `/proc` and `/run` only; none runs a command inside a container:
@@ -125,7 +150,8 @@ Normalize** removes them (see [Project config](./project-config)).
 
 ## Updates
 
-On macOS, Pomelo updates itself, in the background and on your schedule. With
+Pomelo updates itself, in the background and on your schedule: on macOS the
+installed Pomelo.app, on Linux an install made by `install.sh`. With
 **Settings > General > Check for Updates Automatically** on (the default),
 the installed app looks for a newer release at launch and every hour, and
 stays quiet unless it finds one.
@@ -136,7 +162,8 @@ while its signature is checked against the release key built into the app,
 then **Restart to Update**. Nothing is installed until you choose:
 
 - **Restart to Update** swaps in the new version and reopens Pomelo.
-  Services and terminals keep running across the restart.
+  Services and terminals keep running across the restart. On Linux it runs
+  the new tarball's `install.sh` into the same prefix first.
 - **Quit** installs a downloaded update too, so the next launch is the new
   version.
 - The **x** on the button hides it; **Restart to Update** stays in the app
@@ -149,6 +176,10 @@ says what it found: checking, up to date, or the download.
 
 After an update, a notification offers the release notes; **Release
 Notes** in the app menu shows them any time.
+
+**Settings > General > Update Channel** picks what it installs: **Stable**
+(the default) or **Nightly**, a build of `main` every night. See
+[Release channels](./channels).
 
 Installs of 0.6.x and older (the previous app) update to 0.7.0 through
 their existing updater, with no manual download.
