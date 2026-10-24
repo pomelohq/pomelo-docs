@@ -330,6 +330,29 @@ Renaming or deleting a workspace, and the other items of a local workspace's men
 now: `pom -H dev -c ... ws rename <branch> <name>` or `ws delete <branch>`. With a `pom` on the host that
 predates jobs, the app says to update it, and `pom -H dev -c ... ws create <branch>` works as before.
 
+### Settings on a remote project
+
+Settings (<Keys k="cmd-,"/>) opened from the window of a remote project has two tabs at the top: **This Mac**
+and one named after the host, with its connection dot. Opened from a local window, it has no tabs.
+
+- **The host's tab** edits the settings that act on the host, in its own `~/.config/pomelo/settings.json`:
+  under General, **Workspaces** (Sleep When Idle, Running at Once) and **Server** (Idle Exit, Reconnect
+  Window, and the version of `pom` there); the agent command; the terminal shell; under Dev Services, the dev
+  proxy and webhook ports, remote access (bind address, domain, public scheme and port, trusted proxies) and
+  the shared node_modules store; and Jira. It shows only the keys the host's `pom` lists. A change is sent to
+  the host at once; when the host refuses a value (a port under 1024, an address that is not an IP), the row
+  goes back to the old value and says why under it.
+- **Edit in settings.json** on the host's tab opens the host's settings file in your remote editor (see
+  [Open in Editor](#open-in-editor)), for the keys with no row, such as `proxy.token_env`.
+- **This Mac** is the laptop's own settings, as from a local window. Sections that only apply to projects on
+  the laptop (the agent command, the shell, the dev proxy, remote access, the webhook relay, shared
+  node_modules) say so under their heading and point to the host's tab. Its Integrations page keeps the
+  display toggles; Jira is set up on the host's tab.
+
+While the host answers, its rows show their names with an empty value. When it cannot be reached, the tab
+says why and has **Retry**. With a `pom` on the host from before this, the tab shows **Update pom on dev**
+and the path of the file the host reads them from until then.
+
 ### Jira on a remote project
 
 A remote project reads Jira the way a local one does: the ticket status on each workspace row, **Open Ticket**
@@ -344,8 +367,8 @@ in a workspace's right-click menu, and the ticket picker of the new-workspace fo
 The app looks again each minute, so Jira set up on the host while the window is open takes over within a
 minute.
 
-**Settings > Integrations**, opened from the window of a remote project, edits that project's Jira settings
-on the host; a **Kept On** row names the host. With a `pom` on the host from before this, they are kept on
+**Settings > Integrations** on the host's tab edits that project's Jira settings on the host; a **Kept On**
+row names the host. With a `pom` on the host from before this, they are kept on
 the laptop for the project on that host, and the row says to update `pom` there to keep them on the host.
 **Keep Main Fresh** is not shown there: main is refreshed on the host.
 
