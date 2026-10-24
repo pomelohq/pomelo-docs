@@ -358,7 +358,9 @@ repositories and `pom.yml` are changed on the host: edit `pom.yml` from main in 
 When the host runs `pom server` (the connection line says **via server**), the window of a remote project
 has terminals, and they run on the host:
 
-- **Terminal tabs.** A new tab starts your login shell on the host, in the shown workspace's worktree. Typing,
+- **Terminal tabs.** A new tab starts the host's shell, in the shown workspace's worktree: `terminal_shell` in
+  the host's settings.json when set (its program and arguments, read each time a tab opens), else your login
+  shell there. Typing,
   resizing, splitting and the find bar work as on the laptop; each keystroke goes out on its own, at once.
 - **Service output.** A running service's tab types into its console on the host, the same holder the
   service runs in there.
@@ -420,7 +422,9 @@ agents on the laptop:
 
 - **New agent.** The **+** of the dock starts an agent on the host, in the shown workspace, and opens it in
   the dock: the workspace's main agent when it does not run yet, else another one (`agent-2`, `agent-3`,
-  ...). It runs the same command as `pom agent start` there. The first time an agent runs in a folder it asks
+  ...). It runs the same command as `pom agent start` there. The main agent follows `agent_command` in the
+  host's settings.json, as the Agent button does on the laptop: words after `claude` are passed to it, and
+  another CLI (such as `codex --full-auto`) runs as typed in its own tab, which **+** opens again while it runs. The first time an agent runs in a folder it asks
   whether to trust it; answer in its tab. The **+** shows only when the host's `pom` can start agents; with
   an older one, start them on the host with `pom -H dev -c ... agent start`.
 - **Who drives.** The same lease rules apply as on the laptop. An agent you start from the app is yours. An
@@ -461,6 +465,34 @@ pastes that file's path into the tab, where Claude Code attaches it as an image.
 - **An older `pom` on the host.** A toast says pasting an image needs a newer `pom` there;
   [update it](#updating-pom-on-the-host).
 - **Dragging files** onto a tab is not supported yet.
+
+## Settings of the host
+
+Some settings act on the machine a project runs on, not on the app showing it. For a remote project they are
+read from the host's own `~/.config/pomelo/settings.json`; the same keys in your laptop's file apply to
+projects on the laptop only:
+
+| Key | What it does on the host |
+| --- | --- |
+| `agent_command` | the CLI the main agent runs |
+| `terminal_shell` | the shell new terminal tabs run |
+| `modules_store_enabled`, `modules_fallback`, `modules_size_limit_gb`, `modules_unused_days` | the node_modules store of new workspaces |
+| `dev_proxy_port`, `webhook_port`, `proxy.*` | the dev proxy and webhook relay `pom proxy` runs there |
+| `server.idle_exit_minutes`, `server.reconnect_retention_minutes` | `pom server` (see [pom server](#pom-server)) |
+| `workspaces.idle_sleep_minutes`, `workspaces.max_running` | putting idle workspaces to sleep there |
+
+The rest of the file (the theme, fonts, editor and terminal look, notifications, whether the app runs its own
+dev proxy) is the laptop's, whichever window you are in.
+
+`pom server` on the host reads these keys for the app and changes them: a change names only keys of this list,
+each checked as the Settings window checks it (ports from 1024, a store limit from 1 to 1024 GB, an IP address
+for `proxy.bind`, and so on), and the file is replaced in one step with every other key kept. Only a person
+can change them: a request from a process running inside one of the host's agents is refused. When each
+change applies:
+
+- `agent_command`, `terminal_shell` and the store keys: the next agent, tab or workspace.
+- `server.reconnect_retention_minutes`: at once; `server.idle_exit_minutes`: when the server next starts.
+- `dev_proxy_port`, `webhook_port` and `proxy.*`: when `pom proxy` on the host restarts.
 
 ## Ports
 
