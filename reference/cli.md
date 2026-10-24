@@ -34,7 +34,8 @@ A service is `name` or `repo/name`.
 | `pom proxy fault add <service> [--path /x] [--status 503] [--delay 2s] [--rate 0.3] [--ttl 10m] [--json]` | Make the dev proxy fail or slow down this workspace's requests to a service |
 | `pom proxy fault ls [--all] [--json] \| rm <id> [--json] \| clear [--json]` | The fault rules in force; remove one, or every one of the workspace (add, rm and clear return once the running proxy applies the change) |
 | `pom proxy` | Serve the dev proxy and webhook relay for every project (`pom start` runs one in the background when neither the app nor another proxy does) |
-| `pom proxy config [-o json] \| set <key> <value> \| reset <key>` | How other machines reach the proxy: bind, domain, public_scheme, public_port, trusted_proxies (settings.json `proxy`); a new domain, scheme or port rewrites every workspace's env files |
+| `pom proxy config [-o json] \| set <key> <value> \| reset <key>` | How other machines reach the proxy: bind, domain, public_scheme, public_port, trusted_proxies, token_env, allow_unauthenticated (settings.json `proxy`); a new domain, scheme or port rewrites every workspace's env files |
+| `pom proxy token [new \| rm]` | The token other machines present when proxy.bind is not loopback ($POM_PROXY_TOKEN, or one pom keeps encrypted); without one such a bind refuses to start |
 | `pom run [--profile test\|dev] <name\|"cmd"> [repo]` | A command from the config (or any shell command) in the repo's worktree, with the workspace's env; the test profile layers the repo's .env.test on top (connection values keep the workspace's), and `run test` uses it when the repo has a `test:` block |
 | `pom run --explain-env [--profile test] [--json] <name\|"cmd"> [repo]` | Where each variable the command would get comes from, secrets masked |
 | `pom commands [-o json] the named commands of every repo (lifecycle.commands, keyed tasks, the test` | Block, service tasks); json: pom.commands/v1 with name, repo, command, source |
@@ -106,7 +107,7 @@ A service is `name` or `repo/name`.
 | Command | What it does |
 | --- | --- |
 | `pom agent ls [workspace] [--all-workspaces]` | The workspace's agent sessions: role, state, reason, running, phase, turn, holder (states and reasons: see driving agents in the docs) |
-| `pom agent start [workspace] [--role r] [--fresh] [--trust] [--prompt text \| --prompt-file f]` | [--system-prompt-file f] [--tools t] [--allowed-tools t] [--disallowed-tools t] [--permission-mode m] [--model m] [--extra-mcp-config f] start (or reuse) a session; --fresh starts role r on a new conversation; --trust says yes to the agent's prompt to trust the folder (else exit 7) |
+| `pom agent start [workspace] [--role r] [--fresh] [--trust] [--prompt text \| --prompt-file f]` | [--system-prompt-file f] [--tools t] [--allowed-tools t] [--disallowed-tools t] [--permission-mode m] [--model m] [--extra-mcp-config f] start (or reuse) a session; --fresh starts role r on a new conversation; --trust marks the folder trusted in the agent's own config before it starts (else exit 7 at its trust prompt) |
 | `pom agent read <workspace/role> [--turn n \| --since n] [--full] [--live]` | What the agent did in a turn (the last by default), from its transcript; --live adds the reply it is still writing |
 | `pom agent watch [workspace] [--role r] [--live] [--until turn-end] [--from-start] [--timeout d]` | Stream the workspace's agent events as NDJSON; --role keeps one session's, --live adds live_text lines as its reply is written, --until turn-end stops once that session's turn ends (picked as wait does) |
 | `pom agent stop <workspace/role>` | End a session |
@@ -114,11 +115,12 @@ A service is `name` or `repo/name`.
 | `pom agent wait <workspace/role> [--until idle\|awaiting_input\|turn-end] [--turn n] [--timeout d]` | Exit 0 reached, 2 timeout, 3 awaiting input, 4 died; turn-end waits for exactly turn n, else the running turn, else the one the last send started, else the next |
 | `pom agent ask <workspace/role> <text \| --file f> [--take \| --as-person] [--timeout d]` | Send, wait for the turn to end, and read it |
 | `pom agent interrupt <workspace/role> [--as-person]` | Stop the current turn |
-| `pom agent allow\|deny <workspace/role> [<id> \| --id id] [--reason r] [--as-person]` | Answer the permission prompt the session waits on (pending_permission in agent ls --json), the agent's own or its workspace policy's; an id that no longer waits is refused (stale) |
+| `pom agent allow\|deny <workspace/role> [<id> \| --id id] [--reason r] [--as-person]` | Answer the permission prompt the session waits on (pending_permission in agent ls --json), the agent's own or its workspace policy's; an id that no longer waits is refused (stale); a dialog the agent drew (answer_by terminal) is only denied, with Esc, never allowed and never while a person drives it |
 | `pom agent approve <workspace/role> <request> [--always]` | Approve a pending approval of the workspace policy |
 | `pom agent takeover [workspace] --session-id <id> [--settings f] [--mcp-config f]` | - |
 | `pom agent release <workspace/role>` | A person takes a session over, and hands it back |
 | `pom completion bash\|zsh\|fish` | - |
+| `pom self-update [--channel stable\|nightly] [--version <v>] [--check]` | Replace this pom (and the Linux app beside it) with the newest build of the channel (settings.json update_channel, else the build's own), or an exact version, after checking its signature; only a pom install.sh installed |
 | `pom version, --version` | - |
 
 ## Remote machines
