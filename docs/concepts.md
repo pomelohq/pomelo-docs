@@ -1,8 +1,9 @@
 # Concepts
 
 A short tour of the moving parts before you dive deeper. Pomelo is a
-**native macOS app** that runs a full, isolated dev environment per git
-branch — no browser, no server to point at.
+**native app for macOS and Linux** that runs a full, isolated dev environment
+per git branch, on your machine or on a host you reach over SSH - no browser,
+no hosted service.
 
 ## Project
 

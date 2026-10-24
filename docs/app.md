@@ -1,6 +1,6 @@
 # The app
 
-Pomelo is a **native macOS app**, and the primary way to drive Pomelo day
+Pomelo is a **native app for macOS and Linux**, and the primary way to drive Pomelo day
 to day. It is one Rust program with a GPU-rendered UI and the core built
 in (no port, no browser), so everything you see is the real state of your
 worktrees, services and agents. This page is the tour.
