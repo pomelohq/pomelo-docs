@@ -484,7 +484,7 @@ The other machine needs the project first, with its repos cloned on main. `pom p
 | --- | --- |
 | Commits origin does not have (`git bundle` of the branch since it left origin's default branch) | The branch is created at the same commit; nothing is pushed |
 | Uncommitted changes (`git diff --binary HEAD`), and which of them were staged | Applied to the new worktree, the staged part staged again |
-| Untracked files git does not ignore | Unpacked into the worktree |
+| Untracked files git does not ignore | Unpacked into the worktree: plain files and folders only, never under a `.git`, without setuid bits; a link or any other entry stops the import |
 | Each database the workspace owns (`pg_dump -Fc`, run inside the shared Postgres) | Restored with `pg_restore` under this machine's names: `myproject_api_feat-login` becomes `<this project>_api_feat-login` |
 | Docker volumes labelled `pom.workspace=<project>/<branch>` | Recreated with this machine's label |
 | The display name and env profiles of `.pom-workspace.json` | Set on the new workspace |
