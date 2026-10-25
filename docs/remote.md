@@ -176,8 +176,11 @@ credential helper. The laptop's keys and tokens are never passed to it. When a p
 in, the panel says so. Run `pom doctor` on the host to see which repos it cannot sign in to and how to
 give the host a key or a token (see [Checking it with pom doctor](#checking-it-with-pom-doctor)).
 
-Staging part of a file and resolving conflicts in the editor are not available on a remote project yet;
-use a terminal on the host for those. When the host's `pom` predates the remote Git panel, the panel says
+The editor's git runs on the host too: the change strips in the gutter, staging a hunk or a few lines
+(see [Staging part of a file](/docs/git#staging-part-of-a-file)), inline blame, and keeping a side of a
+merge conflict. With a host `pom` older than 0.9.11 the editor shows no change strips; update pom there.
+Files over 256 KiB show no change strips on a remote project. When the host's `pom` predates the remote
+Git panel, the panel says
 "pom 0.9.6 on dev cannot show its repos here. Update pom there to use Git in this window." See
 [Updating pom on the host](#updating-pom-on-the-host). When the host has no `pom server`, the panel says
 that Git needs it there.
