@@ -319,6 +319,7 @@ Each entry of `shared_services:` runs once for every workspace: a Docker `image`
 | `shared_services.<name>.slot_reset` | string | - | For an `image` with `capacity`: a command run inside the instance's container to empty one slot, with `{{slot}}` replaced by its number. It runs when a workspace gives its slot back (deleted, or its folder is gone) and before a slot is handed to a new workspace, so no workspace sees another's data; a slot whose reset fails is not handed out. The redis preset empties the Redis database. |
 | `shared_services.<name>.cpu` | cores | - | For an `image`: the CPU its container may use (Docker `cpus`). Shared services are unlimited without it. |
 | `shared_services.<name>.memory` | size | - | For an `image`: the memory its container may use (Docker `mem_limit`). |
+| `shared_services.<name>.shm_size` | size | 1G for a Postgres image, else Docker's 64M | For an `image`: the size of its `/dev/shm` (Docker `shm_size`). Postgres keeps parallel query work there, and many workspaces querying one shared Postgres outgrow Docker's 64M default (`could not resize shared memory segment`). |
 | `shared_services.<name>.host` | string | `localhost` | The host the app's database and storage browsers connect to. Templates always use `127.0.0.1`. |
 
 Examples, each written under `shared_services.<name>`:
@@ -343,6 +344,8 @@ slot_reset: redis-cli -n {{slot}} FLUSHDB | grep -qx OK
 cpu: 2
 
 memory: 2G
+
+shm_size: 2G
 ```
 
 ## Shared service healthcheck
