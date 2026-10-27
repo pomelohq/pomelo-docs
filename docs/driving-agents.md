@@ -105,9 +105,16 @@ A new workspace is a new folder, so a session you start without a tab can stop t
 Answer it in one of two ways:
 
 - open the session in Pomelo (or `pom agent takeover`) and pick **Yes, I trust this folder**;
-- start it with `--trust`, which answers yes for you. Only a person or an orchestrator can pass it, never an agent.
+- start it with `--trust`. Only a person or an orchestrator can pass it, never an agent.
 
-Pomelo never edits Claude's own config to skip the question.
+With `--trust`, before the agent starts Pomelo marks the folder trusted in Claude's own user config, the same
+entry the prompt's **Yes** writes (`hasTrustDialogAccepted` under `projects`, keyed by the git checkout the
+folder is in, else the folder; `$CLAUDE_CONFIG_DIR/.claude.json` when that is set, else `~/.claude.json`). It
+waits for Claude's lock on that file, keeps every other key and the file's permissions, and leaves a file that
+is not a JSON object alone. The agent then never draws the prompt. `watch` shows a `folder_trusted` line,
+with `via: "agent_config"`, or `via: "none"` and why when the entry could not be written. Only then does
+Pomelo answer the prompt from the screen, as described under [the screen fallback](#the-screen-fallback).
+Without `--trust` Pomelo never touches Claude's config.
 
 ## Turns, state and death
 
@@ -188,6 +195,8 @@ events (`UserPromptSubmit`, `PreToolUse`, `PermissionRequest`, `PostToolUse`, `P
 - `permission_request` (a policy's ask), `permission_decision` (a prompt was answered) and
   `permission_released` (pom stopped holding a prompt and the agent drew its dialog);
 - `lease`: who drives a session, from and to;
+- `screen_fallback`: a key Pomelo typed into a terminal from what it read there, or held back (see
+  [the screen fallback](#the-screen-fallback)); `folder_trusted`: `--trust` marked the folder trusted;
 - `message`: one session sent another a turn, with its depth.
 
 Options:
@@ -268,6 +277,28 @@ Without `--id` it answers whatever waits now; with it, an id that no longer wait
   once the tool runs or the turn moves on.
 - **`approve`** keeps its meaning (a policy ask, with `--always` for a person). `deny <handle> <request>`
   still denies a policy ask.
+
+### The screen fallback
+
+A few answers can only reach the agent as keys in its terminal: the deny of a drawn dialog, the trust
+prompt when `--trust` could not go through Claude's config, and the second Enter `send` presses when a
+prompt still sits unsent in the input box. Pomelo decides them from what it reads on the screen, so it
+holds them to these rules:
+
+- It never types an allow.
+- It types nothing while a person drives the session; it only records what it saw.
+- It reads the screen again right before each key and sends it only while the same dialog, with the same
+  question, choices and highlight, is still shown. Otherwise nothing is typed and the command says so.
+- Every key it sends or holds back is a `screen_fallback` line in the workspace log, so `watch` shows it:
+
+```json
+{"event": "screen_fallback", "role": "reviewer", "action": "permission_deny",
+ "seen": ["Do you want to proceed?", "1. Yes", "2. No"], "sent": "esc", "skipped": false,
+ "why": "denied by operator"}
+```
+
+`action` is `permission_allow` (always refused), `permission_deny`, `trust` or `submit_retry`; `sent` is the
+key (`esc`, `enter`, `down`) or `null` with `skipped: true` and the reason in `why`.
 
 
 
