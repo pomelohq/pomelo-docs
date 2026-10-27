@@ -122,9 +122,10 @@ The window of a remote project shows:
 - The host before the project name in the title bar, its server icon wearing a dot for the connection:
   green connected, yellow reconnecting, red disconnected. Click it to pick another project on that host.
 - The host's workspaces in the WORKSPACES list, with how many services each runs. Pick one to look at it.
-- The Files and Services panels in the left dock and the tabs in the middle, as for a local project: see
-  [Files on a remote project](#files-on-a-remote-project) and
-  [Services on a remote project](#services-on-a-remote-project). Agents are in the agent dock.
+- The Files, Services and Git panels in the left dock and the tabs in the middle, as for a local project: see
+  [Files on a remote project](#files-on-a-remote-project),
+  [Services on a remote project](#services-on-a-remote-project) and
+  [Git on a remote project](#git-on-a-remote-project). Agents are in the agent dock.
 - While no tab is open, the middle says where the host stands. Under the project name, one line says how the
   connection is: connected (and when it last answered), connecting, reconnecting, or disconnected with SSH's
   reason and a **Reconnect** button; a banner says when the host's `pom` needs updating. A card gives the host
@@ -155,8 +156,34 @@ page says **Connected over ssh** and why (for example "update pom on the VM to g
 host's `pom` is on another minor version than the app, the page says so too, with a button to update it: see
 [Updating pom on the host](#updating-pom-on-the-host).
 
-Git still needs the project's files on the laptop, so a remote project does not offer it yet: open the
-worktree in an editor that works over SSH.
+### Git on a remote project
+
+When the host runs `pom server`, a workspace other than main has the [Git panel](./git#the-git-panel). It is
+the same panel as for a local project, and git runs on the host:
+
+- The panel shows each repo's changes, the Remote tab and History. It updates within a few seconds of a
+  change on the host, while the panel is open.
+- Stage, unstage, discard, stash and commit work as they do locally. So do the branch menu (keep, switch,
+  use another branch, fetch) and the branch diff.
+- **Fetch**, **Pull** and **Push** run on the host as jobs, and the panel's footer shows git's progress
+  while they run.
+- Pull requests show in the panel and on the workspace rows. The app asks GitHub from the laptop with the
+  token kept on the laptop: the `github` secret of the project on that host (`myproject@dev`), or else that
+  of the local project of the same name.
+
+Git on the host signs in with the host's own credentials: its SSH keys, its ssh-agent and its git
+credential helper. The laptop's keys and tokens are never passed to it. When a push or a fetch cannot sign
+in, the panel says so. Run `pom doctor` on the host to see which repos it cannot sign in to and how to
+give the host a key or a token (see [Checking it with pom doctor](#checking-it-with-pom-doctor)).
+
+The editor's git runs on the host too: the change strips in the gutter, staging a hunk or a few lines
+(see [Staging part of a file](/docs/git#staging-part-of-a-file)), inline blame, and keeping a side of a
+merge conflict. With a host `pom` older than 0.9.11 the editor shows no change strips; update pom there.
+Files over 256 KiB show no change strips on a remote project. When the host's `pom` predates the remote
+Git panel, the panel says
+"pom 0.9.6 on dev cannot show its repos here. Update pom there to use Git in this window." See
+[Updating pom on the host](#updating-pom-on-the-host). When the host has no `pom server`, the panel says
+that Git needs it there.
 
 ### Files on a remote project
 
@@ -306,6 +333,29 @@ Renaming or deleting a workspace, and the other items of a local workspace's men
 now: `pom -H dev -c ... ws rename <branch> <name>` or `ws delete <branch>`. With a `pom` on the host that
 predates jobs, the app says to update it, and `pom -H dev -c ... ws create <branch>` works as before.
 
+### Settings on a remote project
+
+Settings (<Keys k="cmd-,"/>) opened from the window of a remote project has two tabs at the top: **This Mac**
+and one named after the host, with its connection dot. Opened from a local window, it has no tabs.
+
+- **The host's tab** edits the settings that act on the host, in its own `~/.config/pomelo/settings.json`:
+  under General, **Workspaces** (Sleep When Idle, Running at Once) and **Server** (Idle Exit, Reconnect
+  Window, and the version of `pom` there); the agent command; the terminal shell; under Dev Services, the dev
+  proxy and webhook ports, remote access (bind address, domain, public scheme and port, trusted proxies) and
+  the shared node_modules store; and Jira. It shows only the keys the host's `pom` lists. A change is sent to
+  the host at once; when the host refuses a value (a port under 1024, an address that is not an IP), the row
+  goes back to the old value and says why under it.
+- **Edit in settings.json** on the host's tab opens the host's settings file in your remote editor (see
+  [Open in Editor](#open-in-editor)), for the keys with no row, such as `proxy.token_env`.
+- **This Mac** is the laptop's own settings, as from a local window. Sections that only apply to projects on
+  the laptop (the agent command, the shell, the dev proxy, remote access, the webhook relay, shared
+  node_modules) say so under their heading and point to the host's tab. Its Integrations page keeps the
+  display toggles; Jira is set up on the host's tab.
+
+While the host answers, its rows show their names with an empty value. When it cannot be reached, the tab
+says why and has **Retry**. With a `pom` on the host from before this, the tab shows **Update pom on dev**
+and the path of the file the host reads them from until then.
+
 ### Jira on a remote project
 
 A remote project reads Jira the way a local one does: the ticket status on each workspace row, **Open Ticket**
@@ -320,8 +370,8 @@ in a workspace's right-click menu, and the ticket picker of the new-workspace fo
 The app looks again each minute, so Jira set up on the host while the window is open takes over within a
 minute.
 
-**Settings > Integrations**, opened from the window of a remote project, edits that project's Jira settings
-on the host; a **Kept On** row names the host. With a `pom` on the host from before this, they are kept on
+**Settings > Integrations** on the host's tab edits that project's Jira settings on the host; a **Kept On**
+row names the host. With a `pom` on the host from before this, they are kept on
 the laptop for the project on that host, and the row says to update `pom` there to keep them on the host.
 **Keep Main Fresh** is not shown there: main is refreshed on the host.
 
@@ -334,7 +384,9 @@ repositories and `pom.yml` are changed on the host: edit `pom.yml` from main in 
 When the host runs `pom server` (the connection line says **via server**), the window of a remote project
 has terminals, and they run on the host:
 
-- **Terminal tabs.** A new tab starts your login shell on the host, in the shown workspace's worktree. Typing,
+- **Terminal tabs.** A new tab starts the host's shell, in the shown workspace's worktree: `terminal_shell` in
+  the host's settings.json when set (its program and arguments, read each time a tab opens), else your login
+  shell there. Typing,
   resizing, splitting and the find bar work as on the laptop; each keystroke goes out on its own, at once.
 - **Service output.** A running service's tab types into its console on the host, the same holder the
   service runs in there.
@@ -396,7 +448,9 @@ agents on the laptop:
 
 - **New agent.** The **+** of the dock starts an agent on the host, in the shown workspace, and opens it in
   the dock: the workspace's main agent when it does not run yet, else another one (`agent-2`, `agent-3`,
-  ...). It runs the same command as `pom agent start` there. The first time an agent runs in a folder it asks
+  ...). It runs the same command as `pom agent start` there. The main agent follows `agent_command` in the
+  host's settings.json, as the Agent button does on the laptop: words after `claude` are passed to it, and
+  another CLI (such as `codex --full-auto`) runs as typed in its own tab, which **+** opens again while it runs. The first time an agent runs in a folder it asks
   whether to trust it; answer in its tab. The **+** shows only when the host's `pom` can start agents; with
   an older one, start them on the host with `pom -H dev -c ... agent start`.
 - **Who drives.** The same lease rules apply as on the laptop. An agent you start from the app is yours. An
@@ -420,6 +474,51 @@ a `pom` on the host from before this, the window shows no chip and no cost rathe
 
 Closing an agent's tab leaves the agent running on the host, unless `agent_tab_close` is `"stop"` in your
 settings: then it stops the agent there, as it does on the laptop.
+
+### Pasting a screenshot into an agent
+
+An agent on the host reads the host's clipboard, not the laptop's, so a screenshot you copied on the laptop
+would not reach it. Pomelo carries it over instead: in a terminal or agent tab of a remote project, press
+**Cmd+V** (or **Ctrl+V**, the key Claude Code uses to paste an image) while the clipboard holds an image and
+no text. The app saves the image as a PNG, sends it through `pom server` to a private folder on the host and
+pastes that file's path into the tab, where Claude Code attaches it as an image.
+
+- **Text pastes as before.** With text on the clipboard, both keys do what they always did. A project on the
+  laptop is unchanged too: its agents read the laptop's clipboard themselves.
+- **Where it goes.** The file is `paste-<random>.png` in `~/.local/state/pom/paste` on the host (under
+  `$XDG_STATE_HOME/pom` when that is set), a folder only you can open, and the file is readable only by
+  you. Files there older than a day are removed the next time you paste. An image can be up to 20 MiB.
+- **An older `pom` on the host.** A toast says pasting an image needs a newer `pom` there;
+  [update it](#updating-pom-on-the-host).
+- **Dragging files** onto a tab is not supported yet.
+
+## Settings of the host
+
+Some settings act on the machine a project runs on, not on the app showing it. For a remote project they are
+read from the host's own `~/.config/pomelo/settings.json`; the same keys in your laptop's file apply to
+projects on the laptop only:
+
+| Key | What it does on the host |
+| --- | --- |
+| `agent_command` | the CLI the main agent runs |
+| `terminal_shell` | the shell new terminal tabs run |
+| `modules_store_enabled`, `modules_fallback`, `modules_size_limit_gb`, `modules_unused_days` | the node_modules store of new workspaces |
+| `dev_proxy_port`, `webhook_port`, `proxy.*` | the dev proxy and webhook relay `pom proxy` runs there |
+| `server.idle_exit_minutes`, `server.reconnect_retention_minutes` | `pom server` (see [pom server](#pom-server)) |
+| `workspaces.idle_sleep_minutes`, `workspaces.max_running` | putting idle workspaces to sleep there |
+
+The rest of the file (the theme, fonts, editor and terminal look, notifications, whether the app runs its own
+dev proxy) is the laptop's, whichever window you are in.
+
+`pom server` on the host reads these keys for the app and changes them: a change names only keys of this list,
+each checked as the Settings window checks it (ports from 1024, a store limit from 1 to 1024 GB, an IP address
+for `proxy.bind`, and so on), and the file is replaced in one step with every other key kept. Only a person
+can change them: a request from a process running inside one of the host's agents is refused. When each
+change applies:
+
+- `agent_command`, `terminal_shell` and the store keys: the next agent, tab or workspace.
+- `server.reconnect_retention_minutes`: at once; `server.idle_exit_minutes`: when the server next starts.
+- `dev_proxy_port`, `webhook_port` and `proxy.*`: when `pom proxy` on the host restarts.
 
 ## Ports
 
@@ -514,8 +613,9 @@ pom server run             # start one in the background yourself
 
   The server reads its two when it starts (`pom server stop` to apply a change); the app reads its key when
   a remote project opens.
-- **Fallback.** A host whose `pom` predates `pom server`, or speaks another protocol version, is read with
-  plain SSH as before, without terminals. A server from before terminals still serves the rest; updating
+- **Fallback.** A host whose `pom` predates `pom server`, or shares no protocol version with the app, is
+  read with plain SSH as before, without terminals; the page says whether `pom` on the host or the app is
+  the older one. A server from before terminals still serves the rest; updating
   `pom` on the host brings them.
 
 ### Starting it with systemd
@@ -550,29 +650,54 @@ On a host that runs or ran `pom server`, `pom doctor` adds:
   newer server than the `pom` you ran;
 - a warning when lingering is off while the server or its unit is in use (Linux only).
 
+On any machine with a project, `pom doctor` also asks each repo's `origin` for its HEAD, the way a fetch
+signs in, without prompting. It reports an error for each repo whose origin refuses the machine's
+credentials, with what to set up:
+
+- for an SSH remote, a key the git host accepts (add `~/.ssh/id_ed25519.pub` to your account or as a
+  deploy key, or load it in ssh-agent);
+- for an HTTPS remote, a credential helper (`gh auth login` then `gh auth setup-git`).
+
+It warns about an origin it cannot reach. `pom doctor --quick` skips this check.
+
 ## Updating pom on the host
 
-When the host's `pom server` is on another minor version than the app, the project's page says
-"pom 0.8.2 on dev, the app is 0.9.3." with **Update pom on dev**. The button installs the app's own version
-on the host:
+When the host's `pom server` is on an older minor version than the app, or speaks only an older protocol,
+the project's page says "pom 0.8.2 on dev, the app is 0.9.3." with **Update pom on dev**. When the host is
+the newer one, the page asks you to update the app instead and offers no button: the app never takes `pom`
+on the host back to an older version. The button installs the app's own version
+on the host, or for a nightly app whose build has left the nightly release (it keeps 7 nights), the newest
+nightly:
 
 1. It asks the host what machine it is (`uname -sm`; Linux on x86_64 or aarch64).
-2. It downloads `pom-<version>-linux-<arch>.tar.gz` from the app's release on GitHub over HTTPS, on the
-   laptop, and checks it against the release's `checksums-linux.txt`. A tarball that does not match is
-   refused and nothing is installed.
+2. It downloads `pom-<version>-linux-<arch>.tar.gz` and its `.sig` over HTTPS, on the laptop, from the
+   app's release on GitHub (the `nightly` release for a nightly app), and checks the signature against the
+   release key built into the app. A tarball whose signature does not verify is refused and nothing is
+   installed.
 3. It streams the tarball through SSH into a temporary folder on the host and runs its
    `install.sh --cli-only`, which puts `pom` in `~/.local/bin`. The host downloads nothing itself.
 4. It stops the old version's server and reconnects, which starts the new one. Terminals, services and
    agents keep running throughout, and every tab carries on.
 
 The page shows each step while it runs, and the reason if one fails (the host unreachable, a download that
-timed out, a checksum that did not match). A development build of the app, which has no release to download,
-and a host whose `pom` lives elsewhere (`--pom-path`) show the commands to run on the host instead:
+timed out, a signature that did not verify). A development build of the app, which has no release to
+download, and a host whose `pom` lives elsewhere (`--pom-path`) show the commands to run on the host instead:
 
 ```sh
 curl -fLO https://github.com/pomelohq/pomelo/releases/download/v0.9.3/pom-0.9.3-linux-$(uname -m).tar.gz
 tar -xzf pom-0.9.3-linux-*.tar.gz && pom server stop && pom-0.9.3/install.sh --cli-only
 ```
+
+A `pom` that `install.sh` installed also updates itself on the host with `pom self-update` (see
+[Install > Linux](./install#linux)); stop the running server afterwards with `pom server stop`, and the
+next connection starts the new one.
+
+Which versions work together: the same version of app and host works fully. With different versions the
+app uses only what the host's `pom server` declares when they connect, so a feature the host lacks is
+hidden rather than broken, and the app offers the update once their major or minor version differs and the
+host is older. Underneath, each side names the oldest and newest wire protocol it speaks when they connect,
+and they talk in the newest one both speak; every release is tested against the previous release's `pom` on
+the host. See [Release channels](./channels).
 
 ## Open in Editor
 

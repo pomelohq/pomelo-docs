@@ -74,7 +74,7 @@ Each entry of `repos:` is one repository, keyed by its clone folder name.
 | `repos.<repo>.seed` | list of commands | - | Same as `lifecycle.seed`. |
 | `repos.<repo>.pre_delete` | list of commands | - | Same as `lifecycle.pre_delete`. |
 | `repos.<repo>.copy` | list of globs | - | Same as `lifecycle.copy`. |
-| `repos.<repo>.modules_private` | list of folder names | `[.prisma]` | Folders at the top of `node_modules` that a tool generates for each workspace. The shared node_modules store never keeps them and never links them into a workspace, so each workspace's setup generates its own writable copy. `.prisma` (written by `prisma generate`) is always private; list more here. |
+| `repos.<repo>.modules_private` | list of folder names | [.prisma, @prisma, prisma] | Entries at the top of `node_modules` each workspace keeps to itself instead of sharing through the node_modules store. A name starting with `.` is a folder a tool generates (no package name starts with `.`): the store never keeps it, and each workspace's setup generates its own. Any other name is an installed package (scoped ones like `@prisma` included; quote a name starting with `@` in YAML): the store keeps it, but every workspace gets a writable copy rather than a hard link, for tools that write into it or copy files out of it with their mode. `.prisma`, `@prisma` and `prisma` are always private; list more here, merged with the presets' lists. |
 | `repos.<repo>.tasks` | list | - | Same as `lifecycle.tasks`. |
 | `repos.<repo>.shortcuts` | list | - | Older name of `tasks`. |
 | `repos.<repo>.plugins` | map | - | Ignored. Plugin settings; `config_normalize` deletes them. |
@@ -112,7 +112,7 @@ env:
 test:
   command: bin/rspec
 
-modules_private: [.generated-client]
+modules_private: [.generated-client, "@myorg"]
 ```
 
 ## Repo lifecycle
@@ -319,6 +319,7 @@ Each entry of `shared_services:` runs once for every workspace: a Docker `image`
 | `shared_services.<name>.slot_reset` | string | - | For an `image` with `capacity`: a command run inside the instance's container to empty one slot, with `{{slot}}` replaced by its number. It runs when a workspace gives its slot back (deleted, or its folder is gone) and before a slot is handed to a new workspace, so no workspace sees another's data; a slot whose reset fails is not handed out. The redis preset empties the Redis database. |
 | `shared_services.<name>.cpu` | cores | - | For an `image`: the CPU its container may use (Docker `cpus`). Shared services are unlimited without it. |
 | `shared_services.<name>.memory` | size | - | For an `image`: the memory its container may use (Docker `mem_limit`). |
+| `shared_services.<name>.shm_size` | size | 1G for a Postgres image, else Docker's 64M | For an `image`: the size of its `/dev/shm` (Docker `shm_size`). Postgres keeps parallel query work there, and many workspaces querying one shared Postgres outgrow Docker's 64M default (`could not resize shared memory segment`). |
 | `shared_services.<name>.host` | string | `localhost` | The host the app's database and storage browsers connect to. Templates always use `127.0.0.1`. |
 
 Examples, each written under `shared_services.<name>`:
@@ -343,6 +344,8 @@ slot_reset: redis-cli -n {{slot}} FLUSHDB | grep -qx OK
 cpu: 2
 
 memory: 2G
+
+shm_size: 2G
 ```
 
 ## Shared service healthcheck
@@ -382,6 +385,7 @@ Each entry of `presets:` is a reusable repo fragment. A repo (or the workspace, 
 | `presets.<preset>.seed` | list of commands | - | As on a repo. |
 | `presets.<preset>.pre_delete` | list of commands | - | As on a repo. |
 | `presets.<preset>.copy` | list of globs | - | As on a repo. |
+| `presets.<preset>.modules_private` | list of folder names | - | As on a repo, added to the repo's own list. |
 | `presets.<preset>.seed_from_main` | bool | `false` | As on a repo. |
 | `presets.<preset>.tasks` | list | - | As on a repo. |
 | `presets.<preset>.shortcuts` | list | - | Older name of `tasks`. |
@@ -416,6 +420,7 @@ What the workspace's coding agents may do: a policy command Pomelo asks before e
 |---|---|---|---|
 | `agents.policy` | command | - | Run before every tool call a coding agent in a workspace makes, in the workspace folder. It reads `{tool_name, tool_input, session_id, role, workspace, origin, driven_by}` as JSON on stdin and prints `{"decision": "allow" \| "deny" \| "ask", "reason": "..."}`. `ask` shows the agent's permission prompt; in a session an orchestrator drives it denies with `pending approval <id>` until `pom agent approve` records an approval for that call. A failure, a non-zero exit, a timeout or an unreadable config denies the call. Without a policy, the agent's own permission prompts apply. |
 | `agents.policy_timeout_sec` | int | `5` | How long the policy command may take before the tool call is denied. |
+| `agents.peer_approve` | bool | `false` | Let an agent allow another agent's permission prompt in the same workspace (`pom agent approve`, `pom agent answer`, the `agent_approve` tool). Off, an agent can only deny, and an allow comes from a person or an orchestrator outside the agents. |
 
 Examples, each written under `agents`:
 
@@ -424,6 +429,8 @@ agents:
   policy: ./scripts/agent-policy.sh
 
 policy_timeout_sec: 10
+
+peer_approve: true
 ```
 
 ## Limits

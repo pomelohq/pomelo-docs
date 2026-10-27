@@ -45,9 +45,9 @@ const care = [
   ['Same-origin dev proxy', 'one origin per workspace, so no CORS fights'],
   ['Webhook fan-out', 'each webhook reaches every workspace running the service'],
   ['Config bundles', 'share pom.yml, optionally sealed with secrets'],
-  ['Encrypted secrets', 'per project, referenced by name in pom.yml'],
+  ['Secrets outside git', 'per project, stored in your state folder and referenced by name in pom.yml'],
   ['Command palette', 'every command, with its key'],
-  ['Verified self-updates', 'each update\'s signature is checked first'],
+  ['Verified self-updates on macOS', 'each update\'s signature is checked first'],
 ]
 
 const footer = [
@@ -96,13 +96,13 @@ const footer = [
   <section class="wrap hero">
     <img class="hero-icon" src="/hero-icon.png" alt="" />
     <h1>Every branch gets<br>its own running stack.</h1>
-    <p class="lead">Pomelo is a native macOS app that gives each branch its own worktree,
+    <p class="lead">Pomelo is a native app for macOS and Linux that gives each branch its own worktree,
       services and databases, with the editor, terminals and your AI agent right next to them.</p>
     <div class="actions">
       <a class="btn primary" :href="DL">Download now</a>
       <a class="btn ghost" :href="GH">View source</a>
     </div>
-    <p class="meta">Available for macOS 14+ on Apple Silicon<span v-if="version"> - v{{ version }}</span></p>
+    <p class="meta">Available for macOS 14+ on Apple Silicon and Linux (x86_64, aarch64)<span v-if="version"> - v{{ version }}</span></p>
     <div class="hero-shot"><HeroWindow /></div>
   </section>
 
@@ -163,7 +163,7 @@ const footer = [
         <a class="btn primary" :href="DL">Download now</a>
         <a class="btn ghost" :href="GH">View source</a>
       </div>
-      <p class="meta">Available for macOS 14+ on Apple Silicon</p>
+      <p class="meta">Available for macOS 14+ on Apple Silicon and Linux (x86_64, aarch64)</p>
     </div>
   </section>
 

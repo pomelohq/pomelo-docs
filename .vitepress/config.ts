@@ -41,6 +41,7 @@ const GROUPS = [
     text: 'Getting Started',
     items: [
       { text: 'Install', link: '/docs/install' },
+      { text: 'Release channels', link: '/docs/channels' },
       { text: 'Quick Start', link: '/docs/quickstart' },
     ],
   },
@@ -99,7 +100,7 @@ const SITE = 'https://pomelohq.app'
 
 export default defineConfig({
   title: 'Pomelo',
-  description: 'A native macOS app that runs a full, isolated dev environment per branch',
+  description: 'A native app for macOS and Linux that runs a full, isolated dev environment per branch, on your machine or a remote host',
   // Served at the root of the custom domain pomelohq.app (see public/CNAME),
   // so base is '/'. (Was '/pomelo-docs/' when hosted under github.io project path.)
   base: '/',

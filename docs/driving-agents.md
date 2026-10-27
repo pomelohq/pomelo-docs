@@ -262,17 +262,17 @@ Without `--id` it answers whatever waits now; with it, an id that no longer wait
 | `answer_by` | When | How |
 |---|---|---|
 | `hook` | An orchestrator or an agent holds the lease: nobody is at the terminal. | Pomelo holds the prompt in the agent's permission hook and hands it the answer. A deny `--reason` is told to the agent, which carries on. The holder of the lease answers. |
-| `terminal` | A person drives, or the hook stopped holding the prompt. | The agent's dialog is on screen. Only the person at the terminal allows it. Pomelo can only deny it, and only while no person drives the session. |
+| `terminal` | A person drives, or the hook stopped holding the prompt. | The agent's dialog is on screen. Pomelo can only deny it from there; an allow is given at the terminal. A client of that person passes `--as-person`. |
 | `policy` | The workspace policy answered ask. | As `approve` (once) or a policy deny. |
 
 - **Held prompts.** Pomelo holds a prompt for up to 30 minutes. If a person takes the session over (in the
   app or with `takeover`) it lets go at once, and the dialog shows in the terminal as usual.
-- **Allow on a drawn dialog** is refused with error `allow_needs_hook` (exit 1): an allow reaches the
-  agent only through its hook or from the person at the terminal, never as a key Pomelo types.
-- **Deny on a drawn dialog** presses the dialog's own Esc, which also stops the turn: the session goes `idle`
-  with reason `interrupted`, and `--reason` is not passed on. While a person drives the session (also with
-  `--as-person`) Pomelo types nothing and refuses with `person_drives`; take the session over with
-  `deny --take` to deny it from a client.
+- **Typing into the dialog.** Pomelo never types an allow: an allow for a dialog on screen is refused
+  with error `allow_needs_hook`, so allow it at the terminal (in Pomelo, or after `takeover`). A deny is the
+  dialog's own Esc, sent only while no person drives the session and a fresh read right before the key
+  still shows that prompt. It also stops the turn: the session goes `idle` with reason `interrupted`, and
+  `--reason` is not passed on. Pomelo then checks the dialog closed. Each key sent or held back is written
+  to the workspace log as a `screen_fallback` event.
 - **At the terminal** nothing changes: a person answers the dialog with the keyboard, and the prompt clears
   once the tool runs or the turn moves on.
 - **`approve`** keeps its meaning (a policy ask, with `--always` for a person). `deny <handle> <request>`
@@ -373,6 +373,10 @@ agents:
   - it cannot run, or the project's config cannot be read.
 
   A hook that merely errored would let the tool run.
+- **Only you change it.** The MCP `config_set` tool refuses any edit that adds, changes or removes the
+  `agents` section, and refuses to overwrite a `pom.yml` it cannot read; the agent is told to ask you to
+  edit it. An agent with a shell can still edit `pom.yml` or the policy script directly, so a policy
+  should deny those edits too.
 
 ## For agents: the MCP tools
 
@@ -385,4 +389,14 @@ coder can ask a reviewer it started, and a fixer can report back to the agent th
 `agent_list` returns the same fields as `pom agent ls --json`, including `running`, `phase` and
 `pending_permission`. `agent_approve` answers the prompt a session waits on: give `request` (its id) or
 leave it out for the one waiting now, and `deny: true` with an optional `reason`. An agent answers a
-session's own prompt only when it drives that session, and a dialog the agent drew it can only deny.
+session's own prompt only when it drives that session.
+
+**An agent only denies.** An agent can deny another agent's prompt, but an allow (`pom agent approve`,
+`pom agent allow`, `agent_approve` without `deny`) from inside an agent is refused with
+`allow_needs_person`: a person or an orchestrator outside the agents allows it. A project whose agents
+should approve each other turns that on in `pom.yml`; an agent's `config_set` cannot change it:
+
+```yaml
+agents:
+  peer_approve: true
+```

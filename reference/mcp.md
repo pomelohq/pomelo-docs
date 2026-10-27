@@ -272,7 +272,7 @@ Read-only.
 
 ## config_set
 
-Validate and write a new pom.yml, then reload - adds/edits services, repos, shared services, databases, env. Rejected if invalid (nothing is written). Newly added services get ports allocated automatically. A shared service is a Docker `image:` or a `cmd:` (one process for every workspace, optional repo/port/environment/healthcheck); start it with shared_start. Every key and token: config_reference.
+Validate and write a new pom.yml, then reload - adds/edits services, repos, shared services, databases, env. Rejected if invalid (nothing is written), or if it changes the `agents` section (the agent policy, which only the person edits). Newly added services get ports allocated automatically. A shared service is a Docker `image:` or a `cmd:` (one process for every workspace, optional repo/port/environment/healthcheck); start it with shared_start. Every key and token: config_reference.
 
 Not read-only.
 
@@ -365,7 +365,7 @@ Not read-only.
 
 ## agent_approve
 
-Answer the permission prompt another agent session of THIS workspace waits on, once (allow, or deny with deny: true): its own tool prompt, if you drive that session, or its workspace policy's ask. A request id that no longer waits is refused (stale). A prompt the agent drew as its own dialog (answer_by terminal) can only be denied here, never allowed. Use it only for a call you would make yourself.
+Answer the permission prompt another agent session of THIS workspace waits on, once (allow, or deny with deny: true): its own tool prompt, if you drive that session, or its workspace policy's ask. A request id that no longer waits is refused (stale). A prompt the agent drew as its own dialog (answer_by terminal) can only be denied here, never allowed. You can only deny unless the project sets agents.peer_approve in pom.yml (refused as allow_needs_person); a person allows the rest.
 
 Not read-only.
 

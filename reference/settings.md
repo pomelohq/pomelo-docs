@@ -73,6 +73,7 @@ window; they change as you use it and rarely need editing by hand.
 | --- | --- | --- |
 | `restore_on_startup` | `"last_session"` | `"last_session"` reopens each workspace's tabs from last time; `"none"` starts without them. |
 | `auto_update` | `true` | The installed app checks for a newer release. Nothing installs until you restart. |
+| `update_channel` | `""` | `"stable"` installs releases only; `"nightly"` also installs the nightly build of main, and any stable release newer than it. Empty follows the build: nightly for dev and nightly builds, else stable. Switching back to stable takes effect at the next stable release, never as a downgrade. |
 
 ## Editor
 
@@ -139,11 +140,13 @@ window; they change as you use it and rarely need editing by hand.
 | `dev_proxy_port` | `8767` | The dev proxy's port: a service opens at `<service>.<repo>.<ticket or branch>.localhost:<port>` (see `proxy.domain`). Restart running services after changing it. |
 | `webhook_enabled` | `true` | Run the webhook relay while a project is open. |
 | `webhook_port` | `8766` | The webhook relay's port: point an external webhook at `localhost:<port>/<repo>/<service>`. |
-| `proxy.bind` | `"127.0.0.1"` | The address the dev proxy and webhook relay listen on besides loopback (`127.0.0.1` by default). Any other address lets other machines in, and the proxy has no authentication: use a private network (Tailscale, a LAN) or a reverse proxy. |
-| `proxy.domain` | `"localhost"` | Service hosts end in it: `<service>.<repo>.<ticket or branch>.<domain>`; `localhost` hosts keep working. Changing it rewrites the env files; restart running services. |
+| `proxy.bind` | `"127.0.0.1"` | The address the dev proxy and webhook relay listen on besides loopback (`127.0.0.1` by default). Any other address lets other machines in: they must present the proxy token (see `proxy.token_env`), and without a token the proxy refuses to start unless `proxy.allow_unauthenticated` is on. |
+| `proxy.domain` | `"localhost"` | Service hosts end in it: `<service>.<repo>.<ticket or branch>.<domain>`; `localhost` hosts keep working. A domain other than `localhost` needs the proxy token (see `proxy.token_env`) even on a loopback bind, since a reverse proxy here forwards outsiders' requests; without a token the proxy refuses to start unless `proxy.allow_unauthenticated` is on. Changing it rewrites the env files; restart running services. |
 | `proxy.public_scheme` | `"http"` | `"http"` or `"https"` (a reverse proxy in front terminates TLS): service URLs use it and cookies keep `Secure` under https. |
 | `proxy.public_port` | `0` | The port in service URLs; 0 uses `dev_proxy_port`. 443 with https, or 80 with http, leaves the port out. |
-| `proxy.trusted_proxies` | `[]` | Addresses or CIDR ranges (`["127.0.0.1", "100.64.0.0/10"]`) whose `X-Forwarded-Proto` and `X-Forwarded-Host` are believed; anyone else's are replaced. |
+| `proxy.token_env` | `"POM_PROXY_TOKEN"` | The environment variable holding the token other machines present (`POM_PROXY_TOKEN` by default); the token is never stored in settings. Without it, the token `pom proxy token new` keeps encrypted in pom's secrets is used. A browser opens a link once with `?pom_token=<token>`, which leaves an HttpOnly cookie for the proxy's domain; scripts send the `X-Pom-Token` header. Requests from this machine under a `localhost` name need none, unless they come from a peer in `proxy.trusted_proxies`. |
+| `proxy.allow_unauthenticated` | `false` | `true` serves a non-loopback `proxy.bind` or a domain other than `localhost` with no token, so anyone who reaches the address or the domain opens every workspace's services. Off by default: without a token either refuses to start. |
+| `proxy.trusted_proxies` | `[]` | Addresses or CIDR ranges (`["127.0.0.1", "100.64.0.0/10"]`) whose `X-Forwarded-Proto` and `X-Forwarded-Host` are believed; anyone else's are replaced. A listed peer forwards someone else's request, so it must present the proxy token even from loopback. |
 | `modules_store_enabled` | `true` | A new workspace whose lockfile matches a stored one takes its node_modules instead of installing. |
 | `modules_fallback` | `"hardlink"` | Where a copy-on-write clone is impossible: `"hardlink"`, `"copy"` or `"install"` (skip the store). |
 | `modules_size_limit_gb` | `20` | GB the node_modules store keeps at most; the least recently used copies go first. |

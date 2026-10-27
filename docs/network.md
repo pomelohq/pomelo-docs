@@ -109,11 +109,12 @@ service, when it arrived, the profile and the target URL, then:
   answered and how long it took, or why it could not be reached.
 - **Response** - the headers and body sent back.
 
-<AppShot :width="1002" :height="602" text="Dev Requests. Click a row, the tabs, the filters or Show Hidden; the 15:39:02 webhook shows a fan-out that one of two branches failed."><DevRequests /></AppShot>
+<AppShot :width="1002" :height="602" text="Dev Requests. Click a row, the tabs or the filters; the 15:39:02 webhook shows a fan-out that one of two branches failed."><DevRequests /></AppShot>
 
 Bodies are kept in memory for the session only: the first 256 KB of each, and
-64 MB for the whole log (the oldest are dropped first). Authorization, cookie
-and token headers stay hidden until you click **Show Hidden**.
+64 MB for the whole log (the oldest are dropped first). The values of
+Authorization, cookie, token, secret, password, API-key and session headers are
+never kept: the log shows `[redacted]`, while your app still receives them.
 
 <figure class="diagram">
 <svg viewBox="0 0 760 350" role="img" aria-label="Same-origin dev-proxy: the browser loads one origin; the dev-proxy routes / to the frontend and /_pom_dev/api/server to the backend." xmlns="http://www.w3.org/2000/svg">
@@ -364,9 +365,9 @@ control this. Set them in **Settings > Dev Services > Remote Access** or with
 | `proxy.domain` | `localhost` | Service hosts become `<service>.<repo>.<workspace>.<domain>`. `.localhost` hosts keep routing. |
 | `proxy.public_scheme` | `http` | The scheme in service URLs. Use `https` when the reverse proxy terminates TLS. |
 | `proxy.public_port` | `0` (the proxy's port) | The port in service URLs. 443 with https (or 80 with http) leaves the port out. |
-| `proxy.trusted_proxies` | `[]` | Addresses or CIDR ranges whose `X-Forwarded-Proto` and `X-Forwarded-Host` the proxy believes. |
+| `proxy.trusted_proxies` | `[]` | Addresses or CIDR ranges whose `X-Forwarded-Proto` and `X-Forwarded-Host` the proxy believes. Requests they forward always need the token. |
 | `proxy.token_env` | `POM_PROXY_TOKEN` | The environment variable holding the token other machines present. The token itself is never stored in settings. |
-| `proxy.allow_unauthenticated` | `false` | Serve a non-loopback `bind` with no token. |
+| `proxy.allow_unauthenticated` | `false` | Serve a non-loopback `bind`, or a `domain` other than `localhost`, with no token. |
 
 ```bash
 pom proxy config                                   # show them (-o json for scripts)
@@ -390,11 +391,15 @@ again.
 
 ### The proxy token
 
-When `bind` is not loopback, other machines must present a token, and the
-proxy and the relay refuse to start without one:
+When `bind` is not loopback, or `domain` is anything other than `localhost`,
+requests from outside the machine must present a token, and the proxy and the
+relay refuse to start without one. A real domain counts even on a loopback
+bind, because a reverse proxy on the same machine forwards other people's
+requests to loopback:
 
 ```text
 dev proxy: refusing to listen on 100.64.0.10: other machines could open every workspace with no token. ...
+dev proxy: refusing to serve dev.example.net: anyone a reverse proxy forwards could open every workspace with no token. ...
 ```
 
 `pom proxy token new` makes a random token and keeps it encrypted in pom's
@@ -404,9 +409,19 @@ manage it yourself, put it in `POM_PROXY_TOKEN` (or the variable
 over the kept token. A token is at least 16 characters of letters, digits,
 `-`, `_`, `.` and `~`. Restart the proxy after changing it.
 
-Requests from the machine itself (loopback, or one of its own addresses) need
-no token, so `pom`, services and a reverse proxy on the same machine work as
-before. From anywhere else:
+A request needs no token only when it comes from the machine itself (loopback,
+or one of its own addresses), not from an address in `trusted_proxies`, asks
+for a `localhost` name (`localhost`, `*.localhost`, or a loopback address) and
+carries no forwarding header (`X-Forwarded-For`, `X-Forwarded-Host`,
+`X-Real-IP` or `Forwarded`). So `pom` and services calling `*.localhost` work
+as before, while a request for `*.dev.example.net`, anything a trusted reverse
+proxy forwards, or anything with a forwarding header needs the token even when
+it arrives on loopback. List your reverse proxy in `trusted_proxies`: that is
+how the proxy knows a loopback connection carries someone else's request, and
+its forwarded headers count only then. When an address outside
+`trusted_proxies` sends forwarding headers, the proxy says so in its log and
+`pom doctor` warns about it for a week, until you trust it or it stops.
+Everything else:
 
 - **A browser** opens a link once with the token added:
   `https://web.web.proj-101.dev.example.net/?pom_token=<token>`. The proxy
@@ -422,7 +437,7 @@ The token is taken out of the header, cookie and query before a request goes
 on, so services and the Dev Requests tab never see it.
 
 `pom proxy config set allow_unauthenticated true` serves a non-loopback bind
-with no token. Anyone who can reach the address then opens every workspace's
+or a real domain with no token. Anyone who can reach the address or the domain then opens every workspace's
 services, including admin pages and APIs, so use it only on a network you
 trust. `pom doctor` and the app's doctor report a bind that will not start,
 and warn while the flag is on with no token.
@@ -497,9 +512,11 @@ pom proxy config set domain dev.example.net
 pom proxy config set public_scheme https
 pom proxy config set public_port 443
 pom proxy config set trusted_proxies 127.0.0.1
+pom proxy token new
 ```
 
-Caddy keeps the `Host` header and sets `X-Forwarded-Host` itself. If Caddy runs
+Open a service once with `?pom_token=<token>` (`pom proxy token` shows it) and
+the cookie covers every host under the domain. Caddy keeps the `Host` header and sets `X-Forwarded-Host` itself. If Caddy runs
 on another machine, bind the proxy to the VM's private address, have
 `reverse_proxy` point there, and trust Caddy's address instead of `127.0.0.1`.
 
