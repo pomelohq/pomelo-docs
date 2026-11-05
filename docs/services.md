@@ -269,8 +269,23 @@ services:
 ```
 
 Switch it from the **Mode** submenu of the service's right-click menu; a running
-service restarts. The choice lasts until the app quits, then `mode:` applies
-again.
+service restarts. The choice belongs to the workspace and is kept: another
+workspace still runs `mode:`, and restarting the service, the app or `pom server`
+keeps it.
+
+From a terminal:
+
+```sh
+pom -w feat-login mode build        # every service of feat-login that has a build mode
+pom -w feat-login mode build web    # only web (a service, a repo, or a workspaces: group)
+pom -w feat-login mode              # what each service runs in now
+pom -w feat-login mode --reset      # back to pom.yml's mode:
+pom -w feat-login start web --mode build --wait
+```
+
+Running services whose mode changes restart. A workspace used only for end-to-end
+tests can run built frontends (`vite build && vite preview --port $PORT`) with no
+dev server or file watcher, and go back to `dev` when you work on the code again.
 
 ## Pre-start hooks
 
